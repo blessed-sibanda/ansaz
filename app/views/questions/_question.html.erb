@@ -1,0 +1,27 @@
+<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
+<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+  <div class="card-body py-2">
+    <h6 class="card-title fw-light d-flex justify-content-between">
+      <div class='d-flex align-items-center'>
+        <%= user_avatar(question.user, height: 35, width: 35) %>
+        <div class='ms-2'>
+          <%= question.user.name %>
+          <span class='text-muted small'>asked</span>
+        </div>
+      </div>
+      <div class='d-flex align-items-center'>
+        <% if policy(question).update? %>
+          <%= link_to 'Edit', edit_question_path(question), class: 'small fw-bold text-decoration-none link-warning' %>
+          <span class="mx-1"></span>
+        <% end %>
+        <% if policy(question).destroy? %>
+          <%= link_to 'Delete', question, method: :delete, data: {confirm: 'Are you sure?'}, class: 'small fw-bold text-decoration-none link-danger' %>
+        <% end %>
+      </div>
+    </h6>
+    <h5 class="card-subtitle fw-normal mt-3">
+      <%= link_to question.title, question, class: 'text-decoration-none' %>
+    </h5>
+    <%= yield if on_question_page? %>
+  </div>
+</div>

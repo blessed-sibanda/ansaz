@@ -38,4 +38,6 @@ class User < ApplicationRecord
   has_one_attached :avatar
 
   scope :active, -> { where.not(confirmed_at: nil) }
+
+  has_many :questions
 end

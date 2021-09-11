@@ -68,3 +68,5 @@ gem "bootstrap_form", "~> 4.5"
 gem "image_processing", "~> 1.12"
 
 gem "faker", "~> 2.19", :groups => [:development, :test]
+
+gem "pundit", "~> 2.1"

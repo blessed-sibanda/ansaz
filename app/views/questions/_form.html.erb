@@ -1,0 +1,12 @@
+<%= bootstrap_form_with(model: question) do |form| %>
+  <%= render 'shared/form_errors', resource: question %>
+  <div class="field">
+    <%= form.text_field :title %>
+  </div>
+  <div class="field">
+    <%= form.rich_text_area :content %>
+  </div>
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

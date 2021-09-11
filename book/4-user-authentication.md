@@ -63,7 +63,7 @@ $ bin/rails db:migrate RAILS_ENV=test
 $ rails t
 ```
 
-The tests will fail, because of a missing 'rexml' gem. Let's install that gem.
+The tests will fail, because of a missing `rexml` gem. Let's install that gem.
 
 ```bash
 $ bundle add rexml
@@ -114,7 +114,7 @@ Make the following changes to `db/migrate/{timestamp}_devise_create_users.rb` mi
 
 * Add the `name` string field to store the name of the user
 
-* Add the `bio` text field to store the about information of the user
+* Add the `about` text field to store the about information of the user
 
 The resulting file should look like this
 
@@ -194,7 +194,7 @@ $ rails s
 
 We are going to use Bootstrap CSS styling to achieve a consistent and responsive design.
 
-Install bootstrap from npm
+Install `bootstrap` and `popperjs` from npm
 
 ```bash
 $ yarn add bootstrap@next
@@ -214,7 +214,7 @@ Import bootstrap in `main.scss`
 @import 'bootstrap';
 ```
 
-Import `main.scss` in `app/javascript/packs/application.js`
+Import `main.scss` and `bootstrap.min.js` in `app/javascript/packs/application.js`
 
 ```javascript
 import Rails from '@rails/ujs';
@@ -280,7 +280,7 @@ Update the devise views
 
 - Remove all `<br />` tags from devise forms
 
-A typical login form (i.e `app/views/devise/sessions/new.html.erb`) should look like
+The login page (i.e `app/views/devise/sessions/new.html.erb`) should look like
 
 ```erb
 <h2>Log in</h2>
@@ -471,7 +471,7 @@ Now `application.html.erb` should be
 
 Create layout to be used by devise views
 
-By convention, devise controller will look for a layout name `devise.html.erb`
+By convention, devise controller will look for a layout named `devise.html.erb`
 
 ```bash
 $ touch app/views/layouts/devise.html.erb
@@ -523,10 +523,10 @@ Add the user `name` field to the devise sign up page
 <%= bootstrap_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
   <div class="field">
-    <%= f.text_field :name %>
+    <%= f.text_field :name, required: true%>
   </div>
   <div class="field">
-    <%= f.email_field :email %>
+    <%= f.text_area :about, required: true %>
   </div>
   <div class="field">
     <% if @minimum_password_length %>
@@ -784,6 +784,11 @@ User.create!(name: "Blessed Sibanda",
     about: Faker::Lorem.paragraphs.join,
   )
 end
+```
+
+Seed the database 
+```
+$ rails db:seed:replant
 ```
 
 Visit the users index page at [http://localhost:3000/users](http://localhost:3000/users)

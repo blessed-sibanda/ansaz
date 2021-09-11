@@ -238,7 +238,7 @@ $ gem install rufo
 
 Install the following extensions for VSCode
 
-![VSCode Extensions](./resources/vscode.png)
+![VSCode Extensions](./vscode.png)
 
 
 ## For MacOS and Windows 10

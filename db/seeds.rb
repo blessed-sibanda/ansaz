@@ -21,3 +21,11 @@ User.create!(name: "Blessed Sibanda",
     about: Faker::Lorem.paragraphs.join,
   )
 end
+
+20.times do |i|
+  Question.create!(
+    user: User.active.sample,
+    title: Faker::Lorem.sentence(word_count: rand(5..10)),
+    content: Faker::Lorem.sentence(word_count: rand(75..150)),
+  )
+end
