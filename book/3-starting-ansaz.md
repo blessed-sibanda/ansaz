@@ -49,7 +49,16 @@ Run the development server
 $ rails s
 ```
 
+## Install Dependencies
 
+Install `factory_bot_rails` gem to create data factories for our models
+```
+$ bundle add factory_bot_rails --group "development, test"
+```
 
-
+Install `annotate` gem to write the schema description of our models.
+```
+$ bundle add annotate --group development
+$ rails g annotate:install
+```
 

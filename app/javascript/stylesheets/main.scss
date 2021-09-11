@@ -1,0 +1,18 @@
+@import 'bootstrap';
+
+input[type='submit'] {
+  margin-top: 0.6em;
+}
+
+form {
+  em,
+  i {
+    color: gray;
+    font-size: 0.75rem;
+  }
+
+  label {
+    margin-bottom: 0.2em;
+    margin-top: 0.4em;
+  }
+}

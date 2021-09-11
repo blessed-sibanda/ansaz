@@ -1,0 +1,6 @@
+<% avatar_img_url = user.avatar&.variant(resize_to_limit: [height, width]) %>
+<% if avatar_img_url %>
+  <%= image_tag avatar_img_url, style: "width: #{width}px; height: #{height}px; object-fit: cover;" %>
+<% else %>
+  <%= image_tag gravatar_url(user), height: height, width: width %>
+<% end %>

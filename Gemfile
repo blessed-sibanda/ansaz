@@ -56,3 +56,15 @@ end
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem "devise", "~> 4.8"
+
+gem "rexml", "~> 3.2"
+
+gem "annotate", "~> 3.1", :group => :development
+
+gem "factory_bot_rails", "~> 6.2", :groups => [:development, :test]
+
+gem "bootstrap_form", "~> 4.5"
+
+gem "image_processing", "~> 1.12"
+
+gem "faker", "~> 2.19", :groups => [:development, :test]

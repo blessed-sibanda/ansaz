@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <%= render 'layouts/head' %>
+  <body>
+    <%= render 'layouts/navbar' %>
+    <div class="container pt-3">
+      <div class="row justify-content-center">
+        <div class="col-md-5">
+          <%= render 'layouts/flash_messages' %>
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,3 +1,9 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  get "users/index"
+  get "users/show"
+  devise_for :users
+  authenticate :user do
+    resources :users, only: [:index, :show]
+  end
+  root to: "home#index"
 end
