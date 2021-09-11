@@ -1,7 +1,7 @@
 # Introduction
 
 Welcome to _Concise Rails 6_, a fast paced and enhanced tutorial
-designed to explain the core concepts of Rails in a very practical
+designed to teach the core concepts of Rails in a very practical
 way.
 
 ## What is Ruby on Rails
@@ -25,12 +25,13 @@ forward about 16 years, Rails is now on version 6.1 (at the time of
 this writing) and has been tested and proven by huge names such as Hulu, Zendesk, Soundcloud, Shopify, Groupon, Airbnb and Github -
 just to name a few.
 
-To be proficient with Rails you need a good understanding of Ruby since RoR itself is based on the Ruby programming language. Therefore, the following section is dedicated to the fundamental concepts of Ruby that are essential to Rails development.
 
 ## Assumptions
 
 Before reading this book, I assume that the reader has the following:
 
 - Basic understanding of HTML, CSS and JavaScript
+
+- Basic understanding of Rails (i.e you have done the [Rails Guides Getting Started Tutorial](https://guides.rubyonrails.org/getting_started.html))
 
 - A computer with at least 2GB of RAM and access to an internet connection
