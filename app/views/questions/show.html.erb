@@ -1,3 +1,9 @@
 <%= render @question do %>
   <div class="my-2 pt-1"><%= @question.content %></div>
 <% end %>
+<%= render 'answers/form', answer: Answer.new %>
+<hr>
+<% if @question.answers.any? %>
+  <h5>Answers (<%= @question.answers.count %>)</h5>
+<% end %>
+<%= render @question.answers %>

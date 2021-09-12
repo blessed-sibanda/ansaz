@@ -1,0 +1,7 @@
+<% user.questions.each do |question| %>
+  <div class="card my-2 border-0 border-bottom bg-light">
+    <div class="card-body">
+      <%= link_to question.title, question, class: 'card-title h5 text-decoration-none' %>
+    </div>
+  </div>
+<% end %>

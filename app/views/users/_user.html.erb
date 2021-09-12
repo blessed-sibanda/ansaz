@@ -4,7 +4,10 @@
       <%= user_avatar(user, height: 50, width: 50) %>
       <div class='ms-2'>
         <%= link_to user.name, user, class: 'card-title my-0 h5 text-decoration-none' %>
-        <p class="fw-light small my-0 py-0"><%= user.created_at.to_s(:short) %></p>
+        <p class="fw-light small my-0 py-0">
+          <strong class='me-1'>Joined:</strong>
+          <%= user.created_at.strftime("%d %b %Y, %H:%M") %>
+        </p>
       </div>
     </div>
   </div>

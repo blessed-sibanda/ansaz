@@ -8,7 +8,18 @@ In this chapter we are going to allow users to create questions. The questions w
 $ rails g scaffold question title user:references --skip-stylesheets
 ```
 
----
+Update `routes.rb` to only allow authenticated users to access `questions` controller actions
+
+```ruby
+Rails.application.routes.draw do
+  devise_for :users
+  authenticate :user do
+    resources :users, only: [:index, :show]
+    resources :questions
+  end
+  root to: "home#index"
+end
+```
 
 Run migrations
 

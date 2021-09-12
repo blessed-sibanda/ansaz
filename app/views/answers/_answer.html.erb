@@ -1,0 +1,12 @@
+<div class="card my-3 answer-card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <%= link_to answer.user, class: 'd-flex align-items-center text-decoration-none' do %>
+      <%= user_avatar(answer.user, height: 35, width: 35) %>
+      <span class='ms-2'><%= answer.user.name %></span>
+    <% end %>
+    <span class='text-muted small'>
+      <%= answer.created_at.to_s(:short) %>
+    </span>
+  </div>
+  <div class="card-body"><%= answer.content %></div>
+</div>

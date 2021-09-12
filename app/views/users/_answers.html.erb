@@ -1,0 +1,11 @@
+<% user.answers.each do |answer| %>
+  <div class="card my-3 shadow-none border-1">
+    <div class="card-header">
+      <strong>Question:</strong>
+      <%= link_to answer.question.title, answer.question, class: 'text-decoration-none' %>
+    </div>
+    <div class="card-body">
+      <%= answer.content %>
+    </div>
+  </div>
+<% end %>

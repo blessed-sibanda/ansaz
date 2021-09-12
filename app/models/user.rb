@@ -40,4 +40,5 @@ class User < ApplicationRecord
   scope :active, -> { where.not(confirmed_at: nil) }
 
   has_many :questions
+  has_many :answers
 end

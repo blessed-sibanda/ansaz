@@ -548,35 +548,38 @@ Now if we visit [http://localhost:3000/users/sign_up](http://localhost:3000/user
 
 ![Sign Up Page](./sign-up.png)
 
-
 ## 4.4 User Profiles
 
 Add User Avatar
 
 ```ruby
 class User < ApplicationRecord
-  ... 
+  ...
 
   has_one_attached :avatar
 end
 ```
 
 Install Active Storage
+
 ```
 $ rails active_storage:install
 ```
 
 Run the active storage migrations
+
 ```
 $ rails db:migrate
 ```
 
 Install `image_processing` gem
+
 ```
 $ bundle add image_processing
 ```
 
 Restart rails server
+
 ```
 $ rails restart
 ```
@@ -584,6 +587,7 @@ $ rails restart
 Add the user `name`, `about` and `avatar` to the Edit User page.
 
 `app/views/devise/registrations/edit.html.erb`
+
 ```erb
 <h2>Edit <%= resource_name.to_s.humanize %></h2>
 <%= bootstrap_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
@@ -630,10 +634,10 @@ Update `ApplicationController` to tell devise to also accept user's `name`, `abo
 
 ```ruby
 class ApplicationController < ActionController::Base
-  ... 
+  ...
 
   def configure_permitted_parameters
-    ... 
+    ...
     devise_parameter_sanitizer.permit(
       :account_update,
       keys: [:name, :about, :avatar,
@@ -645,13 +649,14 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-Create a `users-controller` 
+Create a `users-controller`
 
 ```
 $ rails g controller User index show --skip-stylesheets
 ```
 
-Update `config/routes.rb`
+Update `config/routes.rb` to only allow authenticated users to access the `users-controller` actions.
+
 ```ruby
 Rails.application.routes.draw do
   devise_for :users
@@ -663,6 +668,7 @@ end
 ```
 
 Update the `users-controller`
+
 ```ruby
 class UsersController < ApplicationController
   def index
@@ -680,7 +686,7 @@ Create the `active` scope in `user` model to filter out activated users only.
 
 ```ruby
 class User < ApplicationRecord
-  ... 
+  ...
 
   scope :active, -> { where.not(confirmed_at: nil) }
 end
@@ -694,6 +700,7 @@ Update the users `index` view
 ```
 
 Create the `user` partial
+
 ```
 touch app/views/user_profiles/_user.html.erb
 ```
@@ -705,7 +712,10 @@ touch app/views/user_profiles/_user.html.erb
       <%= user_avatar(user, height: 50, width: 50) %>
       <div class='ms-2'>
         <%= link_to user.name, user, class: 'card-title my-0 h5 text-decoration-none' %>
-        <p class="fw-light small my-0 py-0"><%= user.created_at.to_s(:short) %></p>
+        <p class="fw-light small my-0 py-0">
+          <strong class='me-1'>Joined:</strong>
+          <%= user.created_at.strftime("%d %b %Y, %H:%M") %>
+        </p>
       </div>
     </div>
   </div>
@@ -713,6 +723,7 @@ touch app/views/user_profiles/_user.html.erb
 ```
 
 Create the `user_avatar` helper in `app/helpers/users_helper.rb`
+
 ```ruby
 module UsersHelper
   def user_avatar(user, height:, width:)
@@ -731,6 +742,7 @@ $ touch app/views/users/_avatar_img.html.erb
 ```
 
 `app/views/users/_avatar_img.html.erb`
+
 ```erb
 <% avatar_img_url = user.avatar&.variant(resize_to_limit: [height, width]) %>
 <% if avatar_img_url %>
@@ -744,7 +756,7 @@ Create the `gravatar_url` helper inside `app/helpers/users_helper.rb`
 
 ```ruby
 module UsersHelper
-  ... 
+  ...
 
   def gravatar_url(user)
     hash = Digest::MD5.hexdigest(user.email)
@@ -761,7 +773,8 @@ Update the users `show` page
 <div class="lead"><%= @user.about %></div>
 ```
 
-Install `faker` to generate fake data 
+Install `faker` to generate fake data
+
 ```
 $ bundle add faker --group "development, test"
 ```
@@ -786,7 +799,8 @@ User.create!(name: "Blessed Sibanda",
 end
 ```
 
-Seed the database 
+Seed the database
+
 ```
 $ rails db:seed:replant
 ```
@@ -794,8 +808,3 @@ $ rails db:seed:replant
 Visit the users index page at [http://localhost:3000/users](http://localhost:3000/users)
 
 ![Users Page](./users-index.png)
-
-Click on a user
-
-![User Page](./user-show.png)
-
