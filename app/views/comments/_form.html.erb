@@ -1,0 +1,11 @@
+<%= bootstrap_form_with(model: comment) do |form| %>
+  <%= render 'shared/form_errors', resource: comment %>
+  <%= form.hidden_field :commentable_id, value: commentable.id %>
+  <%= form.hidden_field :commentable_type, value: commentable.class.name %>
+  <div class="field">
+    <%= form.text_area :content, required: true %>
+  </div>
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

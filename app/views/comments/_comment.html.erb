@@ -1,0 +1,14 @@
+<div class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
+  <div class="d-flex justify-content-start">
+    <%= user_avatar(comment.user, height: 30, width: 30) %>
+    <div class='d-flex flex-column ms-2'>
+      <%= link_to comment.user.name, comment.user, class: 'mx-1 text-decoration-none' %>
+      <p class='fw-lighter small'>
+        <%= distance_of_time_in_words(comment.created_at) %> ago
+      </p>
+    </div>
+  </div>
+  <%= comment.content %>
+  <%= render 'comments/reply', commentable: comment %>
+  <%= render comment.comments %>
+</div>

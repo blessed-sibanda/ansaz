@@ -22,3 +22,9 @@ form {
     cursor: pointer;
   }
 }
+
+a.reply-link {
+  max-width: min-content;
+  text-decoration: none;
+  font-size: 0.8rem;
+}

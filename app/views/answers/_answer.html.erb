@@ -8,5 +8,19 @@
       <%= answer.created_at.to_s(:short) %>
     </span>
   </div>
-  <div class="card-body"><%= answer.content %></div>
+  <div class="card-body">
+    <%= answer.content %>
+    <div class='mt-2 small text-muted'>
+      <%= render 'comments/reply', commentable: answer %>
+      <span class="mx-2">&middot;</span>
+      <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
+    </div>
+  </div>
+  <% comments = answer.comments.select(&:persisted?) %>
+  <% if comments.any? %>
+    <div class="card-footer bg-transparent">
+      <h6>Comments</h6>
+      <%= render comments %>
+    </div>
+  <% end %>
 </div>

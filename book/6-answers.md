@@ -318,3 +318,230 @@ $ touch app/views/users/_questions.html.erb
 Now if you open a users profile page you see something like this
 
 ![User Profile Page](./user-profile.png)
+
+## 6.3 Commenting on Answers
+
+Create a comment model
+
+```bash
+$ rails g model comment user:references commentable:references{polymorphic} content:text
+```
+
+Run the migrations
+
+```
+$ rails db:migrate
+```
+
+Comments can be nested, so commentable_type can be either `Comment` or `Answer`
+
+Validate Comment content with a presence validation
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :user
+  belongs_to :commentable, polymorphic: true
+  validates :content, presence: true
+end
+```
+
+Add comments to answer model
+
+```ruby
+class Answer < ApplicationRecord
+  belongs_to :user
+  belongs_to :question
+  has_rich_text :answer
+  has_many :comments, as: :commentable
+end
+```
+
+Add comments to user model
+
+```ruby
+class User < ApplicationRecord
+  ...
+  ...
+  has_many :comments
+end
+```
+
+Add comments to comment model
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :user
+  belongs_to :commentable, polymorphic: true
+  validates :comment, presence: true
+  has_many :comments, as: :commentable
+end
+```
+
+Create comments controller
+
+```bash
+$ rails g controller comments --skip-stylesheets
+```
+
+Update `config/routes.rb`
+
+```ruby
+Rails.application.routes.draw do
+  devise_for :users
+  authenticate :user do
+    ...
+    ...
+    resources :comments
+  end
+  root to: "home#index"
+end
+```
+
+Add `create` action to comments-controller
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    @comment = Comment.new(comment_params)
+    @comment.user = current_user
+    if @comment.save
+      redirect_back(fallback_location: root_path)
+    else
+      redirect_back(fallback_location: root_path, alert: "Error creating comment")
+    end
+  end
+
+  private
+
+  def comment_params
+    params.require(:comment).permit(:content,
+                                    :commentable_id, :commentable_type)
+  end
+end
+```
+
+Update `answer` partial to allow for commenting
+
+```erb
+<div class="card my-3 answer-card">
+  ...
+  ...
+  <div class="card-body">
+    <%= answer.content %>
+    <div class='mt-2 small text-muted'>
+      <%= render 'comments/reply', commentable: answer %>
+      <span class="mx-2">&middot;</span>
+      <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
+    </div>
+  </div>
+  <% comments = answer.comments.select(&:persisted?) %>
+  <% if comments.any? %>
+    <div class="card-footer bg-transparent">
+      <h6>Comments</h6>
+      <%= render comments %>
+    </div>
+  <% end %>
+</div>
+```
+
+The comments/reply will contain a link to open a modal with a form to comment on the answer
+
+```bash
+$ touch app/views/comments/_reply.html.erb
+```
+
+`app/views/comments/_reply.html.erb`
+
+```erb
+<%= render 'shared/modal', commentable: commentable, modal_id: "commentable_#{commentable.id}", modal_title: "Reply #{commentable.class.name}" do %>
+  <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
+<% end %>
+<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= "commentable_#{commentable.id}" %>'>
+  Reply
+</a>
+```
+
+The reply partial itself will render a modal partial containing the comment form. The modal will have a unique 'id' and will use `yield` to display the content passed to its block.
+
+```bash
+$ touch app/views/shared/_modal.html.erb
+```
+
+`app/views/shared/_modal.html.erb`
+
+```erb
+<div class="modal fade" id="<%= modal_id %>">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <%= modal_title %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
+      </div>
+      <div class="modal-body">
+        <div class="bg-light p-2">
+          <%= commentable.content %></div>
+        <%= yield %>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Then create the comment form
+
+```bash
+$ touch app/views/comments/_form.html.erb
+```
+
+```erb
+<%= bootstrap_form_with(model: comment) do |form| %>
+  <%= render 'shared/form_errors', resource: comment %>
+  <%= form.hidden_field :commentable_id, value: commentable.id %>
+  <%= form.hidden_field :commentable_type, value: commentable.class.name %>
+  <div class="field">
+    <%= form.text_area :content, required: true %>
+  </div>
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
+```
+
+Create the 'comment' partial to display the comment and its comments
+
+```
+$ touch app/views/comments/_comment.html.erb
+```
+
+```erb
+<div class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
+  <div class="d-flex justify-content-start">
+    <%= user_avatar(comment.user, height: 30, width: 30) %>
+    <div class='d-flex flex-column ms-2'>
+      <%= link_to comment.user.name, comment.user, class: 'mx-1 text-decoration-none' %>
+      <p class='fw-lighter small'>
+        <%= distance_of_time_in_words(comment.created_at) %> ago
+      </p>
+    </div>
+  </div>
+  <%= comment.content %>
+  <%= render 'comments/reply', commentable: comment %>
+  <%= render comment.comments %>
+</div>
+```
+
+Update styles in `main.scss`
+
+```scss
+// previous styles here ...
+
+a.reply-link {
+  max-width: min-content;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+```
+
+Now our users can comment on answers and even on comments to answers

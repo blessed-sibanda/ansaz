@@ -1,0 +1,6 @@
+<%= render 'shared/modal', commentable: commentable, modal_id: "commentable_#{commentable.id}", modal_title: "Reply #{commentable.class.name}" do %>
+  <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
+<% end %>
+<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= "commentable_#{commentable.id}" %>'>
+  Reply
+</a>
