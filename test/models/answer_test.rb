@@ -4,6 +4,7 @@
 #
 #  id          :bigint           not null, primary key
 #  accepted    :boolean          default(FALSE)
+#  stars_count :bigint           default(0)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  question_id :bigint           not null

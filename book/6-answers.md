@@ -519,12 +519,12 @@ $ touch app/views/comments/_comment.html.erb
 
 ```erb
 <div class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
-  <div class="d-flex justify-content-start">
+  <div class="d-flex justify-content-start align-items-center">
     <%= user_avatar(comment.user, height: 30, width: 30) %>
     <div class='d-flex flex-column ms-2'>
       <%= link_to comment.user.name, comment.user, class: 'mx-1 text-decoration-none' %>
-      <p class='fw-lighter small'>
-        <%= distance_of_time_in_words(comment.created_at) %> ago
+      <p class='fw-lighter timestamp my-0 ms-1'>
+        <%= distance_of_time_in_words_to_now(comment.created_at) %> ago
       </p>
     </div>
   </div>
@@ -539,7 +539,8 @@ Update styles in `main.scss`
 ```scss
 // previous styles here ...
 
-a.reply-link {
+a.reply-link,
+.timestamp {
   max-width: min-content;
   text-decoration: none;
   font-size: 0.8rem;

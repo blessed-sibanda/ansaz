@@ -23,4 +23,12 @@ class Star < ApplicationRecord
   belongs_to :starrable, polymorphic: true
   validates_uniqueness_of :user, scope: [:starrable_id,
                                          :starrable_type]
+
+  after_save :update_stars_count
+  after_destroy :update_stars_count
+
+  def update_stars_count
+    starrable.stars_count = starrable.stars.count
+    starrable.save!
+  end
 end

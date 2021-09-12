@@ -232,6 +232,98 @@ Add `stars_count` column to `answers` and `questions` columns
 $ rails g migration add_stars_count_to_questions stars_count:bigint
 
 $ rails g migration add_stars_count_to_answers stars_count:bigint
+```
 
+Add a default stars_count of 0 to both answers and questions
+
+```ruby
+class AddStarsCountToAnswers < ActiveRecord::Migration[6.1]
+  def change
+    add_column :answers, :stars_count, :bigint, default: 0
+  end
+end
+```
+
+```ruby
+class AddStarsCountToQuestions < ActiveRecord::Migration[6.1]
+  def change
+    add_column :questions, :stars_count, :bigint, default: 0
+  end
+end
+```
+
+Run migrations
+
+```
+$ rails db:migrate
+```
+
+Update `stars_count` by actual number of stars in `answers` and `questions`.
+
+Generate the migration
+
+```
 $ rails g migration populate_stars_count_in_questions_and_answers
+```
+
+Add `up` and `down` methods to the generated migration to update the `stars_count` column by iterate over all the questions and answers and update each with the related number of stars.
+
+`{timestamp}_populate_stars_count_in_questions_and_answers.rb`
+
+```ruby
+class PopulateStarsCountInQuestionsAndAnswers < ActiveRecord::Migration[6.1]
+  def up
+    Question.all.each do |question|
+      question.stars_count = question.stars.count
+      question.answers.each do |answer|
+        answer.stars_count = answer.stars.count
+        answer.save!
+      end
+      question.save!
+    end
+  end
+
+  def down
+    Question.all.each do |question|
+      question.answers.each do |answer|
+        answer.stars_count = 0
+        answer.save!
+      end
+      question.stars_count = 0
+      question.save!
+    end
+  end
+end
+```
+
+```bash
+rails db:migrate
+```
+
+Add a callback method to update `stars_count` of the starrable object whenever a `star` is created or destroyed
+
+```ruby
+class Star < ApplicationRecord
+  ...
+  ...
+
+  after_save :update_stars_count
+  after_destroy :update_stars_count
+
+  def update_stars_count
+    starrable.stars_count = starrable.stars.count
+    starrable.save!
+  end
+end
+```
+
+Add a `default_scope` in answer model to order answers by `stars_count` in descending order
+
+```ruby
+class Answer < ApplicationRecord
+  ...
+  ...
+
+  default_scope { order(stars_count: :desc) }
+end
 ```
