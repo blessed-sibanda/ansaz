@@ -8,5 +8,6 @@ Rails.application.routes.draw do
     end
     resources :comments
     resources :stars, only: [:create, :destroy]
+    resources :answer_acceptance, only: [:update, :destroy]
   end
 end

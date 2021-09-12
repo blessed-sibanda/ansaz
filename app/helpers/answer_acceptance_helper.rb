@@ -1,0 +1,2 @@
+module AnswerAcceptanceHelper
+end

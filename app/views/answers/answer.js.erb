@@ -1,0 +1,2 @@
+var answer = document.getElementById('<%= j dom_id(@answer) %>')
+answer.outerHTML = "<%= j render('answers/answer', answer: @answer) %>"

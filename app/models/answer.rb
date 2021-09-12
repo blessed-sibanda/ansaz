@@ -27,5 +27,9 @@ class Answer < ApplicationRecord
   has_many :comments, as: :commentable
   has_many :stars, as: :starrable
 
-  default_scope { order(stars_count: :desc) }
+  default_scope {
+    order(accepted: :desc)
+      .order(stars_count: :desc)
+      .order(created_at: :desc)
+  }
 end

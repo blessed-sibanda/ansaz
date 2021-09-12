@@ -1,4 +1,4 @@
-<div class="card my-3 answer-card">
+<div class="card my-3" id="<%= dom_id(answer) %>">
   <div class="card-header d-flex align-items-center justify-content-between">
     <%= link_to answer.user, class: 'd-flex align-items-center text-decoration-none' do %>
       <%= user_avatar(answer.user, height: 35, width: 35) %>
@@ -10,7 +10,13 @@
   </div>
   <div class="card-body">
     <%= answer.content %>
-    <div class='mt-2 small text-muted'>
+    <div class='mt-2 text-muted'>
+      <% if answer.accepted %>
+        <span class="badge bg-success me-1">
+          <i class="fa fa-check-circle"></i>
+          <strong>Accepted</strong>
+        </span>
+      <% end %>
       <%= render 'comments/reply', commentable: answer %>
       <span class="mx-2">&middot;</span>
       <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
@@ -18,6 +24,7 @@
         &middot;
       </span>
       <%= render 'stars/stars', starrable: answer %>
+      <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
     </div>
   </div>
   <% comments = answer.comments.select(&:persisted?) %>

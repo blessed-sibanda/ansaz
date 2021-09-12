@@ -1,4 +1,4 @@
-# 7 Stars
+# 7 Adding Stars
 
 In this chapter we will allow users to add stars to questions and also to answers they find very helpful.
 
