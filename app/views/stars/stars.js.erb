@@ -1,0 +1,2 @@
+var stars = document.getElementById('<%= j "#{@star.starrable.class.name.downcase}_#{@star.starrable.id}_stars" %>')
+stars.innerHTML = "<%= j render('stars/stars', starrable: @star.starrable) %>"

@@ -24,4 +24,7 @@
     </h5>
     <%= yield if on_question_page? %>
   </div>
+  <div class="card-footer">
+    <%= render 'stars/stars', starrable: question %>
+  </div>
 </div>

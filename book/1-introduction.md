@@ -1,10 +1,10 @@
-# Introduction
+# 1 Introduction
 
 Welcome to _Concise Rails 6_, a fast paced and enhanced tutorial
 designed to teach the core concepts of Rails in a very practical
 way.
 
-## What is Ruby on Rails
+## 1.1 What is Ruby on Rails
 
 Ruby on Rails is popular web framework that is written in the Ruby
 programming language that allows developers to quickly build
@@ -25,8 +25,7 @@ forward about 16 years, Rails is now on version 6.1 (at the time of
 this writing) and has been tested and proven by huge names such as Hulu, Zendesk, Soundcloud, Shopify, Groupon, Airbnb and Github -
 just to name a few.
 
-
-## Assumptions
+## 1.2 Assumptions
 
 Before reading this book, I assume that the reader has the following:
 

@@ -1,5 +1,7 @@
 # 6 Answers
 
+In this chapter we will allow users to provide answers to questions. Users will also be able to comment on answers and even on other's comments.
+
 ## 6.1 Scaffold Answers
 
 ```bash

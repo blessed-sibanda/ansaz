@@ -1,0 +1,7 @@
+<div class='d-inline' id=<%="#{starrable.class.name.downcase}_#{starrable.id}_stars"%>>
+  <% if star=current_user.starred(starrable) %>
+    <%= link_to pluralize(starrable.stars.count, 'star'), star, method: :delete, remote: true, class: 'text-decoration-none star-link' %>
+  <% else %>
+    <%= link_to pluralize(starrable.stars.count, 'star'), stars_path(starrable_id: starrable.id, starrable_type: starrable.class.name), method: :post, remote: true, class: 'text-decoration-none star-link' %>
+  <% end %>
+</div>

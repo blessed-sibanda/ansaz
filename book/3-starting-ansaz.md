@@ -1,6 +1,6 @@
-# Starting Ansaz
+# 3 Starting Ansaz
 
-In this chapter, we will begin building the application that we will be working on throughout this book. The application we are going to build is called *Ansaz*.
+In this chapter, we will begin building the application that we will be working on throughout this book. The application we are going to build is called _Ansaz_.
 
 **Ansaz** is a web application that allow users to ask questions and get answers from other users. It has the following features:
 
@@ -10,21 +10,22 @@ In this chapter, we will begin building the application that we will be working 
 
 - Users can comment on the answers
 
-- Users can star questions and the answers they think are most helpful. 
+- Users can star questions and the answers they think are most helpful.
 
 - Answers to questions are ranked according to their number of stars.
 
-- Users can create private groups where they can ask questions on a specific subject or topic. 
+- Users can create private groups where they can ask questions on a specific subject or topic.
 
 - Groups have staff members who moderate content on the group.
 
-## Create Ansaz
+## 3.1 Create Ansaz
 
-In the terminal, create a new rails application with postgresql as the database. 
+In the terminal, create a new rails application with postgresql as the database.
 
 ```bash
 $ rails new ansaz -d postgresql
 ```
+
 cd into `ansaz`
 
 ```bash
@@ -49,16 +50,17 @@ Run the development server
 $ rails s
 ```
 
-## Install Dependencies
+## 3.2 Install Dependencies
 
 Install `factory_bot_rails` gem to create data factories for our models
+
 ```
 $ bundle add factory_bot_rails --group "development, test"
 ```
 
 Install `annotate` gem to write the schema description of our models.
+
 ```
 $ bundle add annotate --group development
 $ rails g annotate:install
 ```
-

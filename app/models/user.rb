@@ -42,4 +42,9 @@ class User < ApplicationRecord
   has_many :questions
   has_many :answers
   has_many :comments
+  has_many :stars
+
+  def starred(starrable)
+    Star.where(user: self, starrable: starrable).first
+  end
 end
