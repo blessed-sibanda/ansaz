@@ -1,23 +1,25 @@
 <%= render @user %>
-<ul class="nav nav-tabs mt-3">
-  <li class="nav-item">
-    <a class="nav-link" href="#">About</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="#">Questions</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="#">Answers</a>
-  </li>
-</ul>
-<div class="tab-content" id="user-tabs">
-  <div class="tab-pane fade" id="about" role="tabpanel">
-    <div class="lead"><%= @user.about %></div>
-  </div>
-  <div class="tab-pane fade show active" id="questions" role="tabpanel">
-    <%= render 'questions', user: @user %>
-  </div>
-  <div class="tab-pane fade" id="answers" role="tabpanel">
-    <%= render 'answers', user: @user %>
+<div data-controller='tab'>
+  <ul class="nav nav-tabs mt-3">
+    <li class="nav-item">
+      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active">About</a>
+    </li>
+    <li class="nav-item">
+      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link">Questions</a>
+    </li>
+    <li class="nav-item">
+      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+    </li>
+  </ul>
+  <div class="tab-content" id="user-tabs">
+    <div data-tab-target="about" class="tab-pane fade show active">
+      <div class="lead"><%= @user.about %></div>
+    </div>
+    <div data-tab-target="questions" class="tab-pane fade">
+      <%= render 'questions', user: @user %>
+    </div>
+    <div data-tab-target="answers" class="tab-pane fade">
+      <%= render 'answers', user: @user %>
+    </div>
   </div>
 </div>

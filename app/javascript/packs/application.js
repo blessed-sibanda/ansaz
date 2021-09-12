@@ -16,3 +16,4 @@ import '../stylesheets/main.scss';
 import 'bootstrap/dist/js/bootstrap.min'
 require("trix")
 require("@rails/actiontext")
+import "controllers"

@@ -1,6 +1,6 @@
 # 6 Answers
 
-## Scaffold Answers
+## 6.1 Scaffold Answers
 
 ```bash
 rails g scaffold answer user:references question:belongs_to accepted:boolean --skip-stylesheets
@@ -183,6 +183,138 @@ Now if you visit a question page and provide an answer, it looks like this
 
 ![Question Page with Answers](./question-with-answers.png)
 
-## Update User Page
+## 6.2 Update User Profile Page
 
 In this section, we will update the user profile page to show the user's questions and answers
+
+`app/views/users/show.html.erb`
+
+```erb
+<%= render @user %>
+<div data-controller='tab'>
+  <ul class="nav nav-tabs mt-3">
+    <li class="nav-item">
+      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active">About</a>
+    </li>
+    <li class="nav-item">
+      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link">Questions</a>
+    </li>
+    <li class="nav-item">
+      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+    </li>
+  </ul>
+  <div class="tab-content" id="user-tabs">
+    <div data-tab-target="about" class="tab-pane fade show active">
+      <div class="lead"><%= @user.about %></div>
+    </div>
+    <div data-tab-target="questions" class="tab-pane fade">
+      <%= render 'questions', user: @user %>
+    </div>
+    <div data-tab-target="answers" class="tab-pane fade">
+      <%= render 'answers', user: @user %>
+    </div>
+  </div>
+</div>
+```
+
+Note that we are using `data-controller`, `data-action` and `data-target` attributes in the html. These attributes are required by the `Stimulus JS` library that we will use for the interactivity of our tabs. Stimulus is a small javascript library for sprinkling bits of interactivity in your already existing html.
+
+Lets install stimulus
+
+```
+$ rails webpacker:install:stimulus
+```
+
+Create a stimulus `tab` controller (to make our user tab interactive)
+
+```
+$ touch app/javascript/controllers/tab_controller.js
+```
+
+`app/javascript/controllers/tab_controller.js`
+
+```javascript
+import { Controller } from 'stimulus';
+
+export default class extends Controller {
+  static targets = [
+    'about',
+    'aboutLink',
+    'questions',
+    'questionsLink',
+    'answers',
+    'answersLink',
+  ];
+
+  reset() {
+    this.element.querySelectorAll('ul>li>a.nav-link').forEach((item) => {
+      item.classList.remove('active');
+    });
+    this.element.querySelectorAll('.tab-content>.tab-pane').forEach((item) => {
+      item.classList.remove('active');
+      item.classList.remove('show');
+    });
+  }
+
+  about() {
+    this.reset();
+    this.aboutLinkTarget.classList.add('active');
+    this.aboutTarget.classList.add('active');
+    this.aboutTarget.classList.add('show');
+  }
+
+  answers() {
+    this.reset();
+    this.answersLinkTarget.classList.add('active');
+    this.answersTarget.classList.add('active');
+    this.answersTarget.classList.add('show');
+  }
+
+  questions() {
+    this.reset();
+    this.questionsLinkTarget.classList.add('active');
+    this.questionsTarget.classList.add('active');
+    this.questionsTarget.classList.add('show');
+  }
+}
+```
+
+Create the user `answers` partial to render the user's answers
+
+```
+$ touch app/views/users/_answers.html.erb
+```
+
+```erb
+<% user.answers.each do |answer| %>
+  <div class="card my-3 shadow-none border-1">
+    <div class="card-header">
+      <strong>Question:</strong>
+      <%= link_to answer.question.title, answer.question, class: 'text-decoration-none' %>
+    </div>
+    <div class="card-body">
+      <%= answer.content %>
+    </div>
+  </div>
+<% end %>
+```
+
+Create the user `questions` partial to render the user's questions
+
+```
+$ touch app/views/users/_questions.html.erb
+```
+
+```erb
+<% user.questions.each do |question| %>
+  <div class="card my-2 border-0 border-bottom bg-light">
+    <div class="card-body">
+      <%= link_to question.title, question, class: 'card-title h5 text-decoration-none' %>
+    </div>
+  </div>
+<% end %>
+```
+
+Now if you open a users profile page you see something like this
+
+![User Profile Page](./user-profile.png)

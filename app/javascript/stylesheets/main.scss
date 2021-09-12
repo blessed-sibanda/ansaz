@@ -16,3 +16,9 @@ form {
     margin-top: 0.4em;
   }
 }
+
+.nav-tabs {
+  li > a.nav-link {
+    cursor: pointer;
+  }
+}
