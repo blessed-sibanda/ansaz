@@ -1,0 +1,10 @@
+<div class="card rounded-0">
+  <%= image_tag @group.banner, class: 'card-img-top rounded-0 group-banner' %>
+  <div class="card-body">
+    <h5 class="card-title"><%= @group.name %></h1>
+    <div class="card-text"><%= @group.description %></div>
+  </div>
+</div>
+<%= content_for :sidebar do %>
+  <%= render 'sidebar', group: @group %>
+<% end %>

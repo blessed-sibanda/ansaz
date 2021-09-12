@@ -44,6 +44,10 @@ class User < ApplicationRecord
   has_many :comments
   has_many :stars
 
+  has_many :owned_groups, class_name: "Group", foreign_key: "admin_id"
+  has_many :group_memberships
+  has_many :groups, through: :group_memberships, source: :group
+
   def starred(starrable)
     Star.where(user: self, starrable: starrable).first
   end

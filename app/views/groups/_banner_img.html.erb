@@ -1,0 +1,2 @@
+<% banner_img_url = group.banner&.variant(resize_to_limit: [height, width]) %>
+<%= image_tag banner_img_url, style: "width: #{width}px; height: #{height}px; object-fit: cover;" %>

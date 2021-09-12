@@ -29,3 +29,17 @@ end
     content: Faker::Lorem.sentence(word_count: rand(75..150)),
   )
 end
+
+["Rails Devs", "Super Scientists", "Python Hackers", "Frontend Engineers", "Data Science Nerds"].each do |name|
+  g = Group.new(
+    name: name,
+    description: Faker::Lorem.sentence(word_count: rand(50..80)),
+    group_type: Group::GROUP_TYPES.sample,
+    admin: User.active.sample,
+  )
+  g.banner.attach(
+    io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+    filename: "default_banner_img.png",
+  )
+  g.save!
+end

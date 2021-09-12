@@ -1,0 +1,18 @@
+<%= bootstrap_form_with(model: group) do |form| %>
+  <%= render 'shared/form_errors', resource: group %>
+  <div class="field">
+    <%= form.text_field :name %>
+  </div>
+  <div class="field">
+    <%= form.text_area :description %>
+  </div>
+  <div class="field">
+    <%= form.file_field :banner %>
+  </div>
+  <div class="field">
+    <%= form.select :group_type, Group::GROUP_TYPES %>
+  </div>
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

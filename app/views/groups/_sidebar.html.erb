@@ -1,0 +1,24 @@
+<table class="table table-sm">
+  <thead>
+    <th colspan='2'>
+      <span><%= group.name %></span>
+      <% if policy(group).edit? %>
+        <%= link_to 'Edit', edit_group_path(group), class: 'float-end' %>
+      <% end %>
+    </th>
+  </thead>
+  <tbody class="small">
+    <tr>
+      <th>Admin</th>
+      <td><%= link_to group.admin.name, group.admin, class: 'text-decoration-none text-secondary' %></td>
+    </tr>
+    <tr>
+      <th>Group Type</th>
+      <td><%= group.group_type %></td>
+    </tr>
+    <tr>
+      <th>Created</th>
+      <td><%= group.created_at.to_s(:long) %></td>
+    </tr>
+  </tbody>
+</table>

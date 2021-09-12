@@ -1,0 +1,27 @@
+# == Schema Information
+#
+# Table name: groups
+#
+#  id          :bigint           not null, primary key
+#  description :text
+#  group_type  :string
+#  name        :string
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  admin_id    :bigint
+#
+# Indexes
+#
+#  index_groups_on_name  (name) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (admin_id => users.id)
+#
+require "test_helper"
+
+class GroupTest < ActiveSupport::TestCase
+  # test "the truth" do
+  #   assert true
+  # end
+end

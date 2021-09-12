@@ -9,5 +9,6 @@ Rails.application.routes.draw do
     resources :comments
     resources :stars, only: [:create, :destroy]
     resources :answer_acceptance, only: [:update, :destroy]
+    resources :groups
   end
 end
