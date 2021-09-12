@@ -32,4 +32,6 @@ class Answer < ApplicationRecord
       .order(stars_count: :desc)
       .order(created_at: :desc)
   }
+
+  after_create { QuestionMailer.answered(question).deliver_later }
 end

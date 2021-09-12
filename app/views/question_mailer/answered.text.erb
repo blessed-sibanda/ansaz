@@ -1,0 +1,6 @@
+Dear <%= @question.user.name %>
+Your Question:
+<%= @question.title %>
+has been answered.
+To view the answer,
+<%= link_to 'click here', @question %>

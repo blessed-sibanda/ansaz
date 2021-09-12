@@ -183,3 +183,94 @@ Add the `decide` partial in the `answer` partial and also show an accepted answe
   <% end %>
 </div>
 ```
+
+## 8.2 Notify Users When Their Questions Are Answered
+
+Generate a mailer to notify the user when his/her question receives and answer
+
+```bash
+$ rails g mailer question answered
+```
+
+Update `from` address in `application_mailer.rb`
+
+```ruby
+class ApplicationMailer < ActionMailer::Base
+  default from: 'noreply@ansaz.domain'
+  layout 'mailer'
+end
+```
+
+Update the `question_mailer`
+
+`question_mailer.rb`
+
+```ruby
+class QuestionMailer < ApplicationMailer
+  def answered(question)
+    @question = question
+
+    mail to: question.user
+  end
+end
+```
+
+Call the mailer after an answer is created
+
+`answer.rb`
+
+```ruby
+class Answer < ApplicationRecord
+  ...
+  ...
+
+  after_create { QuestionMailer.answered(question).deliver_later }
+end
+```
+
+Update the `answered` email templates
+
+`answered.text.erb`
+
+```erb
+Dear <%= @question.user.name %>
+Your Question:
+<%= @question.title %>
+has been answered.
+To view the answer,
+<%= link_to 'click here', @question %>
+```
+
+`answered.html.erb`
+
+```erb
+<h2>Dear <%= @question.user.name %></h2>
+<h3>Your Question:</h3>
+<blockquote>
+  <%= @question.title %>
+</blockquote>
+<h3>has been answered.</h3>
+<p>To view the answer,
+  <%= link_to 'click here', @question %>
+</p>
+```
+
+Update the `question_mailer_preview` as well (to accept the question parameter)
+
+`question_mailer_preview.rb`
+
+```ruby
+class QuestionMailerPreview < ActionMailer::Preview
+  def answered
+    QuestionMailer.answered(Question.first)
+  end
+end
+```
+
+Make sure the dev server is running and visit [http://localhost:3000/rails/mailers/question_mailer/answered](http://localhost:3000/rails/mailers/question_mailer/answered) to preview the email
+
+The html version should look similar to this:
+
+![Email Preview](./email-preview.png)
+
+Now answer a question from the browser ui and you will see from the terminal running the server that an email is sent to the question owner.

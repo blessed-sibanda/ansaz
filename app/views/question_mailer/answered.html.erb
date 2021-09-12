@@ -1,0 +1,9 @@
+<h2>Dear <%= @question.user.name %></h2>
+<h3>Your Question:</h3>
+<blockquote>
+  <%= @question.title %>
+</blockquote>
+<h3>has been answered.</h3>
+<p>To view the answer,
+  <%= link_to 'click here', @question %>
+</p>
