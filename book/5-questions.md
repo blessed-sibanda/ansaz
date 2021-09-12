@@ -2,13 +2,16 @@
 
 In this chapter we are going to allow users to create questions. The questions will be displayed in the home page.
 
-
 ## 5.1 Scaffold questions
+
 ```
 $ rails g scaffold question title user:references --skip-stylesheets
 ```
 
+---
+
 Run migrations
+
 ```
 $ rails db:migrate
 ```
@@ -18,8 +21,8 @@ Add `questions` to user model
 
 ```ruby
 class User < ApplicationRecord
-  ... 
-  ... 
+  ...
+  ...
 
   has_many :questions
 end
@@ -32,6 +35,7 @@ Refactor question form
 - User `bootstrap_form_for` instead of `form_for`
 
 Refactoring form errors
+
 ```bash
 $ mkdir app/views/shared
 
@@ -53,6 +57,7 @@ $ touch app/views/shared/_form_errors.html.erb
 
 Update question `form` partial
 `app/views/questions/_form.html.erb`
+
 ```erb
 <%= bootstrap_form_with(model: question) do |form| %>
   <%= render 'shared/form_errors', resource: question %>
@@ -80,32 +85,32 @@ end
 
 Update `questions-controller`
 
-- Update the `create` action to assign the questions to the `current_user` 
+- Update the `create` action to assign the questions to the `current_user`
 
-- Remove `:user_id` from 'question_params' 
+- Remove `:user_id` from 'question_params'
 
 `app/controllers/questions_controller.rb`
 
 ```ruby
 class QuestionsController < ApplicationController
-  ... 
+  ...
 
   # POST /questions or /questions.json
   def create
     @question = current_user.questions.build(question_params)
 
     respond_to do |format|
-      ... 
-      ... 
+      ...
+      ...
     end
   end
 
-  ... 
+  ...
 
-  private 
+  private
 
-  ... 
-  ... 
+  ...
+  ...
 
   def question_params
     params.require(:question).permit(:title)
@@ -205,7 +210,7 @@ class Question < ApplicationRecord
 end
 ```
 
-Update question `form` to include *rich text*
+Update question `form` to include _rich text_
 
 ```ruby
 <%= bootstrap_form_with(model: question) do |form| %>
@@ -222,9 +227,10 @@ Update question `form` to include *rich text*
 <% end %>
 ```
 
-Update questions `new` page 
+Update questions `new` page
 
 `app/views/questions/new.html.erb`
+
 ```erb
 <h1 class='h2'>New Question</h1>
 <%= render 'form', question: @question %>
@@ -233,6 +239,7 @@ Update questions `new` page
 
 Update questions `edit` page
 `app/views/questions/edit.html.erb`
+
 ```erb
 <h1 class='h2'>Editing Question</h1>
 <%= render 'form', question: @question %>
@@ -268,6 +275,7 @@ Update 'question' partial as follows (so that we can re-use it in both the quest
 Create the `on_question_page?` helper in `questions_helper.rb` to check whether the user is on the `show` question page.
 
 `app/helpers/questions_helper.rb`
+
 ```ruby
 module QuestionsHelper
   def on_question_page?
@@ -290,8 +298,8 @@ Display question content in question show page
 Update the `db/seeds.rb` with questions data
 
 ```ruby
-... 
-... 
+...
+...
 
 20.times do |i|
   Question.create!(
@@ -303,6 +311,7 @@ end
 ```
 
 Seed the database
+
 ```
 $ rails db:seed:replant
 ```
@@ -318,14 +327,15 @@ $ bundle add pundit
 ```
 
 Include `Pundit` in `ApplicationController`. Handle `Pundit::NotAuthorizedError` by redirecting the user back with an alert message.
+
 ```ruby
 class ApplicationController < ActionController::Base
   include Pundit
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from Pundit::NotAuthorizedError, with: :pundit_not_authorized
 
-  ... 
-  ... 
+  ...
+  ...
 
   private
 
@@ -338,11 +348,13 @@ end
 ```
 
 Create pundit application policy
+
 ```
 $ rails g pundit:install
 ```
 
 Create a pundit question policy
+
 ```
 $ rails g pundit:policy question
 ```
@@ -350,9 +362,10 @@ $ rails g pundit:policy question
 Only allow the owner of the question to update/delete a question. To do that, add the `update?` and `destroy?` method in question policy.
 
 `app/policies/question_policy.rb`
+
 ```ruby
 class QuestionPolicy < ApplicationPolicy
-  ... 
+  ...
 
   def update?
     user == record.user
@@ -399,12 +412,12 @@ class QuestionsController < ApplicationController
   before_action :set_question, only: %i[ show edit update destroy ]
   before_action :authorize_question, only: [:edit, :update, :destory]
 
-  ... 
-  ... 
+  ...
+  ...
 
   private
 
-  ... 
+  ...
 
   def authorize_question
     authorize @question
@@ -415,4 +428,3 @@ end
 Now if you access the `edit` page of a question you did not create, Pundit will deny you access and present you with the following screen.
 
 ![Pundit Authorization](./pundit.png)
-
