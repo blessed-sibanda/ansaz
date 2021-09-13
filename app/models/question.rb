@@ -26,5 +26,30 @@ class Question < ApplicationRecord
   has_many :answers
   has_many :stars, as: :starrable
   belongs_to :group, optional: true
+
+  validates :title, presence: true
+
   scope :ungrouped, -> { where(group_id: nil) }
+
+  has_many :taggings
+  has_many :tags, through: :taggings
+
+  def self.tagged_with(name)
+    Tag.find_by(name: name).questions
+  end
+
+  def self.tag_counts
+    Tag.select("tags.*, count(taggings.tag_id) as count").joins
+    (:taggings).group("taggings.tag_id")
+  end
+
+  def tag_list
+    tags.map(&:name)
+  end
+
+  def tag_list=(names)
+    self.tags = names.split(",").map do |n|
+      Tag.where(name: n.strip).first_or_create! unless n.blank?
+    end
+  end
 end

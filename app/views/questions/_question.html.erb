@@ -24,7 +24,14 @@
     </h5>
     <%= yield if on_question_page? %>
   </div>
-  <div class="card-footer">
-    <%= render 'stars/stars', starrable: question %>
+  <div class="card-footer d-flex justify-content-between">
+    <div>
+      <%= render 'stars/stars', starrable: question %>
+    </div>
+    <div class="d-flex">
+      <% question.tags.each do |tag| %>
+        <%= link_to "##{tag.name}", '#', class: 'badge tag-item' %>
+      <% end %>
+    </div>
   </div>
 </div>

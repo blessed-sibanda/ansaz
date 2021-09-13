@@ -43,3 +43,7 @@ end
   )
   g.save!
 end
+
+["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
+  Tag.create!(name: name)
+end

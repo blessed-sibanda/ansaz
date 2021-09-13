@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "tags/index"
   root to: "home#index"
   devise_for :users
   authenticate :user do
@@ -16,5 +17,6 @@ Rails.application.routes.draw do
         delete :reject
       end
     end
+    resources :tags, only: :index
   end
 end

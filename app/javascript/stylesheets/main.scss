@@ -36,3 +36,15 @@ img.group-banner {
   max-height: 60vh;
   object-fit: cover;
 }
+
+a.tag-item {
+  background: white;
+  color: var(--bs-dark);
+  text-decoration: none;
+  margin: 0 0.3em;
+
+  &:hover {
+    color: white;
+    background-color: var(--bs-gray);
+  }
+}
