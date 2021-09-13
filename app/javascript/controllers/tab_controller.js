@@ -8,6 +8,8 @@ export default class extends Controller {
     'questionsLink',
     'answers',
     'answersLink',
+    'requests',
+    'requestsLink',
   ];
 
   reset() {
@@ -39,5 +41,12 @@ export default class extends Controller {
     this.questionsLinkTarget.classList.add('active');
     this.questionsTarget.classList.add('active');
     this.questionsTarget.classList.add('show');
+  }
+
+  requests() {
+    this.reset();
+    this.requestsLinkTarget.classList.add('active');
+    this.requestsTarget.classList.add('active');
+    this.requestsTarget.classList.add('show');
   }
 }

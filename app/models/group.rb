@@ -19,6 +19,7 @@
 #  fk_rails_...  (admin_id => users.id)
 #
 class Group < ApplicationRecord
+  after_create :add_admin_to_users
   belongs_to :admin, class_name: "User", foreign_key: "admin_id"
   has_one_attached :banner
 
@@ -33,4 +34,8 @@ class Group < ApplicationRecord
 
   has_many :group_memberships
   has_many :users, through: :group_memberships, source: :user
+
+  def add_admin_to_users
+    GroupMembership::Creator.call(user: admin, group: self)
+  end
 end

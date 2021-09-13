@@ -228,6 +228,17 @@ Update the group `show` page
 <% end %>
 ```
 
+Update `main.scss`
+
+```scss
+// previous styles here
+
+img.group-banner {
+  max-height: 60vh;
+  object-fit: cover;
+}
+```
+
 Create the group `sidebar` partial
 
 ```
@@ -279,6 +290,16 @@ class GroupPolicy < ApplicationPolicy
 
   def edit?
     user == record.admin
+  end
+
+  def leave?
+    GroupMembership.accepted.where(user: user,
+                                  group: record).any?
+  end
+
+  def join?
+    GroupMembership.where(user: user,
+                          group: record).empty?
   end
 end
 ```
@@ -379,7 +400,7 @@ class GroupMembership < ApplicationRecord
 end
 ```
 
-- Add `group_memberships` and `owned_groups` (these are groups in which the user is an admin) to user model
+Add `group_memberships` and `owned_groups` (these are groups in which the user is an admin) to user model
 
 ```ruby
 class User < ApplicationRecord
@@ -403,7 +424,7 @@ class Group < ApplicationRecord
   ...
   ...
 
-  has_many :group_membe rships
+  has_many :group_memberships
   has_many :users, through: :group_memberships, source: :user
 end
 ```
@@ -462,7 +483,7 @@ end
 
 The `create` actions uses a service to create group-memberships. This technique allows us to move complicated logic out of the controller.
 
-Now the let's the service
+Now the let's create the service
 
 ```bash
 $ mkdir app/services
@@ -546,7 +567,7 @@ end
 
 The logic is fairly straightforward. We are doing a few things:
 
-- After initializing the class, we set the membership_state using a case statement. in the `set_membership_state` method.
+- After initializing the class, we set the membership state using a case statement. in the `set_membership_state` method.
 
 - The membership state depends on the group-type being joined. If the group is public, then the membership is instant. However, if the group-type is private, the user will need to be approved by the group administrator before joining.
 
@@ -554,6 +575,292 @@ The logic is fairly straightforward. We are doing a few things:
 
 - If the user joining the group is an admin, then the state is always ACCEPTED (i.e the admin user does not need approval from anyone to join his/her own group.
 
-Now lets create a group partial to display groups in the questions index
-
 Update the `group` partial with links to join/leave groups and also to show membership status
+
+`app/views/groups/_group.html.erb`
+
+```erb
+<div class="card py-0 mb-2 border-0 bg-light">
+  <div class="card-body py-2 px-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="card-title py-0 my-0">
+        <%= group_banner(group, height: 35, width: 35) %>
+        <%= link_to group.name, group, class: 'text-decoration-none fw-bold' %>
+      </h6>
+      <div class="">
+        <% if policy(group).join? %>
+          <%= link_to 'join', group_membership_path(group), class: 'text-decoration-none fw-bold', method: :patch %>
+        <% end %>
+        <% if current_user.pending_approval group %>
+          <span class="badge bg-warning">Pending</span>
+        <% end %>
+      </div>
+    </div>
+    <div class='clearfix'>
+      <%= truncate(group.description, length: 80) %>
+    </div>
+  </div>
+</div>
+```
+
+Update the user model with a `pending_approval` method
+`app/models/user.rb`
+
+```ruby
+class User < ApplicationRecord
+  ...
+  ...
+
+  def pending_approval(group)
+    group_memberships.where(
+      group: group,
+      state: GroupMembership::PENDING,
+    ).any?
+  end
+end
+```
+
+These methods will be used in various views to check whether a user can join or leave a group; or whether a user's request to join a private group is pending approval.
+
+## 9.4 Approving Group Join Requests
+
+Add `accept` and `reject` actions to group-memberships controller to allow for the group admin to accept or reject group join requests.
+
+```ruby
+class GroupMembershipsController < ApplicationController
+  before_action :set_group, only: %i[update destroy]
+  before_action :set_group_membership, only: %i[accept reject]
+
+  def accept
+    @group_membership.state = GroupMembership::ACCEPTED
+    @group_membership.save!
+    redirect_back(fallback_location: root_path)
+  end
+
+  def reject
+    @group_membership.destroy
+    redirect_back(fallback_location: root_path)
+  end
+
+  ...
+  ...
+
+  private
+
+  ...
+  ...
+
+  def set_group_membership
+    @group_membership = GroupMembership.find(params[:id])
+    authorize @group_membership, :accept_or_reject?
+  end
+end
+```
+
+Next, let's create a group-membership-policy to only authroize group admins to accept/reject group join requests
+
+```bash
+$ rails g pundit:policy group_membership
+```
+
+```ruby
+class GroupMembershipPolicy < ApplicationPolicy
+  def accept_or_reject?
+    user == record.group.admin
+  end
+end
+```
+
+Update the routes to include these new actions as well
+
+```ruby
+Rails.application.routes.draw do
+  root to: "home#index"
+  devise_for :users
+  authenticate :user do
+    ...
+    ...
+    resources :group_memberships, only: [:update, :destroy] do
+      member do
+        post :accept
+        delete :reject
+      end
+    end
+  end
+end
+```
+
+Display the group join requests in the group admin's profile page
+
+`app/views/users/show.html.erb`
+
+```erb
+<%= render @user %>
+<div data-controller='tab'>
+  <ul class="nav nav-tabs mt-3">
+    ...
+    ...
+    <li class="nav-item">
+      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+    </li>
+    <% if current_user == @user %>
+      <li class="nav-item">
+        <a data-tab-target='requestsLink' data-action="click->tab#requests" class="nav-link">Requests</a>
+      </li>
+    <% end %>
+  </ul>
+  <div class="tab-content" id="user-tabs">
+    ...
+    ...
+    <div data-tab-target="answers" class="tab-pane fade">
+      <%= render 'answers', user: @user %>
+    </div>
+    <% if current_user == @user %>
+      <div data-tab-target="requests" class="tab-pane fade">
+        <%= render 'group_memberships/requests', user: @user %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+```
+
+Create the `group_membership/requests` partial
+
+```bash
+$ touch app/views/group_memberships/_requests.html.erb
+```
+
+```erb
+<% @user.owned_groups.each do |group| %>
+  <% group.group_memberships.pending.each do |membership| %>
+    <div class="card p-2 my-1">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <strong><%= link_to membership.user.user_profile.name, membership.user.user_profile, class: 'text-decoration-none' %></strong>
+          <span class='fw-light'>requests to join</span>
+          <strong><%= link_to membership.group.name, membership.group %></strong>
+        </div>
+        <div>
+          <%= link_to 'accept', accept_group_membership_path(membership), method: :post, class: 'link-success' %>
+          <%= link_to 'reject', reject_group_membership_path(membership), method: :delete, class: 'link-danger' %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+```
+
+Create the `pending` and `accepted` scopes in `group_membership` model
+
+```ruby
+class GroupMembership < ApplicationRecord
+  ...
+  ...
+
+  scope :pending, -> { where(state: PENDING) }
+  scope :accepted, -> { where(state: ACCEPTED) }
+end
+
+```
+
+Update the Stimulus `tab-controller` with the new `requests` tab interactivity
+
+```javascript
+import { Controller } from 'stimulus';
+
+export default class extends Controller {
+  static targets = [
+    'about',
+    'aboutLink',
+    'questions',
+    'questionsLink',
+    'answers',
+    'answersLink',
+    'requests',
+    'requestsLink',
+  ];
+
+  ...
+  ...
+
+  requests() {
+    this.reset();
+    this.requestsLinkTarget.classList.add('active');
+    this.requestsTarget.classList.add('active');
+    this.requestsTarget.classList.add('show');
+  }
+}
+```
+
+Update the group sidebar page with a link to leave a group and to display the members of the group
+
+`app/views/groups/_sidebar.html.erb`
+
+```erb
+<div class="d-flex justify-content-between mt-3 mt-md-0 border-bottom">
+  <h5><%= group.name %></h5>
+  <span class="d-flex">
+    <% if policy(group).edit? %>
+      <%= link_to 'Edit', edit_group_path(group), class: 'mx-1' %>
+    <% end %>
+    <% if policy(@group).leave? %>
+      <%= link_to 'Leave', group_membership_path(@group), class: ' link-danger mx-1', method: :delete %>
+    <% end %>
+  </span>
+</div>
+<table class="table table-sm">
+  ...
+  ...
+</table>
+<table class='table table-sm'>
+  <tr>
+    <th>Members</th>
+  </tr>
+  <% group.users.each do |user| %>
+    <tr>
+      <td class='small'>
+        <%= user.name %>
+        <span class='float-end small text-muted'>Joined: <%= user.joined_on(group) %></span>
+      </td>
+    </tr>
+  <% end %>
+</table>
+```
+
+Update user model with a `joined_on` method (which returns the date when the user joined the group)
+
+```ruby
+class User < ApplicationRecord
+  ...
+  ...
+
+  def joined_on(group)
+    group_memberships.where(group: group).
+      first&.created_at.strftime("%d %b %Y")
+  end
+end
+```
+
+Finally, lets add the group admin to the group `users` when a group is created.
+
+```ruby
+class Group < ApplicationRecord
+  after_create :add_admin_to_users
+
+  ...
+  ...
+
+  def add_admin_to_users
+    GroupMembership::Creator.call(user: admin, group: self)
+  end
+end
+```
+
+```
+$ rails db:seed:replant
+```
+
+Re-seed the database and open a group page, it should look like the following
+
+![Group Page](./group-show.png)

@@ -1,12 +1,15 @@
+<div class="d-flex justify-content-between mt-3 mt-md-0 border-bottom">
+  <h5><%= group.name %></h5>
+  <span class="d-flex">
+    <% if policy(group).edit? %>
+      <%= link_to 'Edit', edit_group_path(group), class: 'mx-1' %>
+    <% end %>
+    <% if policy(@group).leave? %>
+      <%= link_to 'Leave', group_membership_path(@group), class: ' link-danger mx-1', method: :delete %>
+    <% end %>
+  </span>
+</div>
 <table class="table table-sm">
-  <thead>
-    <th colspan='2'>
-      <span><%= group.name %></span>
-      <% if policy(group).edit? %>
-        <%= link_to 'Edit', edit_group_path(group), class: 'float-end' %>
-      <% end %>
-    </th>
-  </thead>
   <tbody class="small">
     <tr>
       <th>Admin</th>
@@ -21,4 +24,17 @@
       <td><%= group.created_at.to_s(:long) %></td>
     </tr>
   </tbody>
+</table>
+<table class='table table-sm'>
+  <tr>
+    <th>Members</th>
+  </tr>
+  <% group.users.each do |user| %>
+    <tr>
+      <td class='small'>
+        <%= user.name %>
+        <span class='float-end small text-muted'>Joined: <%= user.joined_on(group) %></span>
+      </td>
+    </tr>
+  <% end %>
 </table>

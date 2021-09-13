@@ -10,5 +10,11 @@ Rails.application.routes.draw do
     resources :stars, only: [:create, :destroy]
     resources :answer_acceptance, only: [:update, :destroy]
     resources :groups
+    resources :group_memberships, only: [:update, :destroy] do
+      member do
+        post :accept
+        delete :reject
+      end
+    end
   end
 end

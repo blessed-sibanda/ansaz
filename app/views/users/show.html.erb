@@ -10,6 +10,11 @@
     <li class="nav-item">
       <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
     </li>
+    <% if current_user == @user %>
+      <li class="nav-item">
+        <a data-tab-target='requestsLink' data-action="click->tab#requests" class="nav-link">Requests</a>
+      </li>
+    <% end %>
   </ul>
   <div class="tab-content" id="user-tabs">
     <div data-tab-target="about" class="tab-pane fade show active">
@@ -21,5 +26,10 @@
     <div data-tab-target="answers" class="tab-pane fade">
       <%= render 'answers', user: @user %>
     </div>
+    <% if current_user == @user %>
+      <div data-tab-target="requests" class="tab-pane fade">
+        <%= render 'group_memberships/requests', user: @user %>
+      </div>
+    <% end %>
   </div>
 </div>

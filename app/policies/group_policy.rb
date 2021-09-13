@@ -10,4 +10,14 @@ class GroupPolicy < ApplicationPolicy
   def edit?
     user == record.admin
   end
+
+  def leave?
+    GroupMembership.accepted.where(user: user,
+                                   group: record).any?
+  end
+
+  def join?
+    GroupMembership.where(user: user,
+                          group: record).empty?
+  end
 end

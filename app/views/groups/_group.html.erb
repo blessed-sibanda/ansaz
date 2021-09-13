@@ -6,7 +6,7 @@
         <%= link_to group.name, group, class: 'text-decoration-none fw-bold' %>
       </h6>
       <div class="">
-        <% if current_user.can_join group %>
+        <% if policy(group).join? %>
           <%= link_to 'join', group_membership_path(group), class: 'text-decoration-none fw-bold', method: :patch %>
         <% end %>
         <% if current_user.pending_approval group %>

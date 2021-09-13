@@ -30,4 +30,6 @@ class GroupMembership < ApplicationRecord
   ]
 
   validates :state, inclusion: { in: MEMBERSHIP_STATES }
+  scope :pending, -> { where(state: PENDING) }
+  scope :accepted, -> { where(state: ACCEPTED) }
 end
