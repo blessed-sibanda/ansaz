@@ -48,7 +48,7 @@ class Question < ApplicationRecord
   end
 
   def tag_list
-    tags.map(&:map).join(", ")
+    tags.map(&:name)
   end
 
   def tag_list=(names)
@@ -126,8 +126,7 @@ Update question form to include tags
     <label for="">Tags</label>
     <small class="small text-muted">Separate tag names with commas</small>
     <div data-controller="autocomplete" data-autocomplete-url-value="/tags/">
-      <input type="text" class='form-control' data-tag-target='input' data-autocomplete-target="input"/>
-      <input type="hidden" name="tag_id" data-autocomplete-target="hidden"/>
+      <input name='question[tag_list]' value='<%= question.tag_list.join(',') %>' type="text" class='form-control' data-tag-target='input' data-autocomplete-target="input"/>
       <ul class="list-group" data-autocomplete-target="results" style="max-height: 10rem; overflow-y: scroll;"></ul>
     </div>
   </div>
@@ -242,3 +241,5 @@ class QuestionsController < ApplicationController
   end
 end
 ```
+
+Now try creating a new question and you will notice the autocomplete feature working on the tag list

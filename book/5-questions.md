@@ -21,6 +21,18 @@ Rails.application.routes.draw do
 end
 ```
 
+Add presence validation to question `title`
+
+```ruby
+class Question < ApplicationRecord
+  ...
+  ...
+
+  validates :title, presence: true
+end
+
+```
+
 Run migrations
 
 ```
