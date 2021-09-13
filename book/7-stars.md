@@ -297,7 +297,7 @@ end
 ```
 
 ```bash
-rails db:migrate
+$ rails db:migrate
 ```
 
 Add a callback method to update `stars_count` of the starrable object whenever a `star` is created or destroyed

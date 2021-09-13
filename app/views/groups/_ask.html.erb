@@ -1,0 +1,10 @@
+<% if policy(group).participate? %>
+  <% modal_id = "modal_#{SecureRandom.hex(4)}" %>
+  <%= render 'shared/modal', id: modal_id, title: group.name do %>
+    <h3>New Question</h3>
+    <%= render 'questions/form', question: group.questions.new %>
+  <% end %>
+  <a class='btn btn-primary' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>'>
+    Ask Question
+  </a>
+<% end %>

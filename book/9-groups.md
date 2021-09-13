@@ -1,4 +1,4 @@
-# 9 Groups
+# 9 Joining Groups
 
 In this chapter we will allow users to create and join groups where they can ask and answer questions on specific topics or subjects.
 
@@ -83,7 +83,7 @@ Update groups 'form'
     <%= form.file_field :banner %>
   </div>
   <div class="field">
-    <%= form.select :group_type, Group.group_types.keys %>
+    <%= form.select :group_type, Group::GROUP_TYPES %>
   </div>
   <div class="actions">
     <%= form.submit %>
@@ -804,8 +804,11 @@ Update the group sidebar page with a link to leave a group and to display the me
     <% if policy(group).edit? %>
       <%= link_to 'Edit', edit_group_path(group), class: 'mx-1' %>
     <% end %>
-    <% if policy(@group).leave? %>
+    <% if policy(group).leave? %>
       <%= link_to 'Leave', group_membership_path(@group), class: ' link-danger mx-1', method: :delete %>
+    <% end %>
+    <% if policy(group).join? %>
+      <%= link_to 'join', group_membership_path(group), class: 'mx-1', method: :patch %>
     <% end %>
   </span>
 </div>

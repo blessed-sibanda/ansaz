@@ -22,8 +22,7 @@ extracted the source and released it as an open-source project.
 
 In 2005, version 1 of Ruby on Rails was officially released. Fast
 forward about 16 years, Rails is now on version 6.1 (at the time of
-this writing) and has been tested and proven by huge names such as Hulu, Zendesk, Soundcloud, Shopify, Groupon, Airbnb and Github -
-just to name a few.
+this writing) and has been tested and proven by huge names such as Hulu, Zendesk, Soundcloud, Shopify, Groupon, Airbnb and Github - just to name a few.
 
 ## 1.2 Assumptions
 

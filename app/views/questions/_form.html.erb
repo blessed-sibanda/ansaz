@@ -3,6 +3,7 @@
   <div class="field">
     <%= form.text_field :title %>
   </div>
+  <%= form.hidden_field :group_id, value: question.group&.id %>
   <div class="field">
     <%= form.rich_text_area :content %>
   </div>

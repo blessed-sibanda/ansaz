@@ -1,6 +1,10 @@
-<%= render 'shared/modal', commentable: commentable, modal_id: "commentable_#{commentable.id}", modal_title: "Reply #{commentable.class.name}" do %>
+<% modal_id = "modal_#{SecureRandom.hex(4)}" %>
+<%= render 'shared/modal', id: modal_id, title: "Reply #{commentable.class.name}" do %>
+  <div class="bg-light p-2">
+    <%= commentable.content %>
+  </div>
   <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
 <% end %>
-<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= "commentable_#{commentable.id}" %>'>
+<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>'>
   Reply
 </a>

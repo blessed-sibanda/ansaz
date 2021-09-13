@@ -455,10 +455,14 @@ $ touch app/views/comments/_reply.html.erb
 `app/views/comments/_reply.html.erb`
 
 ```erb
-<%= render 'shared/modal', commentable: commentable, modal_id: "commentable_#{commentable.id}", modal_title: "Reply #{commentable.class.name}" do %>
+<% modal_id = "modal_#{SecureRandom.hex(4)}" %>
+<%= render 'shared/modal', id: modal_id, title: "Reply #{commentable.class.name}" do %>
+  <div class="bg-light p-2">
+    <%= commentable.content %>
+  </div>
   <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
 <% end %>
-<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= "commentable_#{commentable.id}" %>'>
+<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>'>
   Reply
 </a>
 ```
@@ -472,18 +476,16 @@ $ touch app/views/shared/_modal.html.erb
 `app/views/shared/_modal.html.erb`
 
 ```erb
-<div class="modal fade" id="<%= modal_id %>">
+<div class="modal fade" id="<%= id %>">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <%= modal_title %>
+          <%= title %>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" ></button>
       </div>
       <div class="modal-body">
-        <div class="bg-light p-2">
-          <%= commentable.content %></div>
         <%= yield %>
       </div>
     </div>

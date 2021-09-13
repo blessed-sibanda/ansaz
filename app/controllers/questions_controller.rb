@@ -4,7 +4,7 @@ class QuestionsController < ApplicationController
 
   # GET /questions or /questions.json
   def index
-    @questions = Question.all.order(created_at: :desc)
+    @questions = Question.ungrouped.order(created_at: :desc)
   end
 
   # GET /questions/1 or /questions/1.json
@@ -23,6 +23,7 @@ class QuestionsController < ApplicationController
   # POST /questions or /questions.json
   def create
     @question = current_user.questions.build(question_params)
+    authorize(@question.group, :participate?) if @question.group
 
     respond_to do |format|
       if @question.save
@@ -62,11 +63,12 @@ class QuestionsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_question
     @question = Question.find(params[:id])
+    authorize(@question.group, :participate?) if @question.group
   end
 
   # Only allow a list of trusted parameters through.
   def question_params
-    params.require(:question).permit(:title, :content)
+    params.require(:question).permit(:title, :content, :group_id)
   end
 
   def authorize_question

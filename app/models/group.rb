@@ -34,6 +34,9 @@ class Group < ApplicationRecord
 
   has_many :group_memberships
   has_many :users, through: :group_memberships, source: :user
+  has_many :active_users, -> { GroupMembership.accepted },
+           through: :group_memberships, source: :user
+  has_many :questions
 
   def add_admin_to_users
     GroupMembership::Creator.call(user: admin, group: self)

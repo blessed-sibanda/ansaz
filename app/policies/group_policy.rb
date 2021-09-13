@@ -20,4 +20,8 @@ class GroupPolicy < ApplicationPolicy
     GroupMembership.where(user: user,
                           group: record).empty?
   end
+
+  def participate?
+    record.active_users.include? user
+  end
 end

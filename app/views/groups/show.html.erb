@@ -1,10 +1,23 @@
 <div class="card rounded-0">
   <%= image_tag @group.banner, class: 'card-img-top rounded-0 group-banner' %>
   <div class="card-body">
-    <h5 class="card-title"><%= @group.name %></h1>
+    <div class="d-flex justify-content-between">
+      <h3><%= @group.name %></h3>
+      <div><%= render 'ask', group: @group %></div>
+    </div>
     <div class="card-text"><%= @group.description %></div>
   </div>
 </div>
+<br>
+<% if policy(@group).participate? %>
+  <h1 class='h5 text-uppercase'>Questions</h1>
+  <%= render @group.questions.select(&:persisted?) %>
+<% else %>
+  <div class="card bg-light p-3 rounded-0">
+    <h5 class='text-danger'>The questions in this group can only be seen by the group members</h5>
+    <p class='my-0'>Join the group to view the questions and participate</p>
+  </div>
+<% end %>
 <%= content_for :sidebar do %>
   <%= render 'sidebar', group: @group %>
 <% end %>
