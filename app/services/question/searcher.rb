@@ -10,7 +10,7 @@ class Question::Searcher < ApplicationService
 
   def call
     build_query
-    Question.joins(:action_text_rich_text)
+    Question.joins(:action_text_rich_text, :tags)
       .where(conditions, *args).order("title asc")
   end
 
@@ -23,16 +23,19 @@ class Question::Searcher < ApplicationService
   end
 
   def build_for_title_search
-    @conditions << "title ilike ?"
+    @conditions << "title ilike ? "
     @args << formatted_keyword
   end
 
   def build_for_content_search
-    @conditions << "OR action_text_rich_texts.body ilike ?"
+    @conditions << "OR action_text_rich_texts.body ilike ? "
     @args << formatted_keyword
   end
 
-  def build_for_tag_list_search; end
+  def build_for_tag_list_search
+    @conditions << " OR tags.name ilike ? "
+    @args << formatted_keyword
+  end
 
   def formatted_keyword
     "%" + keyword + "%"
