@@ -30,7 +30,7 @@
         <% end %>
       </ul>
       <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
-        <%= text_field_tag :keyword, nil, placeholder: 'Search with title,content or tags', class: 'form-control me-2' %>
+        <%= text_field_tag :keyword, nil, placeholder: 'Search questions...', class: 'form-control me-2' %>
         <button class="btn btn-outline-success" type="submit">Search</button>
       <% end %>
     </div>
