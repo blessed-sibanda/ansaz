@@ -483,7 +483,7 @@ class Tag < ApplicationRecord
 end
 ```
 
-Update question model with `tagging` related methods
+Update question model with `tagging` related methods. Also add an `after_save` callback to save tag names in lowercase.
 
 ```ruby
 class Question < ApplicationRecord
@@ -491,6 +491,7 @@ class Question < ApplicationRecord
 
   has_many :taggings
   has_many :tags, through: :taggings
+  after_save { name.downcase! }
 
   def self.tagged_with(name)
     Tag.find_by(name: name).questions

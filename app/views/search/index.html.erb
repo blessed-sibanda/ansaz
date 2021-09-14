@@ -1,7 +1,9 @@
 <%= form_for :search_index, method: :get do |f| %>
   <div class="input-group mb-3 input-group-lg">
-    <%= text_field_tag :keywords,nil, placeholder: 'Title, Content, or Tags', class: 'form-control' %>
+    <%= text_field_tag :keyword,nil, placeholder: 'Title, Content, or Tags', class: 'form-control' %>
     <button type="submit" class='btn btn-primary btn-lg'>Search</button>
   </div>
 <% end %>
-<%= render @questions %>
+<% if @questions %>
+  <%= render @questions %>
+<% end %>
