@@ -3,6 +3,7 @@
   <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
 </div>
 <%= render @questions %>
+<%= will_paginate @questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
 <%= content_for :sidebar do %>
   <div class="d-flex justify-content-between align-items-baseline mb-1">
     <h6 class="fw-bold">Groups</h6>

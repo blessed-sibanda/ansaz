@@ -21,4 +21,6 @@
 class Tagging < ApplicationRecord
   belongs_to :tag
   belongs_to :question
+
+  validates_uniqueness_of :tag_id, scope: [:question_id]
 end

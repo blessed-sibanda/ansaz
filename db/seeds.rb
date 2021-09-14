@@ -47,3 +47,17 @@ end
 ["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
   Tag.create!(name: name)
 end
+
+3000.times do |i|
+  include FactoryBot::Syntax::Methods
+  q = create :question
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase
+  end
+
+  q.tag_list = tags.uniq.join(",")
+  if i % 100 == 0
+    print(".")
+  end
+end

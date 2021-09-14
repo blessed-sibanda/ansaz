@@ -6,7 +6,9 @@ class QuestionsController < ApplicationController
   def index
     keyword = params[:keyword]
     if keyword.nil?
-      @questions = Question.ungrouped.order(created_at: :desc)
+      @questions = Question
+        .paginate(page: params[:page], per_page: 10)
+        .ungrouped.order(created_at: :desc)
     else
       @questions = Question::Searcher.call(keyword: keyword)
     end

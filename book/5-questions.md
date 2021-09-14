@@ -468,6 +468,16 @@ Create a tagging model to link our tags and questions
 $ rails g model Tagging tag:belongs_to question:belongs_to
 ```
 
+Update the tagging model
+
+```ruby
+class Tagging < ApplicationRecord
+  ...
+
+  validates_uniqueness_of :tag_id, scope: [:question_id]
+end
+```
+
 Run migrations
 
 ```

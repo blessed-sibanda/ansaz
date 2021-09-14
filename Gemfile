@@ -70,3 +70,7 @@ gem "image_processing", "~> 1.12"
 gem "faker", "~> 2.19", :groups => [:development, :test]
 
 gem "pundit", "~> 2.1"
+
+gem "will_paginate", "~> 3.3"
+
+gem "will_paginate-bootstrap4", "~> 0.2.2"
