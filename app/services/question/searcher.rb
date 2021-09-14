@@ -1,27 +1,26 @@
 class Question::Searcher < ApplicationService
-  attr_reader :keyword, :conditions, :args, :tags_query
-  private :keyword, :conditions, :args, :tags_query
+  attr_reader :keyword, :conditions, :args, :tags_query, :base_query
+  private :keyword, :conditions, :args, :tags_query, :base_query
 
   def initialize(keyword:)
     @keyword = keyword
     @conditions = ""
     @args = []
+    @base_query = Question.joins(:action_text_rich_text, :tags)
   end
 
   def call
-    build_query
-    query = Question.joins(:action_text_rich_text, :tags)
-    query.where(conditions, *args)
-      .or(query.where(tags_query))
-      .order("title asc").uniq
+    perform_search.order("title asc").uniq
   end
 
   private
 
-  def build_query
+  def perform_search
     build_for_title_search
     build_for_content_search
     build_for_tag_list_search
+    base_query.where(conditions, *args)
+      .or(base_query.where(tags_query))
   end
 
   def build_for_title_search
@@ -36,7 +35,7 @@ class Question::Searcher < ApplicationService
 
   def build_for_tag_list_search
     # Remove suspicious characters from keyword
-    cleaned_keyword = keyword.gsub(/[^A-Za-z]-,/, "").downcase
+    cleaned_keyword = keyword.gsub(/[^A-Za-z]-,/, "").downcase.strip
     @tags_query = "tags.name in ('" + cleaned_keyword.split(",").join("','") + "')"
   end
 
