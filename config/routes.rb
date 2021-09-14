@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "search/index"
   get "tags/index"
   root to: "home#index"
   devise_for :users
@@ -18,5 +19,6 @@ Rails.application.routes.draw do
       end
     end
     resources :tags, only: :index
+    resources :search, only: :index
   end
 end

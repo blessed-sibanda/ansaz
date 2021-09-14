@@ -22,7 +22,6 @@
 #
 class Question < ApplicationRecord
   belongs_to :user
-  has_rich_text :content
   has_many :answers
   has_many :stars, as: :starrable
   belongs_to :group, optional: true
@@ -33,6 +32,12 @@ class Question < ApplicationRecord
 
   has_many :taggings
   has_many :tags, through: :taggings
+
+  has_rich_text :content
+
+  # add relation, so we can search action texts
+  has_one :action_text_rich_text,
+          class_name: "ActionText::RichText", as: :record
 
   def self.tagged_with(name)
     Tag.find_by(name: name).questions

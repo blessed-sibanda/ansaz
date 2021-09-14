@@ -805,6 +805,49 @@ Seed the database
 $ rails db:seed:replant
 ```
 
+Update \_navbar partial with a users link
+
+```erb
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+  <div class="container">
+    <%= link_to content_tag(:strong, 'Ansaz'), root_path, class: 'navbar-brand' %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <%= link_to 'Users', users_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Account
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><%= link_to 'Edit Account', edit_user_registration_path, class: 'dropdown-item' %></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><%= link_to 'Logout', destroy_user_session_path, method: :delete, class: 'dropdown-item' %></li>
+            </ul>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <%= link_to 'Login', new_user_session_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Register', new_user_registration_path, class: 'nav-link' %>
+          </li>
+        <% end %>
+      </ul>
+      <form class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</nav>
+```
+
 Visit the users index page at [http://localhost:3000/users](http://localhost:3000/users)
 
 ![Users Page](./users-index.png)

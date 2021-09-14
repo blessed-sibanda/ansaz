@@ -524,6 +524,12 @@ Update `db/seeds.rb` with a few tags
 end
 ```
 
+Re-seed the database
+
+```
+$ rails db:seed
+```
+
 Display question tags
 
 `app/views/questions/_question.html.erb`
@@ -645,6 +651,8 @@ end
 ```
 
 Create a tags stimulus controller to override the default behaviour of `stimulus-autocomplete`.
+
+To learn more about the `stimulus-autocomplete` package visit its [github page](https://github.com/afcapel/stimulus-autocomplete)
 
 ```
 $ touch app/javascript/controllers/tag_controller
