@@ -5,7 +5,7 @@ class Question::Searcher < ApplicationService
   def initialize(keyword:)
     @keyword = keyword.downcase
     @where_clause = ""
-    @where_args = {}
+    @where_args = []
     @order = {}
   end
 
@@ -19,12 +19,12 @@ class Question::Searcher < ApplicationService
     build_for_title_search
     build_for_content_search
     build_for_tag_list_search
-    Question.where(where_clause, where_args).order(order)
+    Question.where(where_clause, *where_args).order(order)
   end
 
   def build_for_title_search
-    @where_clause << "lower(title) like :title"
-    @where_args[:title] = formatted_keyword
+    @where_clause << "lower(title) like ?"
+    @where_args << formatted_keyword
     @order = "title asc"
   end
 
