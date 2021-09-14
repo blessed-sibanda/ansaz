@@ -10,21 +10,17 @@ class Question::Searcher < ApplicationService
 
   def call
     build_query
-
-    # Question.joins(:action_text_rich_text, :tags)
-    #   .where(conditions, *args).or(Question.joins(:action_text_rich_text, :tags).where(tags_query))
-    #   .order("title asc")
-    # puts query
-    # query
-
-    Question.joins(:tags).where(tags_query)
+    query = Question.joins(:action_text_rich_text, :tags)
+    query.where(conditions, *args)
+      .or(query.where(tags_query))
+      .order("title asc").uniq
   end
 
   private
 
   def build_query
-    # build_for_title_search
-    # build_for_content_search
+    build_for_title_search
+    build_for_content_search
     build_for_tag_list_search
   end
 
