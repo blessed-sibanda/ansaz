@@ -4,7 +4,12 @@ class QuestionsController < ApplicationController
 
   # GET /questions or /questions.json
   def index
-    @questions = Question.ungrouped.order(created_at: :desc)
+    keyword = params[:keyword]
+    if keyword.nil?
+      @questions = Question.ungrouped.order(created_at: :desc)
+    else
+      @questions = Question::Searcher.call(keyword: keyword)
+    end
   end
 
   # GET /questions/1 or /questions/1.json

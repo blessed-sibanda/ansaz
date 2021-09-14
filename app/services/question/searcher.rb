@@ -6,7 +6,7 @@ class Question::Searcher < ApplicationService
     @keyword = keyword
     @conditions = ""
     @args = []
-    @base_query = Question.joins(:action_text_rich_text, :tags)
+    @base_query = Question.joins(:action_text_rich_text, :tags).ungrouped.order(created_at: :desc)
   end
 
   def call
