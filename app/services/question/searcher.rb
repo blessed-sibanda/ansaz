@@ -35,7 +35,7 @@ class Question::Searcher < ApplicationService
 
   def build_for_tag_list_search
     # Remove suspicious characters from keyword
-    cleaned_keyword = keyword.gsub(/[^A-Za-z]-,/, "").downcase.strip
+    cleaned_keyword = keyword.gsub(/[^A-Za-z-]/, "").downcase.strip
     @tags_query = "tags.name in ('" + cleaned_keyword.split(",").join("','") + "')"
   end
 

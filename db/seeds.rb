@@ -48,15 +48,22 @@ end
   Tag.create!(name: name)
 end
 
-3000.times do |i|
+1000.times do |i|
   include FactoryBot::Syntax::Methods
   q = create :question
   tags = []
   rand(1..3).times.each do
-    tags << Faker::Educator.subject.downcase
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
   end
 
   q.tag_list = tags.uniq.join(",")
+
+  # put 10% of the questions in groups
+  if i % 10 == 0
+    q.group = Group.all.sample
+    q.save
+  end
+
   if i % 100 == 0
     print(".")
   end
