@@ -22,14 +22,6 @@ User.create!(name: "Blessed Sibanda",
   )
 end
 
-20.times do |i|
-  Question.create!(
-    user: User.active.sample,
-    title: Faker::Lorem.sentence(word_count: rand(5..10)),
-    content: Faker::Lorem.sentence(word_count: rand(75..150)),
-  )
-end
-
 ["Rails Devs", "Super Scientists", "Python Hackers", "Frontend Engineers", "Data Science Nerds"].each do |name|
   g = Group.new(
     name: name,
@@ -44,27 +36,27 @@ end
   g.save!
 end
 
-["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
-  Tag.create!(name: name)
-end
+# ["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
+#   Tag.create!(name: name)
+# end
 
-1000.times do |i|
-  include FactoryBot::Syntax::Methods
-  q = create :question
-  tags = []
-  rand(1..3).times.each do
-    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
-  end
+# 1000.times do |i|
+#   include FactoryBot::Syntax::Methods
+#   q = create :question
+#   tags = []
+#   rand(1..3).times.each do
+#     tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+#   end
 
-  q.tag_list = tags.uniq.join(",")
+#   q.tag_list = tags.uniq.join(",")
 
-  # put 10% of the questions in groups
-  if i % 10 == 0
-    q.group = Group.all.sample
-    q.save
-  end
+#   # put 10% of the questions in groups
+#   if i % 10 == 0
+#     q.group = Group.all.sample
+#     q.save
+#   end
 
-  if i % 100 == 0
-    print(".")
-  end
-end
+#   if i % 100 == 0
+#     print(".")
+#   end
+# end
