@@ -27,6 +27,10 @@ class Question < ApplicationRecord
                   associated_against: {
                     rich_text_content: [:body],
                   }
+  pg_search_scope :search_tags,
+                  associated_against: {
+                    tags: [:name],
+                  }
 
   belongs_to :user
   has_many :answers
@@ -49,7 +53,8 @@ class Question < ApplicationRecord
   def self.search(keyword)
     a = search_content(keyword).pluck(:id)
     b = search_title(keyword).pluck(:id)
-    ids = (a + b).uniq
+    c = search_tags(keyword).pluck(:id)
+    ids = (a + b + c).uniq
     where(id: ids)
   end
 

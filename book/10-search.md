@@ -110,4 +110,22 @@ Now update the questions index page with different headers based on whether the 
 <% end %>
 ```
 
-# 10.2 Searching for Questions By Tags
+Update the question partial to allow filtering questions by tag names
+
+```erb
+<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
+<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+  ...
+  ...
+  <div class="card-footer d-flex justify-content-between">
+    <div>
+      <%= render 'stars/stars', starrable: question %>
+    </div>
+    <div class="d-flex">
+      <% question.tags.each do |tag| %>
+        <%= link_to "##{tag.name}", questions_path(keywords: tag.name), class: 'badge tag-item' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+```
