@@ -12,7 +12,7 @@ User.create!(name: "Blessed Sibanda",
              confirmed_at: Time.now,
              about: Faker::Lorem.paragraphs.join)
 
-14.times do |i|
+99.times do |i|
   User.create!(
     name: Faker::Name.name,
     email: "user-#{i}@example.com",
@@ -36,27 +36,23 @@ end
   g.save!
 end
 
-# ["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
-#   Tag.create!(name: name)
-# end
+10_000.times do |i|
+  include FactoryBot::Syntax::Methods
+  q = create :question
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+  end
 
-# 1000.times do |i|
-#   include FactoryBot::Syntax::Methods
-#   q = create :question
-#   tags = []
-#   rand(1..3).times.each do
-#     tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
-#   end
+  q.tag_list = tags.uniq.join(",")
 
-#   q.tag_list = tags.uniq.join(",")
+  # put 10% of the questions in groups
+  if i % 10 == 0
+    q.group = Group.all.sample
+    q.save
+  end
 
-#   # put 10% of the questions in groups
-#   if i % 10 == 0
-#     q.group = Group.all.sample
-#     q.save
-#   end
-
-#   if i % 100 == 0
-#     print(".")
-#   end
-# end
+  if i % 50 == 0
+    print(".")
+  end
+end

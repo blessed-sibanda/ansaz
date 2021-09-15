@@ -22,13 +22,11 @@
 #
 class Question < ApplicationRecord
   include PgSearch::Model
-  pg_search_scope :search_title, against: :title
-  pg_search_scope :search_content,
+
+  pg_search_scope :search,
+                  against: :title,
                   associated_against: {
                     rich_text_content: [:body],
-                  }
-  pg_search_scope :search_tags,
-                  associated_against: {
                     tags: [:name],
                   }
 
@@ -49,14 +47,6 @@ class Question < ApplicationRecord
   has_many :tags, through: :taggings
 
   has_rich_text :content
-
-  def self.search(keyword)
-    a = search_content(keyword).pluck(:id)
-    b = search_title(keyword).pluck(:id)
-    c = search_tags(keyword).pluck(:id)
-    ids = (a + b + c).uniq
-    where(id: ids)
-  end
 
   def self.tagged_with(name)
     Tag.find_by(name: name).questions

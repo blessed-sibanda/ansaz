@@ -12,26 +12,27 @@ Lets install `pg_search`
 $ bundle add pg_search
 ```
 
+Generate a migration to create the pg_search_documents database table.
+
+```
+$ rails g pg_search:migration:multisearch
+$ rails db:migrate
+```
+
 Include `PgSearch` in question model and provide a search scopes for question title and content.
 
 ```ruby
 class Question < ApplicationRecord
+  ...
+
   include PgSearch::Model
-  pg_search_scope :search_title, against: :title
-  pg_search_scope :search_content,
+
+  pg_search_scope :search,
+                  against: :title,
                   associated_against: {
                     rich_text_content: [:body],
+                    tags: [:name],
                   }
-
-  ...
-  ...
-
-  def self.search(keyword)
-    a = search_content(keyword).pluck(:id)
-    b = search_title(keyword).pluck(:id)
-    ids = (a + b).uniq
-    where(id: ids)
-  end
 end
 ```
 
@@ -128,4 +129,34 @@ Update the question partial to allow filtering questions by tag names
     </div>
   </div>
 </div>
+```
+
+Update the database seeds with more data to see the search feature in aaction
+
+`db/seeds.rb`
+
+```ruby
+...
+# User and Group seeds unchanged
+
+10_000.times do |i|
+  include FactoryBot::Syntax::Methods
+  q = create :question
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+  end
+
+  q.tag_list = tags.uniq.join(",")
+
+  # put 10% of the questions in groups
+  if i % 10 == 0
+    q.group = Group.all.sample
+    q.save
+  end
+
+  if i % 50 == 0
+    print(".")
+  end
+end
 ```
