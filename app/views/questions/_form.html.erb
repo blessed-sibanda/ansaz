@@ -11,7 +11,7 @@
     <label for="">Tags</label>
     <small class="small text-muted">Separate tag names with commas</small>
     <div data-controller="autocomplete" data-autocomplete-url-value="/tags/">
-      <input name='question[tag_list]' value='<%= question.tag_list.join(',') %>' type="text" class='form-control' data-tag-target='input' data-autocomplete-target="input"/>
+      <input name='question[tag_list]' value='<%= question.tag_list.join(',') %>' type="text" class='form-control' data-tag-target='input' required='true' data-autocomplete-target="input"/>
       <ul class="list-group" data-autocomplete-target="results" style="max-height: 10rem; overflow-y: scroll;"></ul>
     </div>
   </div>

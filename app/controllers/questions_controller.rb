@@ -10,7 +10,9 @@ class QuestionsController < ApplicationController
         .paginate(page: params[:page], per_page: 10)
         .ungrouped.order(created_at: :desc)
     else
-      @questions = Question::Searcher.call(keyword: keyword)
+      @questions = Question::Searcher
+        .call(keyword: keyword, ungrouped: true).
+        paginate(page: params[:page], per_page: 10)
     end
   end
 

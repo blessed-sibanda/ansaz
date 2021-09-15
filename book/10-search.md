@@ -64,3 +64,9 @@ Next lets create the search form in search `index` page
 ```erb
 
 ```
+
+Search service
+
+Pagination
+
+Update Tag controller
