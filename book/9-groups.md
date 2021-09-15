@@ -179,7 +179,7 @@ Update questions `index` page
     <%= link_to 'Create Group', new_group_path, class: 'btn btn-outline-primary btn-sm' %>
   </div>
   <%= render Group.popular %>
-<% end %
+<% end %>
 ```
 
 Update the group model with the new scope
@@ -1237,5 +1237,49 @@ end
   if i % 100 == 0
     print(".")
   end
+end
+```
+
+## 9.6 Popular Questions
+
+In this section we will display the top questions in the groups index page. Questions are ranked by the number of stars and answers they have.
+
+Add the popular questions list in the sidebar of the group index page.
+
+`app/views/groups/index.html.erb`
+
+```erb
+...
+...
+<%= content_for :sidebar do %>
+  <h6 class="fw-bold">Top Questions</h6>
+  <% Question.ungrouped.popular.each do |question| %>
+    <div class="card p-2 my-2 rounded-0 bg-light">
+      <h6 class="card-title py-1 my-0">
+        <%= link_to question.title, question, class: 'text-decoration-none' %>
+      </h6>
+    </div>
+  <% end %>
+<% end %>
+```
+
+Update question model with the `popular` and `ungrouped` scopes
+
+```ruby
+class Question < ApplicationRecord
+  ...
+  ...
+
+  scope :ungrouped, -> { where(group_id: nil) }
+
+  scope :popular, -> {
+      left_joins(:stars, :answers).group(:id)
+        .order("COUNT(stars.id) DESC")
+        .order("COUNT(answers.id) DESC")
+        .limit(10)
+    }
+
+  ...
+  ...
 end
 ```

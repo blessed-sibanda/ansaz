@@ -42,6 +42,15 @@ class Question < ApplicationRecord
         .paginate(page: page, per_page: 10)
     }
 
+  scope :ungrouped, -> { where(group_id: nil) }
+
+  scope :popular, -> {
+      left_joins(:stars, :answers).group(:id)
+        .order("COUNT(stars.id) DESC")
+        .order("COUNT(answers.id) DESC")
+        .limit(10)
+    }
+
   has_many :taggings
   has_many :tags, through: :taggings
 
