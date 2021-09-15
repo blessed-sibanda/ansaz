@@ -13,7 +13,7 @@
 # Indexes
 #
 #  index_groups_on_name  (name) UNIQUE
-#
+#s
 # Foreign Keys
 #
 #  fk_rails_...  (admin_id => users.id)
@@ -21,7 +21,7 @@
 FactoryBot.define do
   factory :group do
     name { "MyString" }
-    description { "MyText" }
+    description { }
     admin_id { "" }
     group_type { "MyString" }
   end

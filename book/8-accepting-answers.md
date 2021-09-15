@@ -2,7 +2,7 @@
 
 In this chapter we will allow the question asker to mark answers as accepted.
 
-# 8.1 Implement Answer Acceptances
+## 8.1 Implement Answer Acceptances
 
 Let's generate a controller to handle accepting answers
 

@@ -12,6 +12,7 @@ class GroupPolicy < ApplicationPolicy
   end
 
   def leave?
+    return false if user == record.admin # the admin cannot leave
     GroupMembership.accepted.where(user: user,
                                    group: record).any?
   end

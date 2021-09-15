@@ -4,7 +4,6 @@
 #
 #  id          :bigint           not null, primary key
 #  accepted    :boolean          default(FALSE)
-#  stars_count :bigint           default(0)
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  question_id :bigint           not null
@@ -28,9 +27,9 @@ class Answer < ApplicationRecord
   has_many :stars, as: :starrable
 
   default_scope {
-    order(accepted: :desc)
-      .order(stars_count: :desc)
-      .order(created_at: :desc)
+    left_joins(:stars).group(:id)
+      .order(accepted: :desc)
+      .order("COUNT(stars.id) DESC")
   }
 
   after_create { QuestionMailer.answered(question).deliver_later }

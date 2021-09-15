@@ -3,6 +3,7 @@
   <span class="d-flex">
     <% if policy(group).edit? %>
       <%= link_to 'Edit', edit_group_path(group), class: 'mx-1' %>
+      <%= link_to 'Delete', group, method: :delete, data: {confirm: 'Are you sure'}, class: 'link-danger' %>
     <% end %>
     <% if policy(group).leave? %>
       <%= link_to 'Leave', group_membership_path(@group), class: ' link-danger mx-1', method: :delete %>

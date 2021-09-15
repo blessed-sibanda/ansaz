@@ -32,11 +32,18 @@ class Group < ApplicationRecord
   validates :name, length: { in: 5..30 }
   validates :group_type, inclusion: { in: GROUP_TYPES }
 
-  has_many :group_memberships
+  has_many :group_memberships, dependent: :destroy
   has_many :users, through: :group_memberships, source: :user
   has_many :active_users, -> { GroupMembership.accepted },
            through: :group_memberships, source: :user
   has_many :questions
+
+  scope :ranked, -> {
+          joins(:questions, :users).group(:id)
+            .order("COUNT(questions.id) DESC")
+            .order("COUNT(users.id) DESC")
+        }
+  scope :popular, -> { ranked.limit(5) }
 
   def add_admin_to_users
     GroupMembership::Creator.call(user: admin, group: self)

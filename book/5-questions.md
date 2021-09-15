@@ -631,7 +631,7 @@ application.load(definitionsFromContext(context));
 application.register('autocomplete', Autocomplete);
 ```
 
-Create the tags rails controller to give us a list of tags
+Create the tags rails controller to give us a list of tags based on the search query from the input.
 
 ```
 $ rails g controller tags index --skip-stylesheets
@@ -642,10 +642,12 @@ class TagsController < ApplicationController
   layout false
 
   def index
-    @tags = Tag.all
+    @tags = Tag.where("name ilike ?", "%" + params["q"].split(",").last + "%")
   end
 end
 ```
+
+The index action in our tags controller uses `ilike` query to search for tags with names that contain the keyword entered in the input box.
 
 Update routes
 
@@ -717,7 +719,7 @@ end
 
 Now try creating a new question and you will notice the autocomplete feature working on the tag list
 
-# 5.5 Searching for Questions
+## 5.5 Searching for Questions
 
 In this chapter we will implement a question search feature. This search feature will allow users to find questions based on title, content and/or tags. To implement our search, we are going to take advantage of the built-in PostgreSQL full-text search capabilities using a gem called `pg-search`. This gem does all the heavy lifting in dealing with things like `ts_vector` and `ts_query` behind the scenes for us. It is a perfect example of how ruby and rails makes life easier for us developers.
 
@@ -800,7 +802,7 @@ Now lets update our navbar search form to send our searches via `get` to the `qu
         ...
       </ul>
       <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
-        <%= text_field_tag :keywords, nil, placeholder: 'Search questions...', class: 'form-control me-2' %>
+        <%= text_field_tag :keywords, nil, placeholder: 'Search public questions...', class: 'form-control me-2' %>
         <button class="btn btn-outline-success" type="submit">Search</button>
       <% end %>
     </div>

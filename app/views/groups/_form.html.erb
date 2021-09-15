@@ -7,7 +7,7 @@
     <%= form.text_area :description %>
   </div>
   <div class="field">
-    <%= form.file_field :banner %>
+    <%= form.file_field :banner, control_class: "form-control" %>
   </div>
   <div class="field">
     <%= form.select :group_type, Group::GROUP_TYPES %>

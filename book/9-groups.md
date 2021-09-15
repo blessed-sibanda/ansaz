@@ -80,7 +80,7 @@ Update groups 'form'
     <%= form.text_area :description %>
   </div>
   <div class="field">
-    <%= form.file_field :banner %>
+    <%= form.file_field :banner, control_class: "form-control" %>
   </div>
   <div class="field">
     <%= form.select :group_type, Group::GROUP_TYPES %>
@@ -89,6 +89,26 @@ Update groups 'form'
     <%= form.submit %>
   </div>
 <% end %>
+```
+
+Unfortunately if you view the new group page, you will notice that `bootstrap_form` gem styles the `file_field` in a weird way by repeating the choose file label. So let's update `main.scss` to hide the extra choose file label.
+
+```scss
+@import 'bootstrap';
+
+input[type='submit'] {
+  margin-top: 0.6em;
+}
+
+form {
+  // other styles here
+
+  .custom-file-label {
+    display: none;
+  }
+}
+
+// other styles here
 ```
 
 Note we are using a select field for the drop down so that a user can select the correct group type.
@@ -155,11 +175,31 @@ Update questions `index` page
 ...
 <%= content_for :sidebar do %>
   <div class="d-flex justify-content-between align-items-baseline mb-1">
-    <h6 class='fw-bold'>Groups</h6>
+    <h6 class="fw-bold">Popular Groups</h6>
     <%= link_to 'Create Group', new_group_path, class: 'btn btn-outline-primary btn-sm' %>
   </div>
-  <%= render Group.all %>
-<% end %>
+  <%= render Group.popular %>
+<% end %
+```
+
+Update the group model with the new scope
+
+```ruby
+class Group < ApplicationRecord
+  ...
+  ...
+
+  scope :ranked, -> {
+          joins(:questions, :users).group(:id)
+            .order("COUNT(questions.id) DESC")
+            .order("COUNT(users.id) DESC")
+        }
+  scope :popular, -> { ranked.limit(5) }
+
+  def add_admin_to_users
+    GroupMembership::Creator.call(user: admin, group: self)
+  end
+end
 ```
 
 Create 'group' partial
@@ -293,6 +333,7 @@ class GroupPolicy < ApplicationPolicy
   end
 
   def leave?
+    return false if user == record.admin # the admin cannot leave
     GroupMembership.accepted.where(user: user,
                                   group: record).any?
   end
@@ -330,18 +371,21 @@ Add group seed data
 `db/seeds.rb`
 
 ```ruby
-["Rails Devs", "Super Scientists", "Python Hackers", "Frontend Engineers", "Data Science Nerds"].each do |name|
-  g = Group.new(
-    name: name,
-    description: Faker::Lorem.sentence(word_count: rand(50..80)),
-    group_type: Group::GROUP_TYPES.sample,
-    admin: User.active.sample,
-  )
-  g.banner.attach(
-    io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
-    filename: "default_banner_img.png",
-  )
-  g.save!
+20.times do
+  name = Faker::Book.genre
+  unless Group.find_by_name(name)
+    g = Group.new(
+      name: name,
+      admin: User.active.sample,
+      group_type: Group::GROUP_TYPES.sample,
+      description: Faker::Lorem.sentence(word_count: rand(50..80)),
+    )
+    g.banner.attach(
+      io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+      filename: "default_banner_img.png",
+    )
+    g.save!
+  end
 end
 ```
 
@@ -354,7 +398,7 @@ $ rails db:seed:replant
 ```
 
 Now the questions index page looks like
-![Group List Displayed in Sidebar](./questions-page-with-groups.png)
+![Group List Displayed in Sidebar](./questions-with-groups.png)
 
 ## 9.3 Link Users To Groups
 
@@ -424,10 +468,12 @@ class Group < ApplicationRecord
   ...
   ...
 
-  has_many :group_memberships
+  has_many :group_memberships, dependent: :destroy
   has_many :users, through: :group_memberships, source: :user
 end
 ```
+
+Note that we added a `dependent: :destroy` option to the `group_memberships` relation so that the `group_memberships` are destroy when the related group is destroy. There is no point in keeping group memberships for a non-existent group.
 
 Create a controller to handle joining/leaving groups
 
@@ -1057,4 +1103,139 @@ Update group `show` page to display questions in group
 <%= content_for :sidebar do %>
   <%= render 'sidebar', group: @group %>
 <% end %>
+```
+
+## 9.5 Display Group List
+
+In this section we are going to create a group list where users can browse the available groups.
+
+Let's start by adding extra links in our `navbar` partial.
+
+```erb
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+  <div class="container">
+    ...
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <%= link_to 'Questions', questions_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Groups', groups_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Users', users_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item dropdown">
+            ...
+          </li>
+        <% else %>
+          ...
+        <% end %>
+      </ul>
+      ...
+    </div>
+  </div>
+</nav>
+```
+
+Update the group index page
+
+`app/views/groups/index.html.erb`
+
+```erb
+
+```
+
+Update the group index page with a nice formatted table showing the group names and their types
+
+```erb
+<div class="d-flex align-items-center justify-content-between">
+  <h1 class='h2'>Groups</h1>
+  <%= link_to 'New Group', new_group_path, class: 'btn btn-primary' %>
+</div>
+<table class='table mt-3 table-hover'>
+  <thead>
+    <tr>
+      <td>Rank</td>
+      <td>Name</td>
+      <td>Type</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @groups.each.with_index do |group, index| %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td class='h5'>
+          <%= link_to group.name, group,
+              class: 'text-decoration-none' %>
+        </td>
+        <td class='text-muted text-end'><%= group.group_type %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= will_paginate @groups,
+    renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
+```
+
+Update the groups controller to provide paginated results
+
+```ruby
+class GroupsController < ApplicationController
+  before_action :set_group, only: %i[ show edit update destroy ]
+  before_action :check_authorization, only: %i[edit update destroy]
+
+  def index
+    @groups = Group.paginate(page: params[:page])
+  end
+
+  ...
+  ...
+end
+```
+
+Add more groups in `db/seeds.rb`
+
+```ruby
+...
+...
+
+40.times do
+  name = Faker::Book.genre
+  unless Group.find_by_name(name)
+    g = Group.new(
+      name: name,
+      admin: User.active.sample,
+      group_type: Group::GROUP_TYPES.sample,
+      description: Faker::Lorem.sentence(word_count: rand(50..80)),
+    )
+    g.banner.attach(
+      io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+      filename: "default_banner_img.png",
+    )
+    g.save!
+  end
+end
+
+2_000.times do |i|
+  include FactoryBot::Syntax::Methods
+  q = create :question
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+  end
+
+  q.tag_list = tags.uniq.join(",")
+
+  if i % 5 == 0 # one in 5 questions belongs to a group
+    q.group = Group.all.sample
+    q.save
+  end
+
+  if i % 100 == 0
+    print(".")
+  end
+end
 ```
