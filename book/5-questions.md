@@ -716,3 +716,146 @@ end
 ```
 
 Now try creating a new question and you will notice the autocomplete feature working on the tag list
+
+# 5.5 Searching for Questions
+
+In this chapter we will implement a question search feature. This search feature will allow users to find questions based on title, content and/or tags. To implement our search, we are going to take advantage of the built-in PostgreSQL full-text search capabilities using a gem called `pg-search`. This gem does all the heavy lifting in dealing with things like `ts_vector` and `ts_query` behind the scenes for us. It is a perfect example of how ruby and rails makes life easier for us developers.
+
+Lets install `pg_search`
+
+```
+$ bundle add pg_search
+```
+
+Generate a migration to create the pg_search_documents database table.
+
+```
+$ rails g pg_search:migration:multisearch
+$ rails db:migrate
+```
+
+Include `PgSearch` in question model and provide a search scopes for question title and content.
+
+```ruby
+class Question < ApplicationRecord
+  ...
+
+  include PgSearch::Model
+
+  pg_search_scope :search,
+                  against: :title,
+                  associated_against: {
+                    rich_text_content: [:body],
+                    tags: [:name],
+                  }
+end
+```
+
+Update the questions controller index action to allow for search
+
+```ruby
+class QuestionsController < ApplicationController
+  before_action :set_question, only: %i[ show edit update destroy ]
+  before_action :authorize_question, only: [:edit, :update, :destory]
+
+  def index
+    keywords = params[:keywords]
+    page = params[:page]
+    if keywords.nil?
+      @questions = Question.paginated(page)
+    else
+      @questions = Question.search(keywords).paginated(page)
+    end
+  end
+
+  ...
+  ...
+end
+```
+
+The paginated scope paginates the questions and orders them in descending order of creation date. It also filters questions by group_id if the group is given.
+
+```ruby
+class Question < ApplicationRecord
+  ...
+
+  scope :paginated, ->(page, group: nil) {
+      where(group: group&.id)
+        .paginate(page: page, per_page: 10)
+        .order(created_at: :desc)
+    }
+end
+```
+
+Now lets update our navbar search form to send our searches via `get` to the `questions_url`.
+
+```erb
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+  <div class="container">
+    ...
+    ...
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        ...
+        ...
+      </ul>
+      <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
+        <%= text_field_tag :keywords, nil, placeholder: 'Search questions...', class: 'form-control me-2' %>
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      <% end %>
+    </div>
+  </nav>
+```
+
+Now update the questions index page with different headers based on whether the results are search results or not.
+
+```erb
+<div class="d-flex justify-content-between align-items-center my-2">
+  <% if @keywords %>
+    <h1 class="h5">Search Results for
+      <span class='text-warning'>"<%= @keywords %>"</span>
+    </h1>
+  <% else %>
+    <h1 class="h5 text-uppercase">Questions</h1>
+    <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+  <% end %>
+</div>
+...
+<%= content_for :sidebar do %>
+  ...
+<% end %>
+```
+
+Update the question partial to allow filtering questions by tag names
+
+```erb
+<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
+<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+  ...
+  ...
+  <div class="card-footer d-flex justify-content-between">
+    <div>
+      <%= render 'stars/stars', starrable: question %>
+    </div>
+    <div class="d-flex">
+      <% question.tags.each do |tag| %>
+        <%= link_to "##{tag.name}", questions_path(keywords: tag.name), class: 'badge tag-item' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+```
+
+Update the database seeds with more data to see the search feature in aaction
+
+`db/seeds.rb`
+
+```ruby
+...
+...
+
+10_000.times do |i|
+  ...
+  ...
+end
+```
