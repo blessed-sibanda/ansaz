@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_15_052559) do
+ActiveRecord::Schema.define(version: 2021_09_13_113925) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,7 +22,6 @@ ActiveRecord::Schema.define(version: 2021_09_15_052559) do
     t.bigint "record_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["body"], name: "index_action_text_rich_texts_on_body_text_pattern_ops", opclass: :text_pattern_ops
     t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
   end
 
@@ -105,7 +104,6 @@ ActiveRecord::Schema.define(version: 2021_09_15_052559) do
     t.bigint "stars_count", default: 0
     t.bigint "group_id"
     t.index ["group_id"], name: "index_questions_on_group_id"
-    t.index ["title"], name: "index_questions_on_title_varchar_pattern_ops", opclass: :varchar_pattern_ops
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 

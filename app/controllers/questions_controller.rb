@@ -4,15 +4,12 @@ class QuestionsController < ApplicationController
 
   # GET /questions or /questions.json
   def index
-    keyword = params[:keyword]
-    if keyword.nil?
-      @questions = Question
-        .paginate(page: params[:page], per_page: 10)
-        .ungrouped.order(created_at: :desc)
+    @keywords = params[:keywords]
+    page = params[:page]
+    if @keywords.nil?
+      @questions = Question.paginated(page)
     else
-      @questions = Question::Searcher
-        .call(keyword: keyword, ungrouped: true).
-        paginate(page: params[:page], per_page: 10)
+      @questions = Question.search(@keywords).paginated(page)
     end
   end
 

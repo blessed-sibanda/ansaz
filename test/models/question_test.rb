@@ -12,9 +12,8 @@
 #
 # Indexes
 #
-#  index_questions_on_group_id                   (group_id)
-#  index_questions_on_title_varchar_pattern_ops  (title)
-#  index_questions_on_user_id                    (user_id)
+#  index_questions_on_group_id  (group_id)
+#  index_questions_on_user_id   (user_id)
 #
 # Foreign Keys
 #

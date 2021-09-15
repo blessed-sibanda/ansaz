@@ -12,9 +12,8 @@
 #
 # Indexes
 #
-#  index_questions_on_group_id                   (group_id)
-#  index_questions_on_title_varchar_pattern_ops  (title)
-#  index_questions_on_user_id                    (user_id)
+#  index_questions_on_group_id  (group_id)
+#  index_questions_on_user_id   (user_id)
 #
 # Foreign Keys
 #
@@ -22,6 +21,13 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Question < ApplicationRecord
+  include PgSearch::Model
+  pg_search_scope :search_title, against: :title
+  pg_search_scope :search_content,
+                  associated_against: {
+                    rich_text_content: [:body],
+                  }
+
   belongs_to :user
   has_many :answers
   has_many :stars, as: :starrable
@@ -29,24 +35,26 @@ class Question < ApplicationRecord
 
   validates :title, presence: true
 
-  scope :ungrouped, -> { where(group_id: nil) }
+  scope :paginated, ->(page, group: nil) {
+      where(group: group&.id)
+        .paginate(page: page, per_page: 10)
+        .order(created_at: :desc)
+    }
 
   has_many :taggings
   has_many :tags, through: :taggings
 
   has_rich_text :content
 
-  # add relation, so we can search action texts
-  has_one :action_text_rich_text,
-          class_name: "ActionText::RichText", as: :record
+  def self.search(keyword)
+    a = search_content(keyword).pluck(:id)
+    b = search_title(keyword).pluck(:id)
+    ids = (a + b).uniq
+    where(id: ids)
+  end
 
   def self.tagged_with(name)
     Tag.find_by(name: name).questions
-  end
-
-  def self.tag_counts
-    Tag.select("tags.*, count(taggings.tag_id) as count").joins
-    (:taggings).group("taggings.tag_id")
   end
 
   def tag_list
