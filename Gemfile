@@ -76,3 +76,5 @@ gem "will_paginate", "~> 3.3"
 gem "will_paginate-bootstrap4", "~> 0.2.2"
 
 gem "pg_search", "~> 2.3"
+
+gem "acts-as-taggable-on", "~> 8.1"

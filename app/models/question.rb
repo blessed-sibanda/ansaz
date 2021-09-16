@@ -26,7 +26,7 @@ class Question < ApplicationRecord
                   against: :title,
                   associated_against: {
                     rich_text_content: [:body],
-                    tags: [:name],
+                  # tags: [:name],
                   }
 
   belongs_to :user
@@ -51,22 +51,5 @@ class Question < ApplicationRecord
         .limit(10)
     }
 
-  has_many :taggings
-  has_many :tags, through: :taggings
-
   has_rich_text :content
-
-  def self.tagged_with(name)
-    Tag.find_by(name: name).questions
-  end
-
-  def tag_list
-    tags.map(&:name)
-  end
-
-  def tag_list=(names)
-    self.tags = names.split(",").map do |n|
-      Tag.where(name: n.strip).first_or_create! unless n.blank?
-    end
-  end
 end
