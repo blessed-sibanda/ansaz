@@ -17,5 +17,6 @@ import 'bootstrap/dist/js/bootstrap.min';
 require('trix');
 require('@rails/actiontext');
 import 'controllers';
+import '@hotwired/turbo-rails';
 
 import '@fortawesome/fontawesome-free/css/all';
