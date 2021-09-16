@@ -7,3 +7,13 @@
   <h5>Answers (<%= @question.answers.count %>)</h5>
 <% end %>
 <%= render @question.answers %>
+<%= content_for :sidebar do %>
+  <h6 class="fw-bold">Similar Questions</h6>
+  <% Question.ungrouped.popular.each do |question| %>
+    <div class="card p-2 my-2 rounded-0 bg-light">
+      <h6 class="card-title py-1 my-0">
+        <%= link_to question.title, question, class: 'text-decoration-none' %>
+      </h6>
+    </div>
+  <% end %>
+<% end %>

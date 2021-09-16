@@ -1240,7 +1240,7 @@ end
 end
 ```
 
-## 9.6 Popular Questions
+## 9.6 Popular and Recommended Questions
 
 In this section we will display the top questions in the groups index page. Questions are ranked by the number of stars and answers they have.
 
@@ -1283,3 +1283,5 @@ class Question < ApplicationRecord
   ...
 end
 ```
+
+In the next sub-section we will display questions with similar tags in the question show page.
