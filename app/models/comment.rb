@@ -24,4 +24,12 @@ class Comment < ApplicationRecord
   belongs_to :commentable, polymorphic: true
   validates :content, presence: true
   has_many :comments, as: :commentable
+
+  def parent_answer
+    loop do
+      c = commentable
+      return c if c.class == Answer
+      self.commentable = c.commentable
+    end
+  end
 end

@@ -33,4 +33,8 @@ class Answer < ApplicationRecord
         }
 
   after_create { QuestionMailer.answered(question).deliver_later }
+
+  def parent_answer
+    self
+  end
 end

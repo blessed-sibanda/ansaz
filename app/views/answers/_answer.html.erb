@@ -8,6 +8,7 @@
       <%= answer.created_at.to_s(:short) %>
     </span>
   </div>
+  <% comments = answer.comments.select(&:persisted?) %>
   <div class="card-body">
     <%= answer.content %>
     <div class='mt-2 text-muted'>
@@ -17,20 +18,21 @@
           <strong>Accepted</strong>
         </span>
       <% end %>
-      <%= render 'comments/reply', commentable: answer %>
+      <%= render partial: 'comments/reply', locals: {commentable: answer, answer: answer} %>
       <span class="mx-2">&middot;</span>
-      <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" 
-        data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
-      <span class="mx-2">
-        &middot;
-      </span>
+      <% if comments.any? %>
+        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" 
+          data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
+        <span class="mx-2">
+          &middot;
+        </span>
+      <% end %>
       <%= render 'stars/stars', starrable: answer %>
       <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
     </div>
   </div>
-  <% comments = answer.comments.select(&:persisted?) %>
   <% if comments.any? %>
-    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent d-none">
+    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent">
       <h6>Comments</h6>
       <%= render comments %>
     </div>

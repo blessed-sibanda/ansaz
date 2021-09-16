@@ -1,4 +1,4 @@
-<div class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
+<div id='<%= dom_id(comment) %>' class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
   <div class="d-flex justify-content-start align-items-center">
     <%= user_avatar(comment.user, height: 30, width: 30) %>
     <div class='d-flex flex-column ms-2'>

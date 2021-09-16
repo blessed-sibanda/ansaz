@@ -2,6 +2,7 @@
   <%= render 'shared/form_errors', resource: comment %>
   <%= form.hidden_field :commentable_id, value: commentable.id %>
   <%= form.hidden_field :commentable_type, value: commentable.class.name %>
+  <%= form.hidden_field :answer_id, value: commentable.parent_answer.id %>
   <div class="field">
     <%= form.text_area :content, required: true %>
   </div>
