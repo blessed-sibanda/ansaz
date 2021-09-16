@@ -32,7 +32,7 @@
     </div>
   </div>
   <% if comments.any? %>
-    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent">
+    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent d-none">
       <h6>Comments</h6>
       <%= render comments %>
     </div>

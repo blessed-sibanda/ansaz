@@ -1,0 +1,20 @@
+var answer = document.getElementById('<%= j "#{dom_id(@answer)}" %>');
+
+document.querySelectorAll('.modal').forEach((modal) => {
+  modal.classList.toggle('show');
+});
+
+document.body.classList.toggle('modal-open');
+
+document.body.removeAttribute('data-bs-padding-right');
+document.body.removeAttribute('style');
+
+document.querySelectorAll('.modal-backdrop').forEach((m) => {
+  m.remove();
+});
+
+answer.outerHTML = "<%= j render('answers/answer', answer: @answer) %>";
+
+document
+  .querySelector('#<%= "#{dom_id(@answer)}_comments" %>')
+  .classList.remove('d-none');

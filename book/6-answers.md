@@ -617,6 +617,74 @@ Now connect the answer partial to the `reply_controller`
 
 We are passing the `id` of the related comments in the `data-reply-id` attribute of the reply link. We extract this link in the stimulus controller using `this.data.get('id')`. We then use this `id` to toggle the `d-none` in the stimulus `reply_controller`.
 
+Now the user can toggle the comments and scroll through answers faster.
+
+To improve the user experience, lets submit replies using `Ajax`
+
+First lets update the `create` action in the comments controller to respond to javascript (i.e Ajax) requests
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    @comment = Comment.new(comment_params)
+    @comment.user = current_user
+    @answer = Answer.find(params[:comment][:answer_id])
+    respond_to do |format|
+      if @comment.save
+        format.js
+      else
+        format.js
+      end
+    end
+  end
+
+  ...
+  ...
+end
+```
+
+Now lets update the comment form to submit data using ajax
+
+```erb
+<%= bootstrap_form_with(model: comment, data: {remote: true}) do |form| %>
+  ...
+  ...
+<% end %>
+```
+
+Create the `create` javascript view
+
+```
+$ touch app/views/comments/create.js.erb
+```
+
+```javascript
+var answer = document.getElementById('<%= j "#{dom_id(@answer)}" %>');
+
+document.querySelectorAll('.modal').forEach((modal) => {
+  modal.classList.toggle('show');
+});
+
+document.body.classList.toggle('modal-open');
+
+document.body.removeAttribute('data-bs-padding-right');
+document.body.removeAttribute('style');
+
+document.querySelectorAll('.modal-backdrop').forEach((m) => {
+  m.remove();
+});
+
+answer.outerHTML = "<%= j render('answers/answer', answer: @answer) %>";
+
+document
+  .querySelector('#<%= "#{dom_id(@answer)}_comments" %>')
+  .classList.remove('d-none');
+```
+
+Since the form is now submitted via ajax, we will have to close the modal manually since there is no longer a full page reload. This requires us to undo the bootstrap magic that creates the modal in the page when the `reply` link is clicked. Also note that we are removing the `d-none` class to display the newly added comment.
+
+Now reload the question page and try responding to an answer, you will see that the user experience is now smooth and the reply is posted without a full page reload.
+
 ## 6.4 Implement Answer Acceptances
 
 In this section we will allow the question asker to mark answers as accepted.

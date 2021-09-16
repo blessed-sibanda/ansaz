@@ -2,11 +2,20 @@ class CommentsController < ApplicationController
   def create
     @comment = Comment.new(comment_params)
     @comment.user = current_user
-    question = Answer.find(params[:comment][:answer_id]).question
-    if @comment.save
-      redirect_to question_path(question, anchor: ActionView::RecordIdentifier.dom_id(@comment))
-    else
-      redirect_to question, alert: "Error creating comment"
+    @answer = Answer.find(params[:comment][:answer_id])
+    question = @answer.question
+    respond_to do |format|
+      if @comment.save
+        format.html do
+          redirect_to question_path(question, anchor: ActionView::RecordIdentifier.dom_id(@comment))
+        end
+        format.js
+      else
+        format.html do
+          redirect_to question, alert: "Error creating comment"
+        end
+        format.js
+      end
     end
   end
 
