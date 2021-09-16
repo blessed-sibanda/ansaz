@@ -20,9 +20,16 @@
 #
 FactoryBot.define do
   factory :group do
-    name { "MyString" }
-    description { }
-    admin_id { "" }
-    group_type { "MyString" }
+    sequence(:name) { |n| "Group #{n}" }
+    description { Faker::Lorem.paragraphs.join }
+    group_type { Group::GROUP_TYPES.sample }
+    association :admin, factory: :user, strategy: :build
+
+    after(:build) do |group|
+      group.banner.attach(
+        io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+        filename: "default_banner_img.png",
+      )
+    end
   end
 end

@@ -149,4 +149,123 @@ class AnswerTest < ActiveSupport::TestCase
 end
 ```
 
+```
+$ rails test test/models/answer_test.rb
+```
+
 The test code is generally straightforward, we are using the `shoulda-matchers` helper methods to test the associations of `answer` with other models. We are also testing that an email is delivered to the question's asker whenever a new answer is created. It is also important to note that we are `perfom`ing `enqueued_jobs` before creating an answer because the email is 'delivered later' (i.e its delivered in a background job). We also check that the `Answer#parent_answer` returns the answer object itself.
+
+Now lets test the `comment` model
+
+First lets update `test/factories/comments.rb`
+
+```ruby
+FactoryBot.define do
+  factory :comment do
+    user { build(:user) }
+    commentable { [build(:answer), build(:comment)].sample }
+    content { Faker::Lorem.paragraphs.join }
+  end
+end
+```
+
+Then lets update the `comment_test.rb` itself
+
+```ruby
+class CommentTest < ActiveSupport::TestCase
+  context "associations" do
+    should belong_to(:user)
+    should belong_to(:commentable)
+    should have_many(:comments)
+  end
+
+  context "validations" do
+    should validate_presence_of(:content)
+  end
+
+  test "#parent_answer" do
+    a = create(:answer)
+    b = create(:comment, commentable: a)
+    c = build(:comment, commentable: b)
+    assert c.parent_answer == a
+  end
+end
+```
+
+```
+$ rails test test/models/comment_test.rb
+```
+
+Now lets test the group-membership model
+
+First lets update the factory `test/factories/group_memberships.rb`
+
+```ruby
+FactoryBot.define do
+  factory :group_membership do
+    user { build(:user) }
+    group { build(:group) }
+    state { GroupMembership::MEMBERSHIP_STATES.sample }
+  end
+end
+```
+
+Lets also update the `groups` factory
+
+`test/factories/groups.rb`
+
+```ruby
+FactoryBot.define do
+  factory :group do
+    sequence(:name) { |n| "Group #{n}" }
+    description { Faker::Lorem.paragraphs.join }
+    group_type { Group::GROUP_TYPES.sample }
+    association :admin, factory: :user, strategy: :build
+
+    after(:build) do |group|
+      group.banner.attach(
+        io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+        filename: "default_banner_img.png",
+      )
+    end
+  end
+end
+```
+
+Next lets update the test
+
+`test/models/group_membership_test.rb`
+
+```ruby
+class GroupMembershipTest < ActiveSupport::TestCase
+  subject { build(:group_membership) }
+
+  context "associations" do
+    should belong_to(:user)
+    should belong_to(:group)
+  end
+
+  context "validations" do
+    should validate_uniqueness_of(:user).scoped_to(:group_id)
+    should validate_inclusion_of(:state)
+             .in_array(GroupMembership::MEMBERSHIP_STATES)
+  end
+
+  test "#pending only returns pending memberships" do
+    create_list :group_membership, 10
+    GroupMembership.pending.each do |gm|
+      assert gm.state == GroupMembership::PENDING
+    end
+  end
+
+  test "#accepted only returns accepted memberships" do
+    create_list :group_membership, 10
+    GroupMembership.accepted.each do |gm|
+      assert gm.state == GroupMembership::ACCEPTED
+    end
+  end
+end
+```
+
+Similar to the answer model test, we are also using the `shoulda-matchers` helper methods to test the active record associations and validations of the `group_membership` model.
+Note that we are opening our test by creating a test subject. This is because of how `shoulda-matcher` works for models with database indexes. Since our group_membership has `not-null` foreign keys to both `user` and `group`, ActiveRecord will raise a `PG:NotNullViolation` error when `shoulda-matcher` attempts to check for uniqueness by creating different `group_membership` objects (some of them with `user_id` or `group_id` of null). Therefore it is important that we provide the matcher with a record where the critical attributes are filled in with valid values beforehand. This is why we are providing a `subject`.

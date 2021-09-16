@@ -22,7 +22,20 @@
 require "test_helper"
 
 class CommentTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  context "associations" do
+    should belong_to(:user)
+    should belong_to(:commentable)
+    should have_many(:comments)
+  end
+
+  context "validations" do
+    should validate_presence_of(:content)
+  end
+
+  test "#parent_answer" do
+    a = create(:answer)
+    b = create(:comment, commentable: a)
+    c = build(:comment, commentable: b)
+    assert c.parent_answer == a
+  end
 end

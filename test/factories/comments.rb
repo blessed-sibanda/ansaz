@@ -21,8 +21,8 @@
 #
 FactoryBot.define do
   factory :comment do
-    user { nil }
-    commentable { nil }
-    content { "MyText" }
+    user { build(:user) }
+    commentable { [build(:answer), build(:comment)].sample }
+    content { Faker::Lorem.paragraphs.join }
   end
 end

@@ -23,7 +23,30 @@
 require "test_helper"
 
 class GroupMembershipTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  subject { build(:group_membership) }
+
+  context "associations" do
+    should belong_to(:user)
+    should belong_to(:group)
+  end
+
+  context "validations" do
+    should validate_uniqueness_of(:user).scoped_to(:group_id)
+    should validate_inclusion_of(:state)
+             .in_array(GroupMembership::MEMBERSHIP_STATES)
+  end
+
+  test "#pending only returns pending memberships" do
+    create_list :group_membership, 10
+    GroupMembership.pending.each do |gm|
+      assert gm.state == GroupMembership::PENDING
+    end
+  end
+
+  test "#accepted only returns accepted memberships" do
+    create_list :group_membership, 10
+    GroupMembership.accepted.each do |gm|
+      assert gm.state == GroupMembership::ACCEPTED
+    end
+  end
 end

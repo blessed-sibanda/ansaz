@@ -22,8 +22,8 @@
 #
 FactoryBot.define do
   factory :group_membership do
-    user { nil }
-    group { nil }
-    state { "MyString" }
+    user
+    group
+    state { GroupMembership::MEMBERSHIP_STATES.sample }
   end
 end
