@@ -454,94 +454,34 @@ Now if you access the `edit` page of a question you did not create, Pundit will 
 
 ## 5.4 Tagging Questions
 
-In this chapter we will allow users to tag their questions for easier discoverability and filtering.
+In this chapter we will allow users to tag their questions for easier discoverability and filtering. We are going to use the `acts-as-taggable-on` gem. This gem greatly simplifies the process of adding tags to active record models and also allows us to specify different tag "contexts" in the same model.
 
-Generate Tag model
-
-```
-$ rails g model Tag name:uniq
-```
-
-Create a tagging model to link our tags and questions
+Lets install the gem
 
 ```
-$ rails g model Tagging tag:belongs_to question:belongs_to
+$ bundle add acts-as-taggable-on
 ```
 
-Update the tagging model
-
-```ruby
-class Tagging < ApplicationRecord
-  ...
-
-  validates_uniqueness_of :tag_id, scope: [:question_id]
-end
-```
-
-Run migrations
+Generate and run the migrations
 
 ```
+$ rake acts_as_taggable_on_engine:install:migrations
 $ rails db:migrate
 ```
 
-Add `taggings` and `questions` to the `Tag` model
-
-```ruby
-class Tag < ApplicationRecord
-  has_many :taggings
-  has_many :questions, through: :taggings
-end
-```
-
-Update question model with `tagging` related methods. Also add an `after_save` callback to save tag names in lowercase.
+Update the question model to include tags
 
 ```ruby
 class Question < ApplicationRecord
   ...
-
-  has_many :taggings
-  has_many :tags, through: :taggings
-  after_save { name.downcase! }
-
-  def self.tagged_with(name)
-    Tag.find_by(name: name).questions
-  end
-
-  def self.tag_counts
-    Tag.select("tags.*, count(taggings.tag_id) as count").joins
-    (:taggings).group("taggings.tag_id")
-  end
-
-  def tag_list
-    tags.map(&:name)
-  end
-
-  def tag_list=(names)
-    self.tags = names.split(",").map do |n|
-      Tag.where(name: n.strip).first_or_create!
-    end
-  end
+  ...
+  acts_as_taggable_on :tags
+  ...
+  ...
 end
 ```
 
-Update `db/seeds.rb` with a few tags
-
-```ruby
-...
-...
-
-["JavaScript", "Programming", "Ruby-on-Rails", "Science"].each do |name|
-  Tag.create!(name: name)
-end
-```
-
-Re-seed the database
-
-```
-$ rails db:seed
-```
-
-Display question tags
+Display question tags in question partial
 
 `app/views/questions/_question.html.erb`
 
@@ -634,7 +574,7 @@ application.register('autocomplete', Autocomplete);
 Create the tags rails controller to give us a list of tags based on the search query from the input.
 
 ```
-$ rails g controller tags index --skip-stylesheets
+$ rails g controller tags index show --skip-stylesheets
 ```
 
 ```ruby
@@ -642,8 +582,11 @@ class TagsController < ApplicationController
   layout false
 
   def index
-    @tags = Tag.where("name ilike ?", "%" + params["q"].split(",").last + "%")
+    @tags = ActsAsTaggableOn::Tag.where("name ilike ?", "%" + params["q"].split(",").last + "%")
   end
+
+  ...
+  ...
 end
 ```
 
@@ -658,7 +601,7 @@ Rails.application.routes.draw do
   devise_for :users
   authenticate :user do
     ...
-    resources :tags, only: :index
+    resources :tags, only: [:index, :show]
   end
 end
 ```
@@ -718,6 +661,81 @@ end
 ```
 
 Now try creating a new question and you will notice the autocomplete feature working on the tag list
+
+Update tags controller `show` action to allow filtering questions by tag names
+
+```ruby
+class TagsController < ApplicationController
+  ...
+  ...
+
+  def show
+    page = params[:page]
+    @questions = Question.tagged_with(params[:id]).paginated(page)
+    render "show", layout: "application"
+  end
+end
+```
+
+Note that we are using `tagged_with` method (provided by the `acts-as-taggable-on` gem) to retrieve questions with the given tag name.
+
+Update tag `show` page
+
+```erb
+<%= render 'questions/questions', questions: @questions do %>
+  <h1 class="h5">Questions tagged
+    <span class='text-success'>'<%= params[:id] %>'</span>
+  </h1>
+  <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+<% end %>
+```
+
+Note that we are using a questions partial with a block to accept a different header based on whether the questions are search results or not.
+
+Factor out the questions list (from the questions page) and replace the header with a `yield`
+
+```
+$ touch app/views/questions/_questions.html.erb
+```
+
+```erb
+<div class="d-flex justify-content-between align-items-center my-2">
+  <%= yield %>
+</div>
+<%= render questions %>
+<%= will_paginate questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
+<%= content_for :sidebar do %>
+  <%= render 'groups/popular' %>
+<% end %>
+```
+
+Now update the questions `index` page
+
+```erb
+<%= render 'questions', questions: @questions do %>
+  <h1 class="h5 text-uppercase">Questions</h1>
+  <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+<% end %>
+```
+
+Update the question partial to allow filtering questions by tag names
+
+```erb
+<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
+<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+  ...
+  ...
+  <div class="card-footer d-flex justify-content-between">
+    ...
+    ...
+    <div class="d-flex">
+      <% question.tags.each do |tag| %>
+        <%= link_to "##{tag.name}", tag_path(tag.name), class: 'badge tag-item' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+```
 
 ## 5.5 Searching for Questions
 
@@ -826,26 +844,6 @@ Now update the questions index page with different headers based on whether the 
 <%= content_for :sidebar do %>
   ...
 <% end %>
-```
-
-Update the question partial to allow filtering questions by tag names
-
-```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
-  ...
-  ...
-  <div class="card-footer d-flex justify-content-between">
-    <div>
-      <%= render 'stars/stars', starrable: question %>
-    </div>
-    <div class="d-flex">
-      <% question.tags.each do |tag| %>
-        <%= link_to "##{tag.name}", questions_path(keywords: tag.name), class: 'badge tag-item' %>
-      <% end %>
-    </div>
-  </div>
-</div>
 ```
 
 Update the database seeds with more data to see the search feature in aaction

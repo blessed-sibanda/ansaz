@@ -551,6 +551,72 @@ a.reply-link,
 
 Now our users can comment on answers and even on comments to answers
 
+Now that the user can comment on either answers or comments, we want to toggle the comments so that the user can view/hide them when they click the `replies` link
+
+To do that, lets create a stimulus controller
+
+```
+$ touch app/javascript/controllers/reply_controller.js
+```
+
+Add a method to `toggle` the comments in the controller
+
+`app/javascript/controllers/reply_controller.js`
+
+```javascript
+import { Controller } from 'stimulus';
+
+export default class extends Controller {
+  toggle(e) {
+    e.preventDefault();
+    const id = this.data.get('id');
+    document.querySelector(`#${id}`).classList.toggle('d-none');
+  }
+}
+```
+
+Now connect the answer partial to the `reply_controller`
+
+```erb
+<div class="card my-3" id="<%= dom_id(answer) %>">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    ...
+    ...
+  </div>
+  <% comments = answer.comments.select(&:persisted?) %>
+  <div class="card-body">
+    <%= answer.content %>
+    <div class='mt-2 text-muted'>
+      <% if answer.accepted %>
+        <span class="badge bg-success me-1">
+          <i class="fa fa-check-circle"></i>
+          <strong>Accepted</strong>
+        </span>
+      <% end %>
+      <%= render partial: 'comments/reply', locals: {commentable: answer, answer: answer} %>
+      <span class="mx-2">&middot;</span>
+      <% if comments.any? %>
+        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle"
+          data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
+        <span class="mx-2">
+          &middot;
+        </span>
+      <% end %>
+      <%= render 'stars/stars', starrable: answer %>
+      <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
+    </div>
+  </div>
+  <% if comments.any? %>
+    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent">
+      <h6>Comments</h6>
+      <%= render comments %>
+    </div>
+  <% end %>
+</div>
+```
+
+We are passing the `id` of the related comments in the `data-reply-id` attribute of the reply link. We extract this link in the stimulus controller using `this.data.get('id')`. We then use this `id` to toggle the `d-none` in the stimulus `reply_controller`.
+
 ## 6.4 Implement Answer Acceptances
 
 In this section we will allow the question asker to mark answers as accepted.
