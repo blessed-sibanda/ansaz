@@ -8,20 +8,21 @@
 <% end %>
 <%= render @question.answers %>
 <%= content_for :sidebar do %>
-  <h6 class="fw-bold">
-    Similar Questions
-    <% if @question.group %>in Group<% end %>
-  </h6>
-  <% @question.similar(5, group_id: @question.group&.id).each do |question| %>
-    <div class="card p-2 my-2 rounded-0 bg-light">
-      <h6 class="card-title py-1 my-0">
-        <%= link_to question.title, question, class: 'text-decoration-none' %>
-      </h6>
-    </div>
+  <% similar_group_qsns = @question.similar(5, group_id: @question.group&.id) %>
+  <% similar_public_qsns = @question.similar(5, group_id: nil) %>
+  <% if similar_group_qsns.any? %>
+    <h6 class="fw-bold">Similar Questions in Group</h6>
+    <% similar_group_qsns.each do |question| %>
+      <div class="card p-2 my-2 rounded-0 bg-light">
+        <h6 class="card-title py-1 my-0">
+          <%= link_to question.title, question, class: 'text-decoration-none' %>
+        </h6>
+      </div>
+    <% end %>
   <% end %>
-  <% if @question.group %>
+  <% if similar_public_qsns.any? %>
     <h6 class="fw-bold">Similar Public Questions</h6>
-    <% @question.similar(5).each do |question| %>
+    <% similar_public_qsns.each do |question| %>
       <div class="card p-2 my-2 rounded-0 bg-light">
         <h6 class="card-title py-1 my-0">
           <%= link_to question.title, question, class: 'text-decoration-none' %>
