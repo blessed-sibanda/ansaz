@@ -4,7 +4,7 @@ User.create!(name: "Blessed Sibanda",
              confirmed_at: Time.now,
              about: Faker::Lorem.paragraphs.join)
 
-1000.times do |i|
+100.times do |i|
   User.create!(
     name: Faker::Name.name,
     email: "user-#{i}@example.com",
@@ -14,7 +14,7 @@ User.create!(name: "Blessed Sibanda",
   )
 end
 
-40.times do
+20.times do
   name = Faker::Book.genre
   unless Group.find_by_name(name)
     g = Group.new(
@@ -31,7 +31,7 @@ end
   end
 end
 
-2_000.times do |i|
+500.times do |i|
   include FactoryBot::Syntax::Methods
   q = create :question
   tags = []
@@ -39,7 +39,8 @@ end
     tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
   end
 
-  q.tag_list = tags.uniq.join(",")
+  q.tag_list = tags.uniq
+  q.save!
 
   if i % 5 == 0 # one in 5 questions belongs to a group
     q.group = Group.all.sample

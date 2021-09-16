@@ -34,6 +34,8 @@ class Question < ApplicationRecord
   has_many :stars, as: :starrable
   belongs_to :group, optional: true
 
+  acts_as_taggable_on :tags
+
   validates :title, presence: true
 
   scope :paginated, ->(page, group: nil) {

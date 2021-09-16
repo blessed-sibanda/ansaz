@@ -1,0 +1,6 @@
+<%= render 'questions/questions', questions: @questions do %>
+  <h1 class="h5">Questions tagged 
+    <span class='text-success'>'<%= params[:id] %>'</span>
+  </h1>
+  <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+<% end %>

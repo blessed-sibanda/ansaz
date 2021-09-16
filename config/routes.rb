@@ -18,7 +18,7 @@ Rails.application.routes.draw do
         delete :reject
       end
     end
-    resources :tags, only: :index
+    resources :tags, only: [:index, :show]
     resources :search, only: :index
   end
 end
