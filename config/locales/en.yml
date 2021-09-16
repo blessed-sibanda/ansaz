@@ -31,3 +31,17 @@
 
 en:
   hello: "Hello world"
+
+en:
+  pundit:
+    default: 'You cannot perform this action.'
+    group_policy:
+      participate?: 'Only members of the group can perform this action!'
+      edit?: 'Only the group admin can edit the group!'
+      update?: 'Only the group admin can edit the group!'
+      destroy?: 'Only the group admin can delete the group!'
+    question_policy:
+      edit?: 'Only question owner can edit the question!'
+      update?: 'Only question owner can update the question!'
+      destroy?: 'Only question owner can delete the question!'
+  

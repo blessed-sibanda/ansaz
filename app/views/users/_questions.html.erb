@@ -1,7 +1,13 @@
 <% user.questions.each do |question| %>
-  <div class="card my-2 border-0 border-bottom bg-light">
-    <div class="card-body">
+  <% if question.group %>
+    <% if policy(question.group).participate? %>
+      <%= render 'shared/card_item' do %>
+        <%= link_to question.title, question, class: 'card-title h5 text-decoration-none' %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/card_item' do %>
       <%= link_to question.title, question, class: 'card-title h5 text-decoration-none' %>
-    </div>
-  </div>
+    <% end %>
+  <% end %>
 <% end %>

@@ -5,8 +5,8 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <% if user_signed_in? %>
+      <% if user_signed_in? %>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <%= link_to 'Questions', questions_path, class: 'nav-link' %>
           </li>
@@ -27,18 +27,20 @@
               <li><%= link_to 'Logout', destroy_user_session_path, method: :delete, class: 'dropdown-item' %></li>
             </ul>
           </li>
-        <% else %>
+        </ul>
+        <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
+          <%= text_field_tag :keywords, nil, placeholder: 'Search public questions...', class: 'form-control me-2' %>
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        <% end %>
+      <% else %>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <%= link_to 'Login', new_user_session_path, class: 'nav-link' %>
           </li>
           <li class="nav-item">
             <%= link_to 'Register', new_user_registration_path, class: 'nav-link' %>
           </li>
-        <% end %>
-      </ul>
-      <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
-        <%= text_field_tag :keywords, nil, placeholder: 'Search public questions...', class: 'form-control me-2' %>
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        </ul>
       <% end %>
     </div>
   </div>
