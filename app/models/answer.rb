@@ -26,11 +26,11 @@ class Answer < ApplicationRecord
   has_many :comments, as: :commentable
   has_many :stars, as: :starrable
 
-  default_scope {
-    left_joins(:stars).group(:id)
-      .order(accepted: :desc)
-      .order("COUNT(stars.id) DESC")
-  }
+  scope :ranked, -> {
+          left_joins(:stars).group(:id)
+            .order(accepted: :desc)
+            .order("COUNT(stars.id) DESC")
+        }
 
   after_create { QuestionMailer.answered(question).deliver_later }
 end

@@ -48,9 +48,21 @@ class User < ApplicationRecord
                           foreign_key: "admin_id"
   has_many :group_memberships
   has_many :groups, through: :group_memberships, source: :group
+  has_many :active_groups, -> { GroupMembership.accepted }, through: :group_memberships, source: :group
+
+  scope :ranked, -> {
+      left_joins(:questions, :answers).group(:id)
+        .order("COUNT(questions.id) DESC")
+        .order("COUNT(answers.id) DESC")
+        .order(created_at: :asc)
+    }
 
   def starred(starrable)
     Star.where(user: self, starrable: starrable).first
+  end
+
+  def unowned_groups
+    active_groups.where.not(admin_id: id)
   end
 
   def joined_on(group)

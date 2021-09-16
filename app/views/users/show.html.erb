@@ -33,3 +33,6 @@
     <% end %>
   </div>
 </div>
+<%= content_for :sidebar do %>
+  <%= render 'sidebar', user: @user %>
+<% end %>

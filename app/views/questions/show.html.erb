@@ -6,7 +6,7 @@
 <% if @question.answers.any? %>
   <h5>Answers (<%= @question.answers.count %>)</h5>
 <% end %>
-<%= render @question.answers %>
+<%= render @question.answers.ranked %>
 <%= content_for :sidebar do %>
   <% similar_group_qsns = @question.similar(5, group_id: @question.group&.id) %>
   <% similar_public_qsns = @question.similar(5, group_id: nil) %>

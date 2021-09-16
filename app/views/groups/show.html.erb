@@ -14,10 +14,10 @@
   <%= render @questions %>
   <%= will_paginate @questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
 <% else %>
-  <div class="card bg-light p-3 rounded-0">
+  <%= render 'shared/card_item' do %>
     <h5 class='text-danger'>The questions in this group can only be seen by the group members</h5>
     <p class='my-0'>Join the group to view the questions and participate</p>
-  </div>
+  <% end %>
 <% end %>
 <%= content_for :sidebar do %>
   <%= render 'sidebar', group: @group %>

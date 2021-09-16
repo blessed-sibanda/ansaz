@@ -36,7 +36,7 @@ class Group < ApplicationRecord
   has_many :users, through: :group_memberships, source: :user
   has_many :active_users, -> { GroupMembership.accepted },
            through: :group_memberships, source: :user
-  has_many :questions
+  has_many :questions, dependent: :destroy
 
   scope :ranked, -> {
           joins(:questions, :users).group(:id)

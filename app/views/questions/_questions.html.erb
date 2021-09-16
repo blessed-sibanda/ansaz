@@ -4,9 +4,5 @@
 <%= render questions %>
 <%= will_paginate questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
 <%= content_for :sidebar do %>
-  <div class="d-flex justify-content-between align-items-baseline mb-1">
-    <h6 class="fw-bold">Popular Groups</h6>
-    <%= link_to 'Create Group', new_group_path, class: 'btn btn-outline-primary btn-sm' %>
-  </div>
-  <%= render Group.popular %>
+  <%= render 'groups/popular' %>
 <% end %>

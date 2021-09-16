@@ -1,0 +1,30 @@
+<% if user.owned_groups.any? %>
+  <h6 class="fw-bold">Owned Groups</h6>
+  <% user.owned_groups.each do |group| %>
+    <%= render 'shared/card_item' do %>
+      <%= link_to group.name, group, class: 'text-decoration-none' %>
+    <% end %>
+  <% end %>
+<% else %>
+  <% if user == current_user %>
+    <%= render 'shared/card_item' do %>
+      <h6>You do not have any group</h6>
+      Click <%= link_to 'here', new_group_path, class: 'fw-bold text-decoration-none' %> to create a group
+    <% end %>
+  <% end %>
+<% end %>
+<% if user.unowned_groups.any? %>
+  <h6 class="fw-bold">Groups</h6>
+  <% user.unowned_groups.each do |group| %>
+    <%= render 'shared/card_item' do %>
+      <%= link_to group.name, group, class: 'text-decoration-none' %>
+    <% end %>
+  <% end %>
+<% else %>
+  <% if user == current_user %>
+    <%= render 'shared/card_item' do %>
+      <h6>You are not a member to any group</h6>
+      Click <%= link_to 'here', groups_path, class: 'fw-bold text-decoration-none' %> to find groups
+    <% end %>
+  <% end %>
+<% end %>

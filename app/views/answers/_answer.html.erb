@@ -19,7 +19,8 @@
       <% end %>
       <%= render 'comments/reply', commentable: answer %>
       <span class="mx-2">&middot;</span>
-      <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
+      <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" 
+        data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
       <span class="mx-2">
         &middot;
       </span>
@@ -29,7 +30,7 @@
   </div>
   <% comments = answer.comments.select(&:persisted?) %>
   <% if comments.any? %>
-    <div class="card-footer bg-transparent">
+    <div id='<%= "#{dom_id(answer)}_comments" %>' class="card-footer bg-transparent d-none">
       <h6>Comments</h6>
       <%= render comments %>
     </div>

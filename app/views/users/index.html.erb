@@ -1,1 +1,5 @@
 <%= render @users %>
+<%= will_paginate @users, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
+<%= content_for :sidebar do %>
+  <%= render 'groups/popular' %>
+<% end %>
