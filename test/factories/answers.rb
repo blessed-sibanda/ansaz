@@ -21,8 +21,12 @@
 #
 FactoryBot.define do
   factory :answer do
-    user { nil }
-    question { nil }
+    user { build(:user) }
+    question { build(:question) }
     accepted { false }
+
+    trait :accepted do
+      accepted { true }
+    end
   end
 end

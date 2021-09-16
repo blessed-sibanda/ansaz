@@ -8,6 +8,6 @@ class QuestionMailer < ApplicationMailer
   def answered(question)
     @question = question
 
-    mail to: question.user
+    mail to: question.user.email
   end
 end

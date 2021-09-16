@@ -22,7 +22,7 @@
 FactoryBot.define do
   factory :question do
     title { ["What is", "Why", "Who", "Where", "How"].sample + " " + Faker::Lorem.sentence.downcase + " #{SecureRandom.hex(2)}" }
-    user { User.active.sample }
+    user { build(:user) }
     content { Faker::Lorem.paragraphs(number: 7).join }
   end
 end

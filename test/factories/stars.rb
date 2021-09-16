@@ -20,7 +20,17 @@
 #
 FactoryBot.define do
   factory :star do
-    user { nil }
-    starrable { nil }
+    user { build(:user) }
+    association :starrable,
+                factory: [:question, :answer].sample,
+                strategy: :build
+
+    trait :question do
+      association :starrable, factory: :question, strategy: :build
+    end
+
+    trait :answer do
+      association :starrable, factory: :answer, strategy: :build
+    end
   end
 end

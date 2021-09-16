@@ -78,3 +78,7 @@ gem "will_paginate-bootstrap4", "~> 0.2.2"
 gem "pg_search", "~> 2.3"
 
 gem "acts-as-taggable-on", "~> 8.1"
+
+gem "shoulda-matchers", "~> 5.0", :group => :test
+
+gem "shoulda-context", "~> 2.0", :group => :test
