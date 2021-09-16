@@ -198,6 +198,8 @@ GEM
       childprocess (>= 0.5, < 4.0)
       rubyzip (>= 1.2.2)
     semantic_range (3.0.0)
+    shoulda-callback-matchers (1.1.4)
+      activesupport (>= 3)
     shoulda-context (2.0.0)
     shoulda-matchers (5.0.0)
       activesupport (>= 5.2.0)
@@ -267,6 +269,7 @@ DEPENDENCIES
   rexml (~> 3.2)
   sass-rails (>= 6)
   selenium-webdriver
+  shoulda-callback-matchers (~> 1.1)
   shoulda-context (~> 2.0)
   shoulda-matchers (~> 5.0)
   spring

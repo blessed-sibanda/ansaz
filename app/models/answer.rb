@@ -32,9 +32,13 @@ class Answer < ApplicationRecord
             .order("COUNT(stars.id) DESC")
         }
 
-  after_create { QuestionMailer.answered(question).deliver_later }
+  after_create :email_question_asker
 
   def parent_answer
     self
+  end
+
+  def email_question_asker
+    QuestionMailer.answered(question).deliver_later
   end
 end

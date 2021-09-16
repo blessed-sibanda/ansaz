@@ -14,6 +14,7 @@ class ActiveSupport::TestCase
 end
 
 Shoulda::Matchers.configure do |config|
+  include Shoulda::Callback::Matchers::ActiveModel
   config.integrate do |with|
     with.test_framework :minitest
     with.library :rails

@@ -82,3 +82,5 @@ gem "acts-as-taggable-on", "~> 8.1"
 gem "shoulda-matchers", "~> 5.0", :group => :test
 
 gem "shoulda-context", "~> 2.0", :group => :test
+
+gem "shoulda-callback-matchers", "~> 1.1", :group => :test
