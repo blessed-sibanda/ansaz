@@ -53,5 +53,9 @@ class Question < ApplicationRecord
         .limit(10)
     }
 
+  def similar(limit, group_id: nil)
+    find_related_tags.where(group_id: group_id).limit(limit)
+  end
+
   has_rich_text :content
 end
