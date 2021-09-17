@@ -4,7 +4,7 @@ User.create!(name: "Blessed Sibanda",
              confirmed_at: Time.now,
              about: Faker::Lorem.paragraphs.join)
 
-200.times do |i|
+100.times do |i|
   User.create!(
     name: Faker::Name.name,
     email: "user-#{i}@example.com",
@@ -14,7 +14,8 @@ User.create!(name: "Blessed Sibanda",
   )
 end
 
-40.times do
+puts "Adding groups"
+30.times do
   name = Faker::Book.genre
   unless Group.find_by_name(name)
     g = Group.new(
@@ -40,7 +41,8 @@ end
   end
 end
 
-1_000.times do |i|
+puts "Adding questions"
+500.times do |i|
   include FactoryBot::Syntax::Methods
   q = create :question
   tags = []
@@ -68,7 +70,8 @@ end
   print(".") if i % 100 == 0
 end
 
-10_000.times do |i|
+puts "Adding stars"
+5_000.times do |i|
   star = Star.new(
     user: User.active.sample,
     starrable: [Question.all.sample, Answer.all.sample].sample,
@@ -77,7 +80,8 @@ end
   print(".") if i % 100 == 0
 end
 
-10_000.times do |i|
+puts "Adding comments"
+5_000.times do |i|
   comment = Comment.new(
     user: User.active.sample,
     commentable: [Answer.all.sample, Comment.all.sample].sample,

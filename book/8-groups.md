@@ -1,8 +1,8 @@
-# 9 Joining Groups
+# 8 Joining Groups
 
 In this chapter we will allow users to create and join groups where they can ask and answer questions on specific topics or subjects.
 
-## 9.1 Scaffold Goups
+## 8.1 Scaffold Goups
 
 ```bash
 $ rails g scaffold group name:uniq description:text admin_id:bigint group_type:integer --skip-stylesheets
@@ -139,7 +139,7 @@ class GroupsController < ApplicationController
 end
 ```
 
-## 9.2 Display Groups List
+## 8.2 Display Groups List
 
 In this section, we will display the group list in the question's page sidebar.
 
@@ -400,7 +400,7 @@ $ rails db:seed:replant
 Now the questions index page looks like
 ![Group List Displayed in Sidebar](./questions-with-groups.png)
 
-## 9.3 Link Users To Groups
+## 8.3 Link Users To Groups
 
 Create a group-membership model
 
@@ -668,7 +668,7 @@ end
 
 These methods will be used in various views to check whether a user can join or leave a group; or whether a user's request to join a private group is pending approval.
 
-## 9.4 Approving Group Join Requests
+## 8.4 Approving Group Join Requests
 
 Add `accept` and `reject` actions to group-memberships controller to allow for the group admin to accept or reject group join requests.
 
@@ -914,7 +914,7 @@ Re-seed the database and open a group page, it should look like the following
 
 ![Group Page](./group-show.png)
 
-## 9.5 Asking in Groups
+## 8.5 Asking in Groups
 
 In this section we will allow our users to ask question in groups and get answers from other group members.
 
@@ -1105,7 +1105,7 @@ Update group `show` page to display questions in group
 <% end %>
 ```
 
-## 9.5 Display Group List
+## 8.6 Display Group List
 
 In this section we are going to create a group list where users can browse the available groups.
 
@@ -1240,11 +1240,11 @@ end
 end
 ```
 
-## 9.6 Popular and Recommended Questions
+## 8.7 Popular and Recommended Questions
 
-In this section we will display the top questions in the groups index page. Questions are ranked by the number of stars and answers they have.
+In this section we will display the top questions in the groups index page and also display similar groups in the question show page. Top questions will be ranked by the number of stars and answers they have whereas similar questions will be determined by the number of common tags.
 
-Add the popular questions list in the sidebar of the group index page.
+Lets add the popular questions list in the sidebar of the group index page.
 
 `app/views/groups/index.html.erb`
 
@@ -1284,4 +1284,75 @@ class Question < ApplicationRecord
 end
 ```
 
-In the next sub-section we will display questions with similar tags in the question show page.
+Note that we are using a `left_join` to the `stars` and `answers` tables to get the questions number of stars and answers.
+
+Now the group list page looks similar to the following
+
+![Top questions](./top-questions.png)
+
+Lets update the question show page to display questions with similar tags.
+
+```erb
+...
+...
+
+<%= content_for :sidebar do %>
+  <section>
+    <% if @question.group %>
+      <% similar_group_qsns = @question.similar(5, group_id: @question.group.id) %>
+      <% if similar_group_qsns.any? %>
+        <h6 class="fw-bold">Similar Questions in Group</h6>
+        <% similar_group_qsns.each do |question| %>
+          <%= render 'shared/card_item' do %>
+            <%= link_to question.title, question, class: 'text-decoration-none' %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </section>
+  <section>
+    <% similar_public_qsns = @question.similar(5) %>
+    <% if similar_public_qsns.any? %>
+      <h6 class="fw-bold">Similar Public Questions</h6>
+      <% similar_public_qsns.each do |question| %>
+        <%= render 'shared/card_item' do %>
+          <%= link_to question.title, question, class: 'text-decoration-none' %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </section>
+<% end %>
+```
+
+Create the `_card_item` partial
+
+```
+$ touch app/views/shared/_card_item.html.erb
+```
+
+```erb
+<div class="card p-2 my-2 rounded-0 bg-light">
+  <div class="card-title py-1 my-0">
+    <%= yield %>
+  </div>
+</div>
+```
+
+Add the `similar` method in the question model
+
+```ruby
+class Question < ApplicationRecord
+  ...
+  ...
+
+  def similar(limit, group_id: nil)
+    find_related_tags.where(group_id: group_id).limit(limit)
+  end
+end
+```
+
+The `similar` method accepts an optional `group_id` to find related questions within a group.
+
+Now the question page looks as follows
+
+![Recommended similar questions](./similar-questions.png)

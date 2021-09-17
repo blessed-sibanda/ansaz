@@ -226,17 +226,17 @@ Now you can try add stars to the questions and answers. You will notice that the
 
 ## 7.2 Rank Answers by Number of Stars
 
-Add a `default_scope` in answer model to order answers by `stars_count` in descending order
+Add a `ranked` scope in the answer model to order answers by `accepted` status and `stars_count` in descending order.
 
 ```ruby
 class Answer < ApplicationRecord
   ...
   ...
 
-  default_scope {
-    left_joins(:stars).group(:id)
-      .order(accepted: :desc)
-      .order("COUNT(stars.id) DESC")
-  }
+  scope :ranked, -> {
+          left_joins(:stars).group(:id)
+            .order(accepted: :desc)
+            .order("COUNT(stars.id) DESC")
+        }
 end
 ```

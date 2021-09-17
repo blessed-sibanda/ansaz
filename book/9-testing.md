@@ -1,8 +1,8 @@
-# 10 Testing
+# 9 Testing
 
 In this chapter we are going to write test code to always ensure that our application works as expected.
 
-## 10.1 Testing Models
+## 9.1 Testing Models
 
 We are going to unit test our models using `shoulda-matchers` gem. This gem makes testing the functionality of our activerecord models a breeze.
 
@@ -625,3 +625,11 @@ Run the test
 ```
 $ rails test test/models/user_test.rb
 ```
+
+Now run all the model tests
+
+```
+$ rails test:models
+```
+
+All the tests should pass
