@@ -1,18 +1,9 @@
-require 'test_helper'
+require "test_helper"
 
-class StarPolicyTest < ActiveSupport::TestCase
-  def test_scope
-  end
-
-  def test_show
-  end
-
-  def test_create
-  end
-
-  def test_update
-  end
-
+class StarPolicyTest < PolicyAssertions::Test
   def test_destroy
+    s = create :star
+    assert_permit s.user, s
+    refute_permit create(:user), s
   end
 end

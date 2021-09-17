@@ -1,18 +1,12 @@
-require 'test_helper'
+require "test_helper"
 
-class AnswerPolicyTest < ActiveSupport::TestCase
-  def test_scope
-  end
+class AnswerPolicyTest < PolicyAssertions::Test
+  def test_accept
+    question = create(:question)
+    answer = create(:answer, question: question)
 
-  def test_show
-  end
-
-  def test_create
-  end
-
-  def test_update
-  end
-
-  def test_destroy
+    assert_permit question.user, answer
+    refute_permit create(:user), answer
+    refute_permit nil, answer
   end
 end

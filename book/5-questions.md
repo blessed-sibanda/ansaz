@@ -201,13 +201,15 @@ class QuestionsController < ApplicationController
 end
 ```
 
-Redirect to questions index page when user logs in
+Update the `home controller` to redirect to questions path when user is logged in otherwise redirect to login page.
 
 ```ruby
 class HomeController < ApplicationController
   def index
     if user_signed_in?
       redirect_to questions_path
+    else
+      redirect_to new_user_session_path
     end
   end
 end
@@ -345,35 +347,34 @@ Now if you login and visit the home page, you will see the questions list
 
 We are going to use the `pundit` gem to build a robust authorization system in our application.
 
+Setup pundit
+
 ```
 $ bundle add pundit
+$ rails g pundit:install
 ```
 
-Include `Pundit` in `ApplicationController`. Handle `Pundit::NotAuthorizedError` by redirecting the user back with an alert message.
+Include `Pundit` in `ApplicationController` and a method to flash an alert message when a user attempts to perform an action they are unauthorized to perform.
 
 ```ruby
 class ApplicationController < ActionController::Base
   include Pundit
   before_action :configure_permitted_parameters, if: :devise_controller?
-  rescue_from Pundit::NotAuthorizedError, with: :pundit_not_authorized
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   ...
   ...
 
   private
 
-  def pundit_not_authorized
-    flash[:alert] = "You are not authorized to perform this action"
-    redirect_back(fallback_location: root_path)
+  def user_not_authorized(exception)
+    policy_name = exception.policy.class.to_s.underscore
+
+    flash[:alert] = t "#{policy_name}.#{exception.query}",
+                      scope: "pundit", default: :default
+    redirect_to(request.referrer || root_path)
   end
 end
-
-```
-
-Create pundit application policy
-
-```
-$ rails g pundit:install
 ```
 
 Create a pundit question policy
@@ -388,8 +389,6 @@ Only allow the owner of the question to update/delete a question. To do that, ad
 
 ```ruby
 class QuestionPolicy < ApplicationPolicy
-  ...
-
   def update?
     user == record.user
   end
@@ -398,6 +397,18 @@ class QuestionPolicy < ApplicationPolicy
     user == record.user
   end
 end
+```
+
+Update `config/locales/en.yml` with pundit messages for question policy
+
+```yml
+en:
+  pundit:
+    default: 'You cannot perform this action.'
+    question_policy:
+      edit?: 'Only question owner can edit the question!'
+      update?: 'Only question owner can update the question!'
+      destroy?: 'Only question owner can delete the question!'
 ```
 
 Update the `Edit` and `Destroy` links in question partial

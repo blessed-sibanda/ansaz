@@ -633,3 +633,149 @@ $ rails test:models
 ```
 
 All the tests should pass
+
+## 9.2 Testing Policies
+
+In this section we will write tests for our Pundit policies
+
+Lets start by install the `policy-assertions` gem to easily test our Pundit policies. The gem provides provides assertions and refutations for policies and strong parameters.
+
+```
+$ bundle add policy-assertions --group=test
+```
+
+Require the `policy-assertions` library in `test_helper.rb`
+
+```ruby
+ENV["RAILS_ENV"] ||= "test"
+require_relative "../config/environment"
+require "rails/test_help"
+require "policy_assertions"
+
+...
+...
+```
+
+Now lets test the `answer-policy`
+
+First update the test to inherit from `PolicyAssertions::Test` instead of inheriting from `ActiveSupport::TestCase` class.
+
+```ruby
+class AnswerPolicyTest < PolicyAssertions::Test
+  def test_accept
+    question = create(:question)
+    answer = create(:answer, question: question)
+
+    assert_permit question.user, answer
+    refute_permit create(:user), answer
+    refute_permit nil, answer
+  end
+end
+```
+
+Here we are testing that the policy only allows the question asker to accept an answer. All the other users cannot mark the answer as accepted.
+
+Run the test
+
+```bash
+$ rails t test/policies/answer_policy_test.rb
+```
+
+Lets test the `group_membership_policy`
+
+```ruby
+class GroupMembershipPolicyTest < PolicyAssertions::Test
+  def test_accept_or_reject
+    g = create(:group)
+    gm = create :group_membership, group: g
+    assert_permit g.admin, gm
+    refute_permit create(:user), gm
+    refute_permit nil, gm
+  end
+end
+```
+
+```bash
+$ rails t test/policies/group_membership_policy_test.rb
+```
+
+Now lets test the `group_policy`
+
+```ruby
+class GroupPolicyTest < PolicyAssertions::Test
+  def setup
+    @group = create :group
+    @membership = create(:group_membership, :accepted, group: @group)
+  end
+
+  def test_edit_and_update_and_destroy
+    assert_permit @group.admin, @group
+    refute_permit create(:user), @group
+    refute_permit nil, @group
+  end
+
+  def test_leave
+    refute_permit @group.admin, @group
+    assert_permit @membership.user, @group
+  end
+
+  def test_join
+    refute_permit @membership.user, @group
+    assert_permit create(:user), @group
+  end
+
+  def test_participate
+    assert_permit @membership.user, @group
+    assert_permit @group.admin, @group
+    refute_permit create(:user), @group
+  end
+end
+```
+
+Like the other policy tests that we have written, the `group-policy-test` also inherits from `PolicyAssertions::Test`.
+
+We are using the `setup` method to set the `@group` and `@membership` instance variables that we are using thorughout the test. The `policy-assertions` gem allows us to test multiple policy methods by combining the individual policy methods with 'and'. So for testing the `edit`, `update`, and `destroy` methods at once we use the `test_edit_and_update_and_destroy` test method. In this test we are testing that only the group admin can 'edit', 'update' and/or 'destroy' a given group.
+
+In the `test_leave` method we are testing that only non-admin users can leave the group. The admin cannot leave (he/she will have to delete the group to get rid of it).
+
+All in all, the test methods are pretty straightforward, i.e they are only checking what is in the corresponding policy method.
+
+Run the test
+
+```
+$ rails t test/policies/group_policy_test.rb
+```
+
+Now lets test the `question_policy`
+
+```ruby
+class QuestionPolicyTest < PolicyAssertions::Test
+  def test_update_and_destroy
+    q = create :question
+    assert_permit q.user, q
+    refute_permit create(:user), q
+  end
+end
+```
+
+```bash
+$ rails t test/policies/question_policy_test.rb
+```
+
+Finally lets finish off testing our policies, by updating the `star_policy_test` as follows
+
+```ruby
+class StarPolicyTest < PolicyAssertions::Test
+  def test_destroy
+    s = create :star
+    assert_permit s.user, s
+    refute_permit create(:user), s
+  end
+end
+```
+
+Now run the all the policy tests
+
+```bash
+$ rails t test/policies/
+```

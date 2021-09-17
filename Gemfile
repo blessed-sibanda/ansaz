@@ -84,3 +84,5 @@ gem "shoulda-matchers", "~> 5.0", :group => :test
 gem "shoulda-context", "~> 2.0", :group => :test
 
 gem "shoulda-callback-matchers", "~> 1.1", :group => :test
+
+gem "policy-assertions", "~> 0.2.0", :group => :test
