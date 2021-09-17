@@ -2,7 +2,9 @@ require "test_helper"
 
 class AnswersControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @answer = answers(:one)
+    @answer = create :answer
+    @user = @answer.user
+    sign_in(@user)
   end
 
   test "should get index" do
@@ -16,7 +18,7 @@ class AnswersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create answer" do
-    assert_difference('Answer.count') do
+    assert_difference("Answer.count") do
       post answers_url, params: { answer: { accepted: @answer.accepted, question_id: @answer.question_id, user_id: @answer.user_id } }
     end
 
@@ -39,7 +41,7 @@ class AnswersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should destroy answer" do
-    assert_difference('Answer.count', -1) do
+    assert_difference("Answer.count", -1) do
       delete answer_url(@answer)
     end
 

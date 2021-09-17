@@ -875,3 +875,145 @@ Run the test
 ```
 $ rails test test/services/
 ```
+
+## 9.5 Testing Controllers
+
+In this section we will now move on to testing the meat and bones of our application - the controllers.
+
+Let's start by updating our `test_helper` with Devise test helper methods.
+
+`test/test_helper.rb`
+
+```ruby
+...
+...
+
+module ActionController
+  class TestCase
+    include Devise::Test::ControllerHelpers
+  end
+end
+
+module ActionDispatch
+  class IntegrationTest
+    include Devise::Test::IntegrationHelpers
+  end
+end
+```
+
+Now let's test the home controller
+
+`test/controllers/home_controller_test.rb`
+
+```ruby
+class HomeControllerTest < ActionDispatch::IntegrationTest
+  test "index redirects unauthenticated users to login page" do
+    get root_url
+    assert_redirected_to new_user_session_url
+  end
+
+  test "index redirects authenticated users to questions page" do
+    sign_in create(:user)
+    get root_url
+    assert_redirected_to questions_url
+  end
+end
+```
+
+The test checks the redirections based on the user's authentication status. Also note that we are using the Devise `sign_in` test helper method to login our user.
+
+Run the test and see that it passses
+
+```bash
+$ rails t test/controllers/home_controller_test.rb
+```
+
+Now lets test the questions controller. Update the `QuestionsControllerTest` with a `setup` method that authenticates the question owner.
+
+`test/controllers/questions_controller_test.rb`
+
+```ruby
+class QuestionsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @question = create :question
+    @user = @question.user
+    sign_in(@user)
+  end
+
+  ...
+  ...
+end
+```
+
+That is all that's needed to make this scaffolded `questions-controller-test` pass.
+
+```bash
+$ rails t test/controllers/questions_controller_test.rb
+```
+
+Now lets generate a 'questions' integration test to test the modifications that we made to `questions_controller` in addition to what rails generated for us.
+
+```
+$ rails g integration_test questions
+```
+
+`test/integration/questions_test.rb`
+
+```ruby
+class QuestionsTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = create(:user)
+  end
+
+  def assert_question_info(q)
+    assert_select "#question_#{q.id}" do
+      assert_select "a[href=?]", question_path(q), text: q.title
+      assert_select "img", count: 1
+      if Pundit.policy!(@user, q).edit?
+        assert_select "a[href=?]", question_path(q), text: "Edit"
+      end
+      if Pundit.policy!(@user, q).destroy?
+        assert_select "a[href=?]", question_path(q), text: "Delete"
+      end
+
+      q.tags.each do |tag|
+        assert_select "a[href=?]", tag_path(tag), text: "##{tag.name}"
+      end
+
+      assert_select "#question_#{q.id}_stars" do
+        assert_select "a", %r{#{q.stars.count} star}
+      end
+    end
+  end
+
+  test "questions are paginated" do
+    sign_in @user
+    create_list :question, 25
+    get questions_url
+    page1 = Question.paginated(1)
+    page1.each { |q| assert_question_info(q) }
+
+    assert_select "nav>ul.pagination" do
+      assert_select "li>a[href=?]", questions_path(page: 2)
+      assert_select "li>a[href=?]", questions_path(page: 3)
+    end
+  end
+
+  test "question page displays the answers" do
+    sign_in @user
+    q = create :question
+    create_list :answer, 5, question: q
+    get question_path(q)
+    assert_question_info(q)
+    assert_select "div", text: q.content.to_plain_text
+
+    q.answers.ranked.each do |a|
+      assert_select "#answer_#{a.id}" do
+        assert_select "div", a.content.to_plain_text
+      end
+    end
+  end
+end
+```
+
+In this test we are using `assert_select` a lot to make assertions against the returned HTML response. Note that `assert_select` accepts a CSS selector to check for the presence of the element matching the selector.
