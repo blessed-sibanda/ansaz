@@ -32,8 +32,12 @@ FactoryBot.define do
   factory :user do
     email { "user-#{SecureRandom.hex(3)}@example.com" }
     name { Faker::Name.name }
-    confirmed_at { Time.zone.now }
     password { "1234pass" }
     about { Faker::Lorem.paragraphs.join }
+    confirmed_at { Time.zone.now }
+
+    trait :unconfirmed do
+      confirmed_at { nil }
+    end
   end
 end

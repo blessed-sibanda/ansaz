@@ -59,9 +59,12 @@ FactoryBot.define do
   factory :user do
     email { "user-#{SecureRandom.hex(3)}@example.com" }
     name { Faker::Name.name }
-    confirmed_at { Time.zone.now }
     password { "1234pass" }
     about { Faker::Lorem.paragraphs.join }
+
+    trait :active do
+      confirmed_at { Time.zone.now }
+    end
   end
 end
 ```
@@ -132,18 +135,14 @@ class AnswerTest < ActiveSupport::TestCase
   end
 
   test "answering a question sends email to question owner" do
-    q = create(:question)
-
     assert_changes("ActionMailer::Base.deliveries.size",
                    from: 0, to: 1) do
-      perform_enqueued_jobs do
-        create :answer, question: q
-      end
+      perform_enqueued_jobs { create(:answer) }
     end
 
     email = ActionMailer::Base.deliveries.last
     assert email.subject == "Answered"
-    assert email.to == [q.user.email]
+    assert email.to == [Answer.last.question.user.email]
   end
 
   test "#parent_answer returns self" do
@@ -207,9 +206,17 @@ First lets update the factory `test/factories/group_memberships.rb`
 ```ruby
 FactoryBot.define do
   factory :group_membership do
-    user { build(:user) }
-    group { build(:group) }
+    user
+    group
     state { GroupMembership::MEMBERSHIP_STATES.sample }
+
+    trait :accepted do
+      state { GroupMembership::ACCEPTED }
+    end
+
+    trait :pending do
+      state { GroupMembership::PENDING }
+    end
   end
 end
 ```
@@ -273,6 +280,10 @@ end
 
 Similar to the answer model test, we are also using the `shoulda-matchers` helper methods to test the active record associations and validations of the `group_membership` model.
 Note that we are opening our test by creating a test subject. This is because of how `shoulda-matcher` works for models with database indexes. Since our group_membership has `not-null` foreign keys to both `user` and `group`, ActiveRecord will raise a `PG:NotNullViolation` error when `shoulda-matcher` attempts to check for uniqueness by creating different `group_membership` objects (some of them with `user_id` or `group_id` of null). Therefore it is important that we provide the matcher with a record where the critical attributes are filled in with valid values beforehand. This is why we are providing a `subject`.
+
+```
+$ rails test test/models/group_membership_test.rb
+```
 
 Now lets test the `group` model
 
@@ -397,6 +408,12 @@ Shoulda::Matchers.configure do |config|
 end
 ```
 
+Now run the test
+
+```
+$ rails test test/models/group_test.rb
+```
+
 Now lets test the `question` model
 
 ```ruby
@@ -471,6 +488,12 @@ class QuestionTest < ActiveSupport::TestCase
 end
 ```
 
+Run the test
+
+```
+$ rails test test/models/question_test.rb
+```
+
 Test the star model
 
 ```ruby
@@ -487,4 +510,118 @@ class StarTest < ActiveSupport::TestCase
              .scoped_to([:starrable_id, :starrable_type])
   end
 end
+```
+
+Run the tests
+
+```
+$ rails test test/models/star_test.rb
+```
+
+Using the same techniques as the ones above, lets test our last model - the user model
+
+```ruby
+class UserTest < ActiveSupport::TestCase
+  context "associations" do
+    should have_one_attached(:avatar)
+    should have_many(:questions)
+    should have_many(:answers)
+    should have_many(:comments)
+    should have_many(:stars)
+    should have_many(:group_memberships)
+    should have_many(:groups).through(:group_memberships).source(:group)
+    should have_many(:active_groups)
+             .through(:group_memberships)
+             .source(:group)
+    should have_many(:owned_groups)
+             .class_name("Group")
+             .with_foreign_key("admin_id")
+  end
+
+  test "#active returns confirmed users" do
+    create_list :user, 4
+    create_list :user, 7, :unconfirmed
+
+    assert User.active.count == 4
+
+    User.active.each do |u|
+      refute u.confirmed_at.nil?
+    end
+  end
+
+  test "#ranked orders users by # of questions & # of answers in ascending order of creation date" do
+    u1 = create(:user)
+    3.times { create(:question, user: u1) }
+    3.times { create(:answer, user: u1) }
+
+    u2 = create(:user)
+    5.times { create(:question, user: u2) }
+    3.times { create(:answer, user: u2) }
+
+    u3 = create(:user)
+    3.times { create(:question, user: u3) }
+    3.times { create(:answer, user: u3) }
+
+    u4 = create(:user)
+    3.times { create(:question, user: u4) }
+    4.times { create(:answer, user: u4) }
+
+    assert User.ranked.first == u2
+    assert User.ranked.second == u4
+    assert User.ranked.third == u1
+    assert User.ranked.fourth == u3
+  end
+
+  test "#starred returns the star of a given user if it exists" do
+    u1 = create :user
+    u2 = create :user
+    q = create :question
+    s = create :star, user: u1, starrable: q
+
+    assert u1.starred(q) == s
+    assert u2.starred(q).nil?
+  end
+
+  test "#unowned_groups returns groups in the user is not an admin but accepted" do
+    u = create :user
+
+    g1 = create :group, admin: u
+    g2 = create :group
+    g3 = create :group
+    g4 = create :group
+
+    create :group_membership, :accepted, user: u, group: g2
+    create :group_membership, :pending, user: u, group: g3
+    create :group_membership, :accepted, user: u, group: g4
+
+    assert_not_includes u.unowned_groups, g1
+    assert_includes u.unowned_groups, g2
+    assert_not_includes u.unowned_groups, g3
+    assert_includes u.unowned_groups, g4
+  end
+
+  test "#joined_on returns time which user joined the group" do
+    u = create :user
+    g = create :group
+    gm = create :group_membership, :accepted, user: u, group: g
+    assert_equal u.joined_on(g), gm.created_at.strftime("%d %b %Y")
+  end
+
+  test "#pending_approval shows whether user has pending group membership" do
+    u = create :user
+    g1 = create :group
+    create :group_membership, :accepted, user: u, group: g1
+    refute u.pending_approval(g1)
+
+    g2 = create :group
+    gm = create :group_membership, :pending, user: u, group: g2
+    assert u.pending_approval(g2)
+  end
+end
+```
+
+Run the test
+
+```
+$ rails test test/models/user_test.rb
 ```

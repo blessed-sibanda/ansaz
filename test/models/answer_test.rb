@@ -46,21 +46,15 @@ class AnswerTest < ActiveSupport::TestCase
     assert q.answers.ranked.last == a3
   end
 
-  context "callbacks" do
-    should callback(:email_question_asker).after(:create)
-  end
-
-  test "#email_question_asker sends email to question owner" do
-    a = create(:answer)
-
+  test "answering a question sends email to question owner" do
     assert_changes("ActionMailer::Base.deliveries.size",
                    from: 0, to: 1) do
-      perform_enqueued_jobs { a.email_question_asker }
+      perform_enqueued_jobs { create(:answer) }
     end
 
     email = ActionMailer::Base.deliveries.last
     assert email.subject == "Answered"
-    assert email.to == [a.question.user.email]
+    assert email.to == [Answer.last.question.user.email]
   end
 
   test "#parent_answer returns self" do

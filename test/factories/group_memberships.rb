@@ -25,5 +25,13 @@ FactoryBot.define do
     user
     group
     state { GroupMembership::MEMBERSHIP_STATES.sample }
+
+    trait :accepted do
+      state { GroupMembership::ACCEPTED }
+    end
+
+    trait :pending do
+      state { GroupMembership::PENDING }
+    end
   end
 end
