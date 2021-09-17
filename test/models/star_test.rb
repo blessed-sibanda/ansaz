@@ -21,7 +21,15 @@
 require "test_helper"
 
 class StarTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  subject { build(:star) }
+
+  context "associations" do
+    should belong_to(:user)
+    should belong_to(:starrable)
+  end
+
+  context "validations" do
+    should validate_uniqueness_of(:user)
+             .scoped_to([:starrable_id, :starrable_type])
+  end
 end
