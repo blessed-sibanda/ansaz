@@ -235,9 +235,22 @@ FactoryBot.define do
 
     after(:build) do |group|
       group.banner.attach(
-        io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+        io: File.open(
+          Rails.root.join("app",
+                          "assets",
+                          "images",
+                          "default_banner_img.png")
+        ),
         filename: "default_banner_img.png",
       )
+    end
+
+    trait :public do
+      group_type { Group::PUBLIC }
+    end
+
+    trait :private do
+      group_type { Group::PRIVATE }
     end
   end
 end
@@ -808,3 +821,57 @@ $ rails test:mailers
 ```
 
 ## 9.4 Testing Services
+
+In this section we are going to test our `group_membership` creator service.
+
+Create the test file
+
+```bash
+$ mkdir test/services/group_membership -p
+$ touch test/services/group_membership/creator_test.rb
+```
+
+Add the following code to the test file
+
+```ruby
+require "test_helper"
+
+class GroupMembership::CreatorTest < ActiveSupport::TestCase
+  test "joining a public group" do
+    g = create :group, :public
+    u = create :user
+    assert_difference "GroupMembership.count", 1 do
+      message = GroupMembership::Creator.call(user: u, group: g)
+      assert_equal message, "You have joined '#{g.name}' group"
+      assert_equal GroupMembership.last.state, GroupMembership::ACCEPTED
+    end
+  end
+
+  test "joining a private group" do
+    g = create :group, :private
+    u = create :user
+    assert_difference "GroupMembership.count", 1 do
+      message = GroupMembership::Creator.call(user: u, group: g)
+      assert_equal message, "A request to join '#{g.name}' has been sent"
+      assert_equal GroupMembership.last.state, GroupMembership::PENDING
+    end
+  end
+
+  test "group admin is already in the group" do
+    g = create :group, :private
+    assert_difference "GroupMembership.count", 0 do
+      message = GroupMembership::Creator.call(user: g.admin, group: g)
+      assert_equal message, "You are already in this group"
+      assert_equal GroupMembership.last.state, GroupMembership::ACCEPTED
+    end
+  end
+end
+```
+
+The test checkes the different messages and group-membership states that are created when a user joins a private or a public group. The test also asserts that the group admin is already in the group, so no new membership is created.
+
+Run the test
+
+```
+$ rails test test/services/
+```

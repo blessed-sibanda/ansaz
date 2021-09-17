@@ -27,9 +27,22 @@ FactoryBot.define do
 
     after(:build) do |group|
       group.banner.attach(
-        io: File.open(Rails.root.join("app", "assets", "images", "default_banner_img.png")),
+        io: File.open(
+          Rails.root.join("app",
+                          "assets",
+                          "images",
+                          "default_banner_img.png")
+        ),
         filename: "default_banner_img.png",
       )
+    end
+
+    trait :public do
+      group_type { Group::PUBLIC }
+    end
+
+    trait :private do
+      group_type { Group::PRIVATE }
     end
   end
 end
