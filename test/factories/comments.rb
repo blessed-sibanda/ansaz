@@ -21,8 +21,12 @@
 #
 FactoryBot.define do
   factory :comment do
-    user { build(:user) }
-    commentable { [build(:answer), build(:comment)].sample }
     content { Faker::Lorem.paragraphs.join }
+    association :commentable, factory: :answer, strategy: :build
+    association :user, strategy: :build
+
+    trait :on_comment do
+      association :commentable, factory: :comment, strategy: :build
+    end
   end
 end

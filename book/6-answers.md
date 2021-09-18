@@ -37,7 +37,7 @@ Rails.application.routes.draw do
   authenticate :user do
     resources :users, only: [:index, :show]
     resources :questions do
-      resources :answers
+      resources :answers, only: [:create, :destroy]
     end
   end
   root to: "home#index"
@@ -83,6 +83,8 @@ Update answers controller
 - to only accept answer `:content` in `answer_params` method
 
 - to redirect to question page after creating an answers
+
+- remove the `new`, `show`, `edit`, and `update` actions
 
 ```ruby
 class AnswersController < ApplicationController
@@ -177,11 +179,81 @@ touch app/views/answers/_answer.html.erb
       <%= answer.created_at.to_s(:short) %>
     </span>
   </div>
-  <div class="card-body"><%= answer.content %></div>
+  <div class="card-body">
+    <%= answer.content %>
+    <% if policy(answer).destroy? %>
+      <%= link_to 'delete', question_answer_path(answer.question, answer), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+      <% end %>
+  </div>
 </div>
 ```
 
-Now if you visit a question page and provide an answer, it looks like this
+Update `main.scss`
+
+```scss
+// previous styles here
+
+a.reply-link,
+a.star-link,
+a.decide-link,
+a.delete-link,
+.timestamp {
+  text-decoration: none;
+  font-size: 0.8rem;
+  text-transform: lowercase;
+}
+```
+
+Note that we are using a pundit policy to check whether the user is authorized to delete an answer. Only the creator of the answer can delete it. We are also using `remote: true` option in the delete link to delete answers via ajax.
+
+Let's generate the `answer_policy` to add the `destroy?` authorization.
+
+```bash
+$ rails g pundit:policy answer
+```
+
+```ruby
+class AnswerPolicy < ApplicationPolicy
+  def destroy?
+    user == record.user
+  end
+end
+```
+
+Add this authorization check to the answers controller `destroy` action
+
+```ruby
+class AnswersController < ApplicationController
+  ...
+  ...
+
+  def destroy
+    authorize @answer
+    @answer.destroy
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  ...
+  ...
+end
+```
+
+Note that we are responding with javascript (ajax) in the destroy action
+
+So lets create the `destroy.js.erb` view
+
+```
+$ touch app/views/answers/destroy.js.erb
+```
+
+```javascript
+var answer = document.getElementById('<%= j dom_id(@answer) %>');
+answer.remove();
+```
+
+Now if you visit a question page and provide an answer, it looks like this and the answer can be destroyed without a full page reload.
 
 ![Question Page with Answers](./question-with-answers.png)
 
@@ -354,7 +426,7 @@ class Answer < ApplicationRecord
   belongs_to :user
   belongs_to :question
   has_rich_text :answer
-  has_many :comments, as: :commentable
+  has_many :comments, as: :commentable, dependent: :destroy
 end
 ```
 
@@ -393,13 +465,13 @@ Rails.application.routes.draw do
   authenticate :user do
     ...
     ...
-    resources :comments
+    resources :comments, only: :create
   end
   root to: "home#index"
 end
 ```
 
-Add `create` action to comments-controller
+Add `create` and `destroy` actions to comments-controller
 
 ```ruby
 class CommentsController < ApplicationController
@@ -413,6 +485,15 @@ class CommentsController < ApplicationController
     end
   end
 
+  def destroy
+    @comment = Comment.find(params[:id])
+    authorize @comment
+    @comment.destroy
+    respond_to do |format|
+      format.js
+    end
+  end
+
   private
 
   def comment_params
@@ -422,10 +503,35 @@ class CommentsController < ApplicationController
 end
 ```
 
-Update `answer` partial to allow for commenting
+Create the `destroy.js.erb` view
+
+```bash
+$ touch app/views/comments/destroy.js.erb
+```
+
+```javascript
+var comment = document.getElementById('<%= j dom_id(@comment) %>');
+comment.remove();
+```
+
+Generate the comment policy to only allow the comment owner to destroy the comment.
+
+```bash
+$ rails g pundit:policy comment
+```
+
+```ruby
+class CommentPolicy < ApplicationPolicy
+  def destroy?
+    user == record.user
+  end
+end
+```
+
+Now let's update `answer` partial to allow for commenting
 
 ```erb
-<div class="card my-3 answer-card">
+<div class="card my-3" id="<%= dom_id(answer) %>">
   ...
   ...
   <div class="card-body">
@@ -520,7 +626,7 @@ $ touch app/views/comments/_comment.html.erb
 ```
 
 ```erb
-<div class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
+<div id='<%= dom_id(comment) %>' class='py-2 border-start border-1 ps-3 pb-0 card border-0 rounded-0 <%= cycle('', 'bg-light') %> '>
   <div class="d-flex justify-content-start align-items-center">
     <%= user_avatar(comment.user, height: 30, width: 30) %>
     <div class='d-flex flex-column ms-2'>
@@ -531,7 +637,12 @@ $ touch app/views/comments/_comment.html.erb
     </div>
   </div>
   <%= comment.content %>
-  <%= render 'comments/reply', commentable: comment %>
+  <div class="d-flex align-items-center justify-content-between pe-3">
+    <%= render 'comments/reply', commentable: comment %>
+    <% if policy(comment).destroy? %>
+      <%= link_to 'delete', comment_path(comment), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+    <% end %>
+  </div>
   <%= render comment.comments %>
 </div>
 ```
@@ -542,6 +653,7 @@ Update styles in `main.scss`
 // previous styles here ...
 
 a.reply-link,
+a.delete-link,
 .timestamp {
   max-width: min-content;
   text-decoration: none;
@@ -782,7 +894,7 @@ end
 
 Note that we are using `left_joins` instead of just `joins` in the above scope because the later will only return the answers which have stars.
 
-Create a 'decide' partial to accept/reject an answer
+Create a `decide` partial to accept/reject an answer
 
 ```
 $ touch app/views/answer_acceptance/_decide.html.erb

@@ -9,6 +9,11 @@
     </div>
   </div>
   <%= comment.content %>
-  <%= render 'comments/reply', commentable: comment %>
+  <div class="d-flex align-items-center justify-content-between pe-3">
+    <%= render 'comments/reply', commentable: comment %>
+    <% if policy(comment).destroy? %>
+      <%= link_to 'delete', comment_path(comment), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+    <% end %>
+  </div>
   <%= render comment.comments %>
 </div>

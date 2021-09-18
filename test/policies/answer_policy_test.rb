@@ -9,4 +9,12 @@ class AnswerPolicyTest < PolicyAssertions::Test
     refute_permit create(:user), answer
     refute_permit nil, answer
   end
+
+  def test_destroy
+    answer = create(:answer)
+
+    assert_permit answer.user, answer
+    refute_permit create(:user), answer
+    refute_permit nil, answer
+  end
 end

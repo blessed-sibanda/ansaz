@@ -29,6 +29,9 @@
       <% end %>
       <%= render 'stars/stars', starrable: answer %>
       <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
+      <% if policy(answer).destroy? %>
+        <%= link_to 'delete', question_answer_path(answer.question, answer), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+      <% end %>
     </div>
   </div>
   <% if comments.any? %>

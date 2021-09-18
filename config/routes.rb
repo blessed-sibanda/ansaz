@@ -6,9 +6,9 @@ Rails.application.routes.draw do
   authenticate :user do
     resources :users, only: [:index, :show]
     resources :questions do
-      resources :answers
+      resources :answers, only: [:create, :destroy]
     end
-    resources :comments
+    resources :comments, only: [:create, :destroy]
     resources :stars, only: [:create, :destroy]
     resources :answer_acceptance, only: [:update, :destroy]
     resources :groups

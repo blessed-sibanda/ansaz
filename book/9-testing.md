@@ -683,15 +683,41 @@ class AnswerPolicyTest < PolicyAssertions::Test
     refute_permit create(:user), answer
     refute_permit nil, answer
   end
+
+  def test_destroy
+    answer = create(:answer)
+
+    assert_permit answer.user, answer
+    refute_permit create(:user), answer
+    refute_permit nil, answer
+  end
 end
 ```
 
-Here we are testing that the policy only allows the question asker to accept an answer. All the other users cannot mark the answer as accepted.
+Here we are testing that the policy only allows the question asker to accept an answer. All the other users cannot mark the answer as accepted. We are also testing that only the creator of an answer is permitted to destroy it.
 
 Run the test
 
 ```bash
 $ rails t test/policies/answer_policy_test.rb
+```
+
+Lets test the `comment_policy`
+
+```ruby
+class CommentPolicyTest < PolicyAssertions::Test
+  def test_destroy
+    comment = create :comment
+    assert_permit comment.user, comment
+    refute_permit create(:user), comment
+  end
+end
+```
+
+Run the test
+
+```bash
+$ rails t test/policies/comment_policy_test.rb
 ```
 
 Lets test the `group_membership_policy`
@@ -876,7 +902,7 @@ Run the test
 $ rails test test/services/
 ```
 
-## 9.5 Testing Controllers
+## 9.5 Integration & Controller Tests
 
 In this section we will now move on to testing the meat and bones of our application - the controllers.
 
@@ -1017,3 +1043,93 @@ end
 ```
 
 In this test we are using `assert_select` a lot to make assertions against the returned HTML response. Note that `assert_select` accepts a CSS selector to check for the presence of the element matching the selector.
+
+Now lets test the `answers-controller`. Remove the tests for the `new`, `show`, `edit` and `update` actions in the `answers_controller_test`. We don't need these tests since we deleted the corresponding actions in the **Answers** chapter.
+
+Update the `answers_controller_test.rb` as follows
+
+```ruby
+class AnswersControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @answer = create :answer
+    @user = @answer.user
+    @question_id = @answer.question.id
+    sign_in(@user)
+  end
+
+  test "should create answer" do
+    assert_difference("Answer.count") do
+      post question_answers_url(question_id: @question_id), params: { answer: { content: "Blah blah" } }
+    end
+
+    assert_redirected_to question_url(@answer.question)
+  end
+
+  test "should destroy answer" do
+    assert_difference("Answer.count", -1) do
+      delete question_answer_url(@answer.question, @answer), xhr: true
+    end
+  end
+
+  test "only answer owner can destroy the answer" do
+    other_answer = create(:answer)
+    assert_no_difference "Answer.count" do
+      delete question_answer_url(other_answer.question, other_answer)
+    end
+  end
+end
+```
+
+Run the test
+
+```bash
+$ rails t test/controllers/answers_controller_test.rb
+```
+
+Update the `comments_controller_test`. The test checks whether a user can create a comment on either an answer or another comment. The test also checks that only the comment user can delete it.
+
+```ruby
+class CommentsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = create :user
+    @comment = create :comment, user: @user
+    sign_in @user
+  end
+
+  test "should create comment on answer" do
+    answer = create :answer
+    assert_difference("Comment.count") do
+      post comments_url,
+           params: { comment: { content: "Blah blah",
+                               commentable_id: answer.id,
+                               commentable_type: "Answer",
+                               answer_id: answer.parent_answer.id } },
+           xhr: true
+    end
+  end
+
+  test "should create comment on another comments" do
+    assert_difference("Comment.count") do
+      post comments_url,
+           params: { comment: { content: "Blah blah",
+                               commentable_id: @comment.id,
+                               commentable_type: "Comment",
+                               answer_id: @comment.parent_answer.id } },
+           xhr: true
+    end
+  end
+
+  test "comment owner can destroy comment" do
+    assert_difference("Comment.count", -1) do
+      delete comment_url(@comment), xhr: true
+    end
+  end
+
+  test "non comment owner cannot destroy comment" do
+    random_comment = create :comment
+    assert_no_difference("Comment.count") do
+      delete comment_url(random_comment), xhr: true
+    end
+  end
+end
+```
