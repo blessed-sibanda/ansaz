@@ -857,7 +857,7 @@ Now update the questions index page with different headers based on whether the 
 <% end %>
 ```
 
-Update the database seeds with more data to see the search feature in aaction
+Update the database seeds with more data to see the search and tagging features in action
 
 `db/seeds.rb`
 
@@ -865,8 +865,18 @@ Update the database seeds with more data to see the search feature in aaction
 ...
 ...
 
-10_000.times do |i|
-  ...
-  ...
+puts "Adding questions"
+500.times do |i|
+  include FactoryBot::Syntax::Methods
+  q = create :question
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+  end
+
+  q.tag_list = tags.uniq
+  q.save!
+
+  print(".") if i % 100 == 0
 end
 ```
