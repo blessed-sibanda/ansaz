@@ -46,4 +46,6 @@ en:
       destroy?: 'Only question owner can delete the question!'
     group_membership_policy:
       accept_or_reject?: 'Only group admin can accept or reject group join requests.'
+    answer_policy:
+      accept_or_reject?: 'Only the owner of the question can mark answers as accepted or rejected.'
   

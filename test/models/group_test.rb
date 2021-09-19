@@ -36,7 +36,6 @@ class GroupTest < ActiveSupport::TestCase
   context "validations" do
     should validate_presence_of(:name)
     should validate_presence_of(:description)
-    should validate_presence_of(:banner)
     should validate_inclusion_of(:group_type)
              .in_array(Group::GROUP_TYPES)
     should have_one_attached(:banner)

@@ -35,7 +35,7 @@ Update the group model
 
 - A group can either be public or private, therefore use the `inclusion` validation to validate the group type
 - Add a banner image to the group as well
-- Add presence validations to `name`, `description` and `banner`
+- Add presence validations to `name` and `description`
 - Validate the length of the group `name`
 
 ```ruby
@@ -48,7 +48,7 @@ class Group < ApplicationRecord
     PRIVATE = "Private",
   ].freeze
 
-  validates :name, :description, :banner, presence: true
+  validates :name, :description, presence: true
   validates :name, length: { in: 5..30 }
   validates :group_type, inclusion: { in: GROUP_TYPES }
 end
@@ -720,9 +720,7 @@ end
 Update `config/locales/en.yml` with pundit messages for the above policy.
 
 ```yml
-
 ---
-
 ---
 en:
   pundit:

@@ -1,7 +1,7 @@
 require "test_helper"
 
 class AnswerPolicyTest < PolicyAssertions::Test
-  def test_accept
+  def test_accept_or_reject
     question = create(:question)
     answer = create(:answer, question: question)
 

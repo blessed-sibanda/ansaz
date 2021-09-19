@@ -829,10 +829,20 @@ $ rails g pundit:policy answer
 
 ```ruby
 class AnswerPolicy < ApplicationPolicy
-  def accept?
+  def accept_or_reject?
     user == record.question.user
   end
 end
+```
+
+Update the pundit message for the above policy method
+
+```yaml
+en:
+  pundit:
+    default: 'You cannot perform this action.'
+    answer_policy:
+      accept_or_reject?: 'Only the owner of the question can mark answers as accepted or rejected.'
 ```
 
 Create the `update` and `destroy` actions in the `answer-acceptance` controller
@@ -861,7 +871,7 @@ class AnswerAcceptanceController < ApplicationController
 
   def set_answer
     @answer = Answer.find(params[:id])
-    authorize @answer, :accept?
+    authorize @answer, :accept_or_reject?
   end
 end
 ```
@@ -888,6 +898,7 @@ class Answer < ApplicationRecord
     left_joins(:stars).group(:id)
       .order(accepted: :desc)
       .order("COUNT(stars.id) DESC")
+      .order(created_at: :asc)
   }
 end
 ```
@@ -903,7 +914,7 @@ $ touch app/views/answer_acceptance/_decide.html.erb
 `app/views/answer_acceptance/_decide.html.erb`
 
 ```erb
-<% if policy(answer).accept? %>
+<% if policy(answer).accept_or_reject? %>
   <% if answer.accepted %>
     <%= link_to 'reject', answer_acceptance_path(answer), method: :delete, remote: true, class: 'text-decoration-none decide-link' %>
   <% else %>

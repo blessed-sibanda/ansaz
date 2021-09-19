@@ -21,6 +21,6 @@ class AnswerAcceptanceController < ApplicationController
 
   def set_answer
     @answer = Answer.find(params[:id])
-    authorize @answer, :accept?
+    authorize @answer, :accept_or_reject?
   end
 end

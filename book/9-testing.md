@@ -321,7 +321,6 @@ class GroupTest < ActiveSupport::TestCase
   context "validations" do
     should validate_presence_of(:name)
     should validate_presence_of(:description)
-    should validate_presence_of(:banner)
     should validate_inclusion_of(:group_type)
              .in_array(Group::GROUP_TYPES)
     should have_one_attached(:banner)
@@ -1208,4 +1207,76 @@ class GroupMembershipsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 end
+```
+
+Update the `groups_controller_test.rb` as follows
+
+```ruby
+class GroupsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @group = create :group
+    sign_in @group.admin
+  end
+
+  test "should create group" do
+    assert_difference("Group.count") do
+      post groups_url,
+           params: {
+             group: {
+               description: "This is a very awesome group",
+               group_type: Group::PUBLIC,
+               name: "Rails Geeks",
+             },
+           }
+    end
+  end
+
+  ...
+  ...
+end
+```
+
+Run the tests
+
+```bash
+$ rails t test/controllers/groups_controller_test.rb
+```
+
+Now lets add tests for the `answer_acceptance_controller`
+
+```ruby
+class AnswerAcceptanceControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @answer = create :answer
+    sign_in @answer.question.user
+  end
+
+  test "question asker should accept answer" do
+    refute @answer.accepted?
+    patch answer_acceptance_path(@answer), xhr: true
+    assert @answer.reload.accepted?
+  end
+
+  test "others cannot accept answer" do
+    sign_in create(:user)
+    refute @answer.accepted?
+    patch answer_acceptance_path(@answer), xhr: true
+    refute @answer.reload.accepted?
+    assert_equal flash[:alert], "Only the owner of the question can mark answers as accepted or rejected."
+  end
+
+  test "should reject answer" do
+    refute @answer.accepted?
+    @answer.accepted = true
+    @answer.save!
+    delete answer_acceptance_path(@answer), xhr: true
+    refute @answer.reload.accepted?
+  end
+end
+```
+
+Run the tests
+
+```bash
+$ rails t test/controllers/answer_acceptance_controller_test.rb
 ```

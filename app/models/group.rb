@@ -28,7 +28,7 @@ class Group < ApplicationRecord
     PRIVATE = "Private",
   ].freeze
 
-  validates :name, :description, :banner, presence: true
+  validates :name, :description, presence: true
   validates :name, length: { in: 5..30 }
   validates :group_type, inclusion: { in: GROUP_TYPES }
 

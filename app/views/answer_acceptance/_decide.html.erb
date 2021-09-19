@@ -1,4 +1,4 @@
-<% if policy(answer).accept? %>
+<% if policy(answer).accept_or_reject? %>
   <% if answer.accepted %>
     <%= link_to 'reject', answer_acceptance_path(answer), method: :delete, remote: true, class: 'text-decoration-none decide-link' %>
   <% else %>

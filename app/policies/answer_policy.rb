@@ -1,5 +1,5 @@
 class AnswerPolicy < ApplicationPolicy
-  def accept?
+  def accept_or_reject?
     user == record.question.user
   end
 
