@@ -44,4 +44,6 @@ en:
       edit?: 'Only question owner can edit the question!'
       update?: 'Only question owner can update the question!'
       destroy?: 'Only question owner can delete the question!'
+    group_membership_policy:
+      accept_or_reject?: 'Only group admin can accept or reject group join requests.'
   

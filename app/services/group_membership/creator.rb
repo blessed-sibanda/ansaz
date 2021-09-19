@@ -10,10 +10,10 @@ class GroupMembership::Creator < ApplicationService
 
   def call
     membership = GroupMembership.find_or_initialize_by(
-      state: @state, user: @user, group: @group,
+      state: @state, user: @user, group: @group
     )
     if membership.persisted?
-      @result_message = "You are already in this group"
+      @result_message = 'You are already in this group'
     else
       membership.save!
     end
@@ -34,6 +34,8 @@ class GroupMembership::Creator < ApplicationService
     when Group::PRIVATE
       @state = GroupMembership::PENDING
       @result_message = "A request to join '#{group.name}' has been sent"
+    else
+      # type code here
     end
   end
 end

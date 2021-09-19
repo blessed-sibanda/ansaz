@@ -717,6 +717,20 @@ class GroupMembershipPolicy < ApplicationPolicy
 end
 ```
 
+Update `config/locales/en.yml` with pundit messages for the above policy.
+
+```yml
+
+---
+
+---
+en:
+  pundit:
+    default: 'You cannot perform this action.'
+    group_membership_policy:
+      accept_or_reject?: 'Only group admin can accept or reject group join requests.'
+```
+
 Update the routes to include these new actions as well
 
 ```ruby
