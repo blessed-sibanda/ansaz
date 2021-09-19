@@ -135,9 +135,11 @@ class AnswerTest < ActiveSupport::TestCase
   end
 
   test "answering a question sends email to question owner" do
-    assert_changes("ActionMailer::Base.deliveries.size",
-                   from: 0, to: 1) do
-      perform_enqueued_jobs { create(:answer) }
+    perform_enqueued_jobs do
+      assert_changes("ActionMailer::Base.deliveries.size",
+                     from: 0, to: 1) do
+        create(:answer)
+      end
     end
 
     email = ActionMailer::Base.deliveries.last

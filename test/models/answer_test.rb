@@ -40,16 +40,20 @@ class AnswerTest < ActiveSupport::TestCase
     a2 = create(:answer, :accepted, question: q)
     create(:star, starrable: a1)
     a3 = create(:answer, question: q)
+    a4 = create(:answer, question: q)
 
     assert q.answers.ranked.first == a2
     assert q.answers.ranked.second == a1
-    assert q.answers.ranked.last == a3
+    assert q.answers.ranked.third == a3
+    assert q.answers.ranked.last == a4
   end
 
   test "answering a question sends email to question owner" do
-    assert_changes("ActionMailer::Base.deliveries.size",
-                   from: 0, to: 1) do
-      perform_enqueued_jobs { create(:answer) }
+    perform_enqueued_jobs do
+      assert_changes("ActionMailer::Base.deliveries.size",
+                     from: 0, to: 1) do
+        create(:answer)
+      end
     end
 
     email = ActionMailer::Base.deliveries.last

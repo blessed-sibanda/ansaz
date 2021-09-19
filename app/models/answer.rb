@@ -27,10 +27,11 @@ class Answer < ApplicationRecord
   has_many :stars, as: :starrable
 
   scope :ranked, -> {
-          left_joins(:stars).group(:id)
-            .order(accepted: :desc)
-            .order("COUNT(stars.id) DESC")
-        }
+    left_joins(:stars).group(:id)
+                      .order(accepted: :desc)
+                      .order("COUNT(stars.id) DESC")
+                      .order(created_at: :asc)
+  }
 
   after_create :email_question_asker
 

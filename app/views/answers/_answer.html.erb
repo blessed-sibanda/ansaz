@@ -18,7 +18,7 @@
           <strong>Accepted</strong>
         </span>
       <% end %>
-      <%= render partial: 'comments/reply', locals: {commentable: answer, answer: answer} %>
+      <%= render partial: 'comments/reply', locals: {commentable: answer} %>
       <span class="mx-2">&middot;</span>
       <% if comments.any? %>
         <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" 
