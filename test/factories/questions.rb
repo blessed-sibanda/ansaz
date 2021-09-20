@@ -24,6 +24,7 @@ FactoryBot.define do
     title { ["What is", "Why", "Who", "Where", "How"].sample + " " + Faker::Lorem.sentence.downcase + " #{SecureRandom.hex(2)}" }
     user { build(:user) }
     content { Faker::Lorem.paragraphs(number: 7).join }
+    tag_list { }
 
     trait :grouped do
       association :group, strategy: :build

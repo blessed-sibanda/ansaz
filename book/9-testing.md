@@ -77,12 +77,13 @@ FactoryBot.define do
     title { ["What is", "Why", "Who", "Where", "How"].sample + " " + Faker::Lorem.sentence.downcase + " #{SecureRandom.hex(2)}" }
     user { build(:user) }
     content { Faker::Lorem.paragraphs(number: 7).join }
+    tag_list { }
 
     trait :grouped do
       association :group, strategy: :build
     end
   end
-end
+ends
 ```
 
 Update `test/factories/stars.rb`
@@ -903,7 +904,7 @@ Run the test
 $ rails test test/services/
 ```
 
-## 9.5 Integration & Controller Tests
+## 9.5 Testing Controllers
 
 In this section we will now move on to testing the meat and bones of our application - the controllers.
 
@@ -1279,4 +1280,94 @@ Run the tests
 
 ```bash
 $ rails t test/controllers/answer_acceptance_controller_test.rb
+```
+
+Now lets test the `stars_controller`
+
+```ruby
+class StarsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = create :user
+    @question = create :question
+    sign_in @user
+  end
+
+  test "should create star" do
+    assert_equal @question.stars.count, 0
+    post stars_url,
+         params: { starrable_id: @question.id,
+                   starrable_type: @question.class.name },
+         xhr: true
+    assert_equal @question.stars.count, 1
+  end
+
+  test "user can remove his/her own star" do
+    star = create :star, user: @user
+    assert_difference "Star.count", -1 do
+      delete star_url(star), xhr: true
+    end
+  end
+
+  test "user cannot remove others' stars" do
+    star = create :star
+    assert_no_difference "Star.count" do
+      delete star_url(star), xhr: true
+      assert_equal flash[:alert], "You cannot perform this action."
+    end
+  end
+end
+```
+
+Run the test
+
+```bash
+$ rails t test/controllers/stars_controller_test.rb
+```
+
+Lets add tests for `tags_controller`
+
+```ruby
+class TagsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = create :user
+    sign_in @user
+  end
+
+  test "#index should get tags matching the given params" do
+    tags = ["technology", "food", "health", "finance", "education"]
+    tags.each { |name| ActsAsTaggableOn::Tag.create(name: name) }
+    get tags_url(q: "f")
+    assert_response :success
+
+    # 2 tags matching 'f' will be returned (i.e food & finance)
+    assert_select ".list-group-item", 2
+    assert_select ".list-group-item", "food"
+    assert_select ".list-group-item", "finance"
+  end
+
+  test "#show should return questions matching the tag" do
+    q1 = create :question, tag_list: ["react", "javascript"]
+    q2 = create :question, tag_list: ["god", "religion"]
+    q3 = create :question, tag_list: ["web-dev", "react", "rails"]
+
+    get tag_url(id: "react")
+
+    assert_select "#question_#{q1.id}" do
+      assert_select "a[href=?]", question_path(q1), text: q1.title
+    end
+
+    # q2 is not return since it doesn't contain 'react' tag
+    assert_select "#question_#{q2.id}", count: 0
+
+    assert_select "#question_#{q3.id}" do
+      assert_select "a[href=?]", question_path(q3), text: q3.title
+    end
+  end
+end
+```
+
+Run the test
+
+```bash
+$ rails t test/controllers/tags_controller_test.rb
 ```

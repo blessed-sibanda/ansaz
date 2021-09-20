@@ -601,13 +601,22 @@ class TagsController < ApplicationController
 end
 ```
 
+Lets create the tag `index` view
+
+```erb
+<% @tags.each do |tag| %>
+  <li id="<%= dom_id(tag) %>" class="list-group-item" role="option">
+    <%= tag.name %>
+  </li>
+<% end %>
+```
+
 The index action in our tags controller uses `ilike` query to search for tags with names that contain the keyword entered in the input box.
 
 Update routes
 
 ```ruby
 Rails.application.routes.draw do
-  get "tags/index"
   root to: "home#index"
   devise_for :users
   authenticate :user do

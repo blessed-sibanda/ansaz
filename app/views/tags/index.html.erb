@@ -1,5 +1,5 @@
 <% @tags.each do |tag| %>
-  <li class="list-group-item" role="option" data-autocomplete-value="<%= tag.id %>">
+  <li id="<%= dom_id(tag) %>" class="list-group-item" role="option">
     <%= tag.name %>
   </li>
 <% end %>
