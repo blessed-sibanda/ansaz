@@ -31,7 +31,7 @@ class UserProfilesTest < ApplicationSystemTestCase
 
     within ".tab-content" do
       @user_answers.each do |a|
-        assert_selector "a", text: a.content
+        assert_text a.content.to_plain_text
       end
     end
 

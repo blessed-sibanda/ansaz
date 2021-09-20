@@ -257,7 +257,11 @@ Update the group `show` page
 
 ```erb
 <div class="card rounded-0">
-  <%= image_tag @group.banner, class: 'card-img-top rounded-0 group-banner' %>
+  <% if @group.banner.attached? %>
+    <%= image_tag @group.banner, class: 'card-img-top rounded-0 group-banner' %>
+  <% else %>
+    <%= image_tag 'default_banner_img.png', class: 'card-img-top rounded-0 group-banner'  %>
+  <% end %>
   <div class="card-body">
     <h5 class="card-title"><%= @group.name %></h1>
     <div class="card-text"><%= @group.description %></div>
