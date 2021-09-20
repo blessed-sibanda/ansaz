@@ -50,6 +50,8 @@ Update \_navbar partial with a link to `questions` index page
 </nav>
 ```
 
+**Note** The three dots (`...`) in the above code represents sections of code that haven't changed.
+
 Add presence validation to question `title`
 
 ```ruby
