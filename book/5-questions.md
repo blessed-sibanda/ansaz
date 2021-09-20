@@ -990,11 +990,15 @@ Now lets update our navbar search form to send our search `keywords` via `get` t
         ...
       </ul>
       <%= form_for :search, url: questions_url, method: :get, html: {class: 'd-flex'} do |f| %>
-        <%= text_field_tag :keywords, nil, placeholder: 'Search public questions...', class: 'form-control me-2' %>
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        <%= text_field_tag :keywords, nil,
+          placeholder: 'Search public questions...',
+          class: 'form-control me-2' %>
+        <button class="btn btn-outline-success" type="submit">
+          Search</button>
       <% end %>
     </div>
-  </nav>
+  </div>
+</nav>
 ```
 
 Now update the questions index page with different headers based on whether the results are search results or not.
@@ -1007,9 +1011,10 @@ Now update the questions index page with different headers based on whether the 
     </h1>
   <% else %>
     <h1 class="h5 text-uppercase">Questions</h1>
-    <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+    <%= link_to 'New Question', new_question_path,
+      class: 'btn btn-primary' %>
   <% end %>
 </div>
 ```
 
-Now we have implemented full-text search and filtering in our questions. In the next chapter, we will allow users to post answers to questions and do many other things.
+Now we have implemented full-text search and tag-sfiltering in our questions. In the next chapter, we will allow users to post answers to questions and do many other awesome things.
