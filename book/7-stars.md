@@ -1,13 +1,14 @@
 # 7 Adding Stars
 
-In this chapter we will allow users to add stars to questions and also to answers they find very helpful.
+In this chapter we will allow users to add stars to questions and answers they find very helpful.
 
 ## 7.1 Implement Stars
 
 Generate star model
 
 ```bash
-$ rails g model star user:belongs_to starrable:references{polymorphic}
+$ rails g model star user:belongs_to \
+   starrable:references{polymorphic}
 ```
 
 ```
@@ -22,7 +23,7 @@ $ rails g controller stars --skip-stylesheets
 
 Add 'stars' resources in `routes.rb`
 
-`config/routes.rb`
+**config/routes.rb**
 
 ```ruby
 Rails.application.routes.draw do
@@ -80,7 +81,7 @@ class User < ApplicationRecord
 end
 ```
 
-Implement `create` and `destroy` actions in `stars` controller. To improve the user experiences we will implement the `star` ring via ajax.
+Implement `create` and `destroy` actions in `stars` controller. To improve the user experiences we will implement the starring feature via ajax.
 
 ```ruby
 class StarsController < ApplicationController
@@ -158,16 +159,14 @@ Add `stars` to `answer` partial
   <div class="card-body">
     <%= answer.content %>
     <div class='mt-2 small text-muted'>
-      <%= render 'comments/reply', commentable: answer %>
-      <span class="mx-2">&middot;</span>
-      <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
+      ...
+      ...
       <span class="mx-2">
         &middot;
       </span>
       <%= render 'stars/stars', starrable: answer %>
     </div>
   </div>
-  ...
   ...
 </div>
 ```
@@ -178,14 +177,17 @@ Now create the stars partial
 $ touch app/views/stars/_stars.html.erb
 ```
 
-`_stars.html.erb`
-
 ```erb
-<div class='d-inline' id=<%="#{starrable.class.name.downcase}_#{starrable.id}_stars"%>>
+<div class='d-inline'
+  id=<%="#{starrable.class.name.downcase}_#{starrable.id}_stars"%>>
   <% if star=current_user.starred(starrable) %>
-    <%= link_to pluralize(starrable.stars.count, 'star'), star, method: :delete, remote: true, class: 'text-decoration-none star-link' %>
+    <%= link_to pluralize(starrable.stars.count, 'star'), star,
+      method: :delete, remote: true, class: 'star-link' %>
   <% else %>
-    <%= link_to pluralize(starrable.stars.count, 'star'), stars_path(starrable_id: starrable.id, starrable_type: starrable.class.name), method: :post, remote: true, class: 'text-decoration-none star-link' %>
+    <%= link_to pluralize(starrable.stars.count, 'star'),
+      stars_path(starrable_id: starrable.id,
+        starrable_type: starrable.class.name),
+        method: :post, remote: true, class: 'star-link' %>
   <% end %>
 </div>
 ```
@@ -206,12 +208,15 @@ a.star-link {
 }
 ```
 
-Add the `stars` partial in questions show page as well
-`_question.html.erb`
+Add the `stars` partial in \_question partial as well
+
+**app/views/questions/\_question.html.erb**
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   <div class="card-body py-2">
     ...
     ...
@@ -222,7 +227,7 @@ Add the `stars` partial in questions show page as well
 </div>
 ```
 
-Now you can try add stars to the questions and answers. You will notice that the `stars` count will update without a full page reload.
+Now you can try adding stars to the questions and answers. You will notice that the `stars` count will update without a full page reload.
 
 ## 7.2 Rank Answers by Number of Stars
 
@@ -239,4 +244,17 @@ class Answer < ApplicationRecord
             .order("COUNT(stars.id) DESC")
         }
 end
+```
+
+Update the questions show page to rank answers
+
+**app/views/questions/show.html.erb**
+
+```erb
+...
+...
+<% if @question.answers.any? %>
+  <h5>Answers (<%= @question.answers.count %>)</h5>
+<% end %>
+<%= render @question.answers.ranked %>
 ```
