@@ -22,28 +22,32 @@ export default class extends Controller {
     });
   }
 
-  about() {
+  about(e) {
+    e.preventDefault();
     this.reset();
     this.aboutLinkTarget.classList.add('active');
     this.aboutTarget.classList.add('active');
     this.aboutTarget.classList.add('show');
   }
 
-  answers() {
+  answers(e) {
+    e.preventDefault();
     this.reset();
     this.answersLinkTarget.classList.add('active');
     this.answersTarget.classList.add('active');
     this.answersTarget.classList.add('show');
   }
 
-  questions() {
+  questions(e) {
+    e.preventDefault();
     this.reset();
     this.questionsLinkTarget.classList.add('active');
     this.questionsTarget.classList.add('active');
     this.questionsTarget.classList.add('show');
   }
 
-  requests() {
+  requests(e) {
+    e.preventDefault();
     this.reset();
     this.requestsLinkTarget.classList.add('active');
     this.requestsTarget.classList.add('active');

@@ -1,17 +1,15 @@
-<% @user.owned_groups.each do |group| %>
-  <% group.group_memberships.pending.each do |membership| %>
-    <div class="card p-2 my-1">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <strong><%= link_to membership.user.name, membership.user, class: 'text-decoration-none' %></strong>
-          <span class='fw-light'>requests to join</span>
-          <strong><%= link_to membership.group.name, membership.group %></strong>
-        </div>
-        <div>
-          <%= link_to 'accept', accept_group_membership_path(membership), method: :post, class: 'link-success' %>
-          <%= link_to 'reject', reject_group_membership_path(membership), method: :delete, class: 'link-danger' %>
-        </div>
+<% @user.group_requests.each do |membership| %>
+  <div id="<%= dom_id(membership) %>" class="card p-2 my-1">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <strong><%= link_to membership.user.name, membership.user, class: 'text-decoration-none' %></strong>
+        <span class='fw-light'>requests to join</span>
+        <strong><%= link_to membership.group.name, membership.group %></strong>
+      </div>
+      <div>
+        <%= link_to 'accept', accept_group_membership_path(membership), method: :post, class: 'link-success' %>
+        <%= link_to 'reject', reject_group_membership_path(membership), method: :delete, class: 'link-danger' %>
       </div>
     </div>
-  <% end %>
+  </div>
 <% end %>

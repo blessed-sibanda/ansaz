@@ -1,0 +1,28 @@
+
+[1mFrom:[0m /home/blessed/Workspace/Projects/ansaz/test/system/user_profiles_test.rb:22 UserProfilesTest#test_visiting_own_profile:
+
+    [1;34m11[0m: test [31m[1;31m"[0m[31mvisiting own profile[1;31m"[0m[31m[0m [32mdo[0m
+    [1;34m12[0m:   user = create [33m:user[0m
+    [1;34m13[0m: 
+    [1;34m14[0m:   login_as user
+    [1;34m15[0m:   visit user_url(user)
+    [1;34m16[0m:   assert_selector [31m[1;31m"[0m[31mdiv[1;31m"[0m[31m[0m, [35mtext[0m: user.about
+    [1;34m17[0m: 
+    [1;34m18[0m:   user_questions = create_list [33m:question[0m, [1;34m6[0m, [35muser[0m: user
+    [1;34m19[0m:   within [31m[1;31m"[0m[31m.nav-tabs[1;31m"[0m[31m[0m [32mdo[0m
+    [1;34m20[0m:     click_on [31m[1;31m"[0m[31mQuestions[1;31m"[0m[31m[0m
+    [1;34m21[0m:     binding.pry
+ => [1;34m22[0m:     user_questions.each [32mdo[0m |q|
+    [1;34m23[0m:       assert_selector [31m[1;31m"[0m[31ma[1;31m"[0m[31m[0m, [35mtext[0m: q.title
+    [1;34m24[0m:     [32mend[0m
+    [1;34m25[0m:   [32mend[0m
+    [1;34m26[0m: 
+    [1;34m27[0m:   user_answers = create_list [33m:answer[0m, [1;34m4[0m, [35muser[0m: user
+    [1;34m28[0m:   within [31m[1;31m"[0m[31m.nav-tabs[1;31m"[0m[31m[0m [32mdo[0m
+    [1;34m29[0m:     click_on [31m[1;31m"[0m[31mAnswers[1;31m"[0m[31m[0m
+    [1;34m30[0m:     user_answers.each [32mdo[0m |a|
+    [1;34m31[0m:       assert_selector [31m[1;31m"[0m[31m.card-body[1;31m"[0m[31m[0m, [35mtext[0m: a.content
+    [1;34m32[0m:     [32mend[0m
+    [1;34m33[0m:   [32mend[0m
+    [1;34m34[0m: [32mend[0m
+

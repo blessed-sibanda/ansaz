@@ -2,17 +2,17 @@
 <div data-controller='tab'>
   <ul class="nav nav-tabs mt-3">
     <li class="nav-item">
-      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active">About</a>
+      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active" href="#">About</a>
     </li>
     <li class="nav-item">
-      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link">Questions</a>
+      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link" href="#">Questions</a>
     </li>
     <li class="nav-item">
-      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link" href="#">Answers</a>
     </li>
     <% if current_user == @user %>
       <li class="nav-item">
-        <a data-tab-target='requestsLink' data-action="click->tab#requests" class="nav-link">Requests</a>
+        <a data-tab-target='requestsLink' data-action="click->tab#requests" class="nav-link" href="#">Requests</a>
       </li>
     <% end %>
   </ul>

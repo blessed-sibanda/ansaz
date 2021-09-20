@@ -57,6 +57,14 @@ class User < ApplicationRecord
         .order(created_at: :asc)
     }
 
+  def group_requests
+    requests = []
+    owned_groups.exclusive.each do |g|
+      requests += g.group_memberships.pending
+    end
+    requests
+  end
+
   def starred(starrable)
     Star.where(user: self, starrable: starrable).first
   end

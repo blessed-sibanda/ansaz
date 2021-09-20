@@ -1371,3 +1371,131 @@ Run the test
 ```bash
 $ rails t test/controllers/tags_controller_test.rb
 ```
+
+Now update the `users_controller` test
+
+```ruby
+class UsersControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = create :user
+    sign_in @user
+  end
+
+  test "#index should return paginated users list" do
+    create_list :user, 45
+    get users_url
+    assert_response :success
+    page1 = User.active.ranked.paginate(per_page: 20, page: 1)
+
+    page1.each do |u|
+      assert_select "a[href=?]", user_path(u), u.name
+    end
+
+    assert_select "nav>ul.pagination" do
+      assert_select "li>a[href=?]", users_path(page: 2)
+      assert_select "li>a[href=?]", users_path(page: 3)
+    end
+  end
+
+  test "#index should not return unconfirmed users" do
+    unconfirmed_users = create_list :user, 45, :unconfirmed
+    get users_url
+    assert_response :success
+    unconfirmed_users.each do |u|
+      assert_select "a[href=?]", user_path(u), count: 0
+    end
+  end
+
+  test "should get show" do
+    get user_url(@user)
+    assert_response :success
+    assert_select "div", @user.about
+  end
+end
+```
+
+Run the test
+
+```
+$ rails t test/controllers/users_controller_test.rb
+```
+
+## 9.6 Testing JavaScript
+
+In this section we are going to use system tests to test the JavaScript function in our application.
+
+The user profile page has tabs that display different pieces of information about the user. To display each piece of information, the corresponding tab must be clicked to activate the relevant. Testing this feature calls for a system test.
+
+Lets generate the system test
+
+```bash
+$ rails g system_test user_profile
+```
+
+```ruby
+class UserProfilesTest < ApplicationSystemTestCase
+  setup do
+    @user = create :user
+    @user_questions = create_list :question, 6, user: @user
+    @user_answers = create_list :answer, 4, user: @user
+    group = create :group, :private, admin: @user
+    @requests = create_list :group_membership, 3, :pending, group: group
+    login_as @user
+  end
+
+  def login_as(user)
+    visit new_user_session_url
+    fill_in "Email", with: user.email
+    fill_in "Password", with: "1234pass"
+    click_button "Log in"
+  end
+
+  test "visiting own user profile" do
+    visit user_url(@user)
+    assert_selector "div", text: @user.about
+
+    within ".nav-tabs" do
+      click_on "Questions"
+    end
+
+    within ".tab-content" do
+      assert_selector "a.card-title", count: 6
+      @user_questions.each do |q|
+        assert_selector "a.card-title", text: q.title
+      end
+    end
+
+    within ".nav-tabs" do
+      click_on "Answers"
+    end
+
+    within ".tab-content" do
+      @user_answers.each do |a|
+        assert_selector "a", text: a.content
+      end
+    end
+
+    within ".nav-tabs" do
+      click_on "Requests"
+    end
+
+    within ".tab-content" do
+      @requests.each do |m|
+        within "#group_membership_#{m.id}" do
+          assert_selector "a", text: m.group.name
+          assert_selector "a", text: "accept"
+          assert_selector "a", text: "reject"
+        end
+      end
+    end
+  end
+end
+```
+
+In the above test, we are clicking each of the tabs in the user profile page and verifying that the corresponding information is displayed.
+
+Run the test
+
+```bash
+$ rails t test/system/user_profiles_test.rb
+```

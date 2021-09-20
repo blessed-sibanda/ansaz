@@ -44,6 +44,7 @@ class Group < ApplicationRecord
             .order("COUNT(users.id) DESC")
         }
   scope :popular, -> { ranked.limit(5) }
+  scope :exclusive, -> { where(group_type: PRIVATE) }
 
   def add_admin_to_users
     GroupMembership::Creator.call(user: admin, group: self)
