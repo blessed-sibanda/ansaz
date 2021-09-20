@@ -2,13 +2,23 @@
   <div id="<%= dom_id(membership) %>" class="card p-2 my-1">
     <div class="d-flex justify-content-between align-items-center">
       <div>
-        <strong><%= link_to membership.user.name, membership.user, class: 'text-decoration-none' %></strong>
+        <strong>
+          <%= link_to membership.user.name, membership.user %>
+        </strong>
         <span class='fw-light'>requests to join</span>
-        <strong><%= link_to membership.group.name, membership.group %></strong>
+        <strong>
+          <%= link_to membership.group.name, membership.group %>
+        </strong>
       </div>
       <div>
-        <%= link_to 'accept', accept_group_membership_path(membership), method: :post, class: 'link-success' %>
-        <%= link_to 'reject', reject_group_membership_path(membership), method: :delete, class: 'link-danger' %>
+        <%= link_to 'accept', 
+          accept_group_membership_path(membership), 
+            remote: true,
+            method: :post, class: 'link-success' %>
+        <%= link_to 'reject', 
+            reject_group_membership_path(membership), 
+            remote: true,
+            method: :delete, class: 'link-danger' %>
       </div>
     </div>
   </div>

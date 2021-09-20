@@ -5,12 +5,13 @@ In this chapter we will allow users to create and join groups where they can ask
 ## 8.1 Scaffold Goups
 
 ```bash
-$ rails g scaffold group name:uniq description:text admin_id:bigint group_type:integer --skip-stylesheets
+$ rails g scaffold group name:uniq description:text \
+   admin_id:bigint group_type:integer --skip-stylesheets
 ```
 
-Make `admin_id` a foreign key to `users.id`. Add a default of `0` for the group_type column.
+Make `admin_id` a foreign key to `users.id`
 
-`{timestamp}_create_groups.rb`
+**{timestamp}\_create_groups.rb**
 
 ```ruby
 class CreateGroups < ActiveRecord::Migration[6.1]
@@ -69,6 +70,8 @@ end
 ```
 
 Update groups 'form'
+
+**app/views/groups/\_form.html.erb**
 
 ```erb
 <%= bootstrap_form_with(model: group) do |form| %>
@@ -134,7 +137,8 @@ class GroupsController < ApplicationController
   ...
 
   def group_params
-    params.require(:group).permit(:name, :description, :group_type, :banner)
+    params.require(:group).permit(:name, :description,
+     :group_type, :banner)
   end
 end
 ```
@@ -144,6 +148,8 @@ end
 In this section, we will display the group list in the question's page sidebar.
 
 Update the `application.html.erb` layout and make it have a two column layout
+
+**app/views/layouts/application.html.erb**
 
 ```erb
 <!DOCTYPE html>
@@ -168,7 +174,7 @@ Update the `application.html.erb` layout and make it have a two column layout
 
 Update questions `index` page
 
-`app/views/questions/index.html.erb`
+**app/views/questions/index.html.erb**
 
 ```erb
 ...
@@ -176,13 +182,14 @@ Update questions `index` page
 <%= content_for :sidebar do %>
   <div class="d-flex justify-content-between align-items-baseline mb-1">
     <h6 class="fw-bold">Popular Groups</h6>
-    <%= link_to 'Create Group', new_group_path, class: 'btn btn-outline-primary btn-sm' %>
+    <%= link_to 'Create Group', new_group_path,
+      class: 'btn btn-outline-primary btn-sm' %>
   </div>
   <%= render Group.popular %>
 <% end %>
 ```
 
-Update the group model with the new scope
+Update the group model with new scopes
 
 ```ruby
 class Group < ApplicationRecord
@@ -195,10 +202,6 @@ class Group < ApplicationRecord
             .order("COUNT(users.id) DESC")
         }
   scope :popular, -> { ranked.limit(5) }
-
-  def add_admin_to_users
-    GroupMembership::Creator.call(user: admin, group: self)
-  end
 end
 ```
 
@@ -208,15 +211,13 @@ Create 'group' partial
 $ touch app/views/groups/_group.html.erb
 ```
 
-`app/views/groups/_group.html.erb`
-
 ```erb
 <div class="card py-0 mb-2 border-0 bg-light">
   <div class="card-body py-2 px-2">
     <div class="d-flex justify-content-between align-items-center">
       <h6 class="card-title py-0 my-0">
         <%= group_banner(group, height: 35, width: 35) %>
-        <%= link_to group.name, group, class: 'text-decoration-none fw-bold' %>
+        <%= link_to group.name, group, class: 'fw-bold' %>
       </h6>
       <%= link_to 'join', '#' %>
     </div>
@@ -227,7 +228,7 @@ $ touch app/views/groups/_group.html.erb
 </div>
 ```
 
-Create the `group_banner` helper in `groups_helper.rb`
+Create the `group_banner` helper in `groups_helper.rb`. This helper will display the banner image of a given group.
 
 ```ruby
 module GroupsHelper
@@ -248,19 +249,27 @@ $ touch app/views/groups/_banner_img.html.erb
 
 ```erb
 <% banner_img_url = group.banner&.variant(resize_to_limit: [height, width]) %>
-<%= image_tag banner_img_url, style: "width: #{width}px; height: #{height}px; object-fit: cover;" %>
+<% if banner_img_url %>
+  <%= image_tag banner_img_url,
+    style: "width: #{width}px; height: #{height}px; object-fit: cover;" %>
+<% else %>
+  <%= image_tag "default_banner_img",
+    height: height, width: width %>
+<% end %>
 ```
 
 Update the group `show` page
 
-`app/views/groups/show.html.erb`
+**app/views/groups/show.html.erb**
 
 ```erb
 <div class="card rounded-0">
   <% if @group.banner.attached? %>
-    <%= image_tag @group.banner, class: 'card-img-top rounded-0 group-banner' %>
+    <%= image_tag @group.banner,
+      class: 'card-img-top rounded-0 group-banner' %>
   <% else %>
-    <%= image_tag 'default_banner_img.png', class: 'card-img-top rounded-0 group-banner'  %>
+    <%= image_tag 'default_banner_img.png',
+      class: 'card-img-top rounded-0 group-banner'  %>
   <% end %>
   <div class="card-body">
     <h5 class="card-title"><%= @group.name %></h1>
@@ -295,14 +304,16 @@ $ touch app/views/groups/_sidebar.html.erb
     <th colspan='2'>
       <span><%= group.name %></span>
       <% if policy(group).edit? %>
-        <%= link_to 'Edit', edit_group_path(group), class: 'float-end' %>
+        <%= link_to 'Edit', edit_group_path(group),
+          class: 'float-end' %>
       <% end %>
     </th>
   </thead>
   <tbody class="small">
     <tr>
       <th>Admin</th>
-      <td><%= link_to group.admin.name, group.admin, class: 'text-decoration-none text-secondary' %></td>
+      <td><%= link_to group.admin.name, group.admin,
+        class: 'text-secondary' %></td>
     </tr>
     <tr>
       <th>Group Type</th>
@@ -351,7 +362,7 @@ end
 
 Update the `groups` controller to use the `group-policy` authorizations
 
-```
+```ruby
 class GroupsController < ApplicationController
   before_action :set_group, only: %i[ show edit update destroy ]
   before_action :check_authorization, only: %i[edit update destroy]
@@ -375,7 +386,7 @@ Add group seed data
 `db/seeds.rb`
 
 ```ruby
-20.times do
+100.times do
   name = Faker::Book.genre
   unless Group.find_by_name(name)
     g = Group.new(
@@ -393,7 +404,7 @@ Add group seed data
 end
 ```
 
-Download the `default_banner_img.png` from this books code repository
+Download the `default_banner_img.png` from this book's [code repository](https://github.com/blessed-sibanda/ansaz)
 
 Re-seed the database
 
@@ -409,7 +420,8 @@ Now the questions index page looks like
 Create a group-membership model
 
 ```
-$ rails g model group-membership user:references group:references state
+$ rails g model group-membership user:references \
+   group:references state
 ```
 
 Update the migration to enforce only one membership for a user per group
@@ -455,9 +467,11 @@ class User < ApplicationRecord
   ...
   ...
 
-  has_many :owned_groups, class_name: "Group", foreign_key: "admin_id"
+  has_many :owned_groups, class_name: "Group", \
+    foreign_key: "admin_id"
   has_many :group_memberships
-  has_many :groups, through: :group_memberships, source: :group
+  has_many :groups, through: :group_memberships, \
+     source: :group
 
   def starred(starrable)
     Star.where(user: self, starrable: starrable).first
@@ -473,7 +487,8 @@ class Group < ApplicationRecord
   ...
 
   has_many :group_memberships, dependent: :destroy
-  has_many :users, through: :group_memberships, source: :user
+  has_many :users, through: :group_memberships, \
+    source: :user
 end
 ```
 
@@ -515,11 +530,13 @@ class GroupMembershipsController < ApplicationController
 
   def destroy
     if current_user == @group.admin
-      redirect_back(fallback_location: root_path, alert: "Group admin cannot leave")
+      redirect_back(fallback_location: root_path,
+        alert: "Group admin cannot leave")
     else
       GroupMembership.where(user: current_user,
                             group: @group).first.destroy
-      redirect_to root_path, alert: "You have left '#{@group.name}' group"
+      redirect_to root_path,
+         alert: "You have left '#{@group.name}' group"
     end
   end
 
@@ -531,7 +548,7 @@ class GroupMembershipsController < ApplicationController
 end
 ```
 
-The `create` actions uses a service to create group-memberships. This technique allows us to move complicated logic out of the controller.
+The `create` actions uses a service to create group-memberships. Using a service allows us to move complicated logic out of the controller (and hence keep our controllers thinner and cleaner).
 
 Now the let's create the service
 
@@ -545,8 +562,6 @@ Create the base application service
 $ touch app/services/application_service.rb
 ```
 
-`application_service.rb`
-
 ```ruby
 class ApplicationService
   def self.call(**args)
@@ -557,7 +572,7 @@ end
 
 All our services will inherit from this `ApplicationService` (Similar to how our controllers inherit from `ApplicationController`). This is good object oriented design.
 
-The service exploses a call class-method which will be used by the service caller to run the service. Methods in a service should be private except for the `call` method only.
+The service exploses a call class-method which will be used by the service caller to execute the service. It is good design to keep all methods in a service private except for the `call` method only.
 
 Now lets create the service for creating group-memberships
 
@@ -571,7 +586,7 @@ Note that our services are namespaced according to the primary models they work 
 $ touch app/services/group_membership/creator.rb
 ```
 
-It is good practice to name your services according to the direct action they perform. (In this case, we are 'creating' group-membership for a user, and hence our service name is `creator`)
+It is good practice to name your services according to the direct action they perform. (In this case, we are 'creating' a group-membership for a user, and hence our service name is `creator`)
 
 ```ruby
 class GroupMembership::Creator < ApplicationService
@@ -617,17 +632,17 @@ end
 
 The logic is fairly straightforward. We are doing a few things:
 
-- After initializing the class, we set the membership state using a case statement. in the `set_membership_state` method.
+- After initializing the class, we set the membership state using a case statement in the `set_membership_state` method.
 
 - The membership state depends on the group-type being joined. If the group is public, then the membership is instant. However, if the group-type is private, the user will need to be approved by the group administrator before joining.
 
 - The case statement is also setting the appropriate 'flash-message' that will be used in the controller to notify the user of the result of the operation.
 
-- If the user joining the group is an admin, then the state is always ACCEPTED (i.e the admin user does not need approval from anyone to join his/her own group.
+- If the user joining the group is an admin, then the state is always ACCEPTED (i.e the admin user does not need approval from anyone to join his/her own group).
 
 Update the `group` partial with links to join/leave groups and also to show membership status
 
-`app/views/groups/_group.html.erb`
+**app/views/groups/\_group.html.erb**
 
 ```erb
 <div class="card py-0 mb-2 border-0 bg-light">
@@ -635,11 +650,12 @@ Update the `group` partial with links to join/leave groups and also to show memb
     <div class="d-flex justify-content-between align-items-center">
       <h6 class="card-title py-0 my-0">
         <%= group_banner(group, height: 35, width: 35) %>
-        <%= link_to group.name, group, class: 'text-decoration-none fw-bold' %>
+        <%= link_to group.name, group, class: 'fw-bold' %>
       </h6>
-      <div class="">
+      <div>
         <% if policy(group).join? %>
-          <%= link_to 'join', group_membership_path(group), class: 'text-decoration-none fw-bold', method: :patch %>
+          <%= link_to 'join', group_membership_path(group),
+             class: 'fw-bold', method: :patch %>
         <% end %>
         <% if current_user.pending_approval group %>
           <span class="badge bg-warning">Pending</span>
@@ -653,8 +669,46 @@ Update the `group` partial with links to join/leave groups and also to show memb
 </div>
 ```
 
-Update the user model with a `pending_approval` method
-`app/models/user.rb`
+Lets create the `group-policy` to implement the `join/leave` authorizations
+
+```
+$ rails g pundit:policy group
+```
+
+**app/policies/group_policy.rb**
+
+```ruby
+class GroupPolicy < ApplicationPolicy
+  def update?
+    user == record.admin
+  end
+
+  def destroy?
+    user == record.admin
+  end
+
+  def edit?
+    user == record.admin
+  end
+
+  def leave?
+    return false if user == record.admin # the admin cannot leave
+    GroupMembership.accepted.where(user: user,
+                                   group: record).any?
+  end
+
+  def join?
+    GroupMembership.where(user: user,
+                          group: record).empty?
+  end
+end
+```
+
+These policy authorizations will be used in various views to check whether a user can join or leave a group.
+
+Add the `pending_approval` method to the user model to check whether a user's request to join a private group is pending approval.
+
+**app/models/user.rb**
 
 ```ruby
 class User < ApplicationRecord
@@ -670,8 +724,6 @@ class User < ApplicationRecord
 end
 ```
 
-These methods will be used in various views to check whether a user can join or leave a group; or whether a user's request to join a private group is pending approval.
-
 ## 8.4 Approving Group Join Requests
 
 Add `accept` and `reject` actions to group-memberships controller to allow for the group admin to accept or reject group join requests.
@@ -684,12 +736,16 @@ class GroupMembershipsController < ApplicationController
   def accept
     @group_membership.state = GroupMembership::ACCEPTED
     @group_membership.save!
-    redirect_back(fallback_location: root_path)
+    respond_to do |format|
+      format.js { render "decide" }
+    end
   end
 
   def reject
     @group_membership.destroy
-    redirect_back(fallback_location: root_path)
+    respond_to do |format|
+      format.js { render "decide" }
+    end
   end
 
   ...
@@ -707,7 +763,20 @@ class GroupMembershipsController < ApplicationController
 end
 ```
 
-Next, let's create a group-membership-policy to only authroize group admins to accept/reject group join requests
+Create the `decide` js view to hold remove our group request when it is accepted/rejected by the group admin.
+
+```bash
+$ touch app/views/group_memberships/decide.js.erb
+```
+
+```javascript
+var membership = document.getElementById(
+  '<%= j "group_membership_#{@group_membership.id}" %>',
+);
+membership.remove();
+```
+
+Next, let's create a group-membership-policy to only authorize group admins to accept/reject group join requests
 
 ```bash
 $ rails g pundit:policy group_membership
@@ -754,7 +823,7 @@ end
 
 Display the group join requests in the group admin's profile page
 
-`app/views/users/show.html.erb`
+**app/views/users/show.html.erb**
 
 ```erb
 <%= render @user %>
@@ -763,11 +832,16 @@ Display the group join requests in the group admin's profile page
     ...
     ...
     <li class="nav-item">
-      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+      <a data-tab-target='answersLink'
+        data-action="click->tab#answers" href='#'
+        class="nav-link">Answers</a>
     </li>
     <% if current_user == @user %>
       <li class="nav-item">
-        <a data-tab-target='requestsLink' data-action="click->tab#requests" class="nav-link">Requests</a>
+        <a data-tab-target='requestsLink'
+          href="#"
+          data-action="click->tab#requests"
+          class="nav-link">Requests</a>
       </li>
     <% end %>
   </ul>
@@ -784,8 +858,9 @@ Display the group join requests in the group admin's profile page
     <% end %>
   </div>
 </div>
-
 ```
+
+Note that the `group-requests` are only displayed if the user is viewing his/her own profile.
 
 Create the `group_membership/requests` partial
 
@@ -794,23 +869,48 @@ $ touch app/views/group_memberships/_requests.html.erb
 ```
 
 ```erb
-<% @user.owned_groups.each do |group| %>
-  <% group.group_memberships.pending.each do |membership| %>
-    <div class="card p-2 my-1">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <strong><%= link_to membership.user.user_profile.name, membership.user.user_profile, class: 'text-decoration-none' %></strong>
-          <span class='fw-light'>requests to join</span>
-          <strong><%= link_to membership.group.name, membership.group %></strong>
-        </div>
-        <div>
-          <%= link_to 'accept', accept_group_membership_path(membership), method: :post, class: 'link-success' %>
-          <%= link_to 'reject', reject_group_membership_path(membership), method: :delete, class: 'link-danger' %>
-        </div>
+<% @user.group_requests.each do |membership| %>
+  <div id="<%= dom_id(membership) %>" class="card p-2 my-1">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <strong>
+          <%= link_to membership.user.name, membership.user %>
+        </strong>
+        <span class='fw-light'>requests to join</span>
+        <strong>
+          <%= link_to membership.group.name, membership.group %>
+        </strong>
+      </div>
+      <div>
+        <%= link_to 'accept',
+          accept_group_membership_path(membership),
+            remote: true,
+            method: :post, class: 'link-success' %>
+        <%= link_to 'reject',
+            reject_group_membership_path(membership),
+            remote: true,
+            method: :delete, class: 'link-danger' %>
       </div>
     </div>
-  <% end %>
+  </div>
 <% end %>
+```
+
+Add the `group_requests` method in the user model to return all the pending group memberships in the user's owned groups.
+
+```ruby
+class User < ApplicationRecord
+  ...
+  ...
+
+  def group_requests
+    requests = []
+    owned_groups.exclusive.each do |g|
+      requests += g.group_memberships.pending
+    end
+    requests
+  end
+end
 ```
 
 Create the `pending` and `accepted` scopes in `group_membership` model
@@ -846,7 +946,8 @@ export default class extends Controller {
   ...
   ...
 
-  requests() {
+  requests(e) {
+    e.preventDefault();
     this.reset();
     this.requestsLinkTarget.classList.add('active');
     this.requestsTarget.classList.add('active');
@@ -867,10 +968,12 @@ Update the group sidebar page with a link to leave a group and to display the me
       <%= link_to 'Edit', edit_group_path(group), class: 'mx-1' %>
     <% end %>
     <% if policy(group).leave? %>
-      <%= link_to 'Leave', group_membership_path(@group), class: ' link-danger mx-1', method: :delete %>
+      <%= link_to 'Leave', group_membership_path(@group),
+        class: ' link-danger mx-1', method: :delete %>
     <% end %>
     <% if policy(group).join? %>
-      <%= link_to 'join', group_membership_path(group), class: 'mx-1', method: :patch %>
+      <%= link_to 'join', group_membership_path(group),
+        class: 'mx-1', method: :patch %>
     <% end %>
   </span>
 </div>
@@ -886,7 +989,9 @@ Update the group sidebar page with a link to leave a group and to display the me
     <tr>
       <td class='small'>
         <%= user.name %>
-        <span class='float-end small text-muted'>Joined: <%= user.joined_on(group) %></span>
+        <span class='float-end small text-muted'>
+          Joined: <%= user.joined_on(group) %>
+        </span>
       </td>
     </tr>
   <% end %>
@@ -926,7 +1031,7 @@ end
 $ rails db:seed:replant
 ```
 
-Re-seed the database and open a group page, it should look like the following
+Re-seed the database (to make sure the group admins are added as users also) and open a group page, it should look like the following
 
 ![Group Page](./group-show.png)
 
@@ -969,7 +1074,7 @@ class Group < ApplicationRecord
   ...
   ...
   has_many :questions
-
+  ...
   ...
 end
 ```
@@ -1039,7 +1144,7 @@ end
 
 Update the question `form` with a hidden `group_id` field
 
-`app/views/questions/_form.html.erb`
+**app/views/questions/\_form.html.erb**
 
 ```erb
 <%= bootstrap_form_with(model: question) do |form| %>
@@ -1062,10 +1167,6 @@ Update `question_params` to accept `group_id` in questions controller
 ```ruby
 class QuestionsController < ApplicationController
   ...
-
-  def index
-    @questions = Question.ungrouped.order(created_at: :desc)
-  end
 
   def create
     @question = current_user.questions.build(question_params)
@@ -1091,12 +1192,20 @@ class QuestionsController < ApplicationController
 end
 ```
 
-Add a `public` scope in `question` model to retrieve questions without groups.
+Update question model `paginated` scope to allow filtering questions by groups.
 
 ```ruby
 class Question < ApplicationRecord
   ...
-  scope :ungrouped, -> { where(group_id: nil) }
+  ...
+
+  scope :paginated, ->(page, group: nil) {
+      where(group: group&.id)
+        .order(created_at: :desc)
+        .paginate(page: page, per_page: 10)
+    }
+  ...
+  ...
 end
 ```
 
@@ -1112,8 +1221,13 @@ Update group `show` page to display questions in group
   <%= render @group.questions.select(&:persisted?) %>
 <% else %>
   <div class="card bg-light p-3 rounded-0">
-    <h5 class='text-danger'>The questions in this group can only be seen by the group members</h5>
-    <p class='my-0'>Join the group to view the questions and participate</p>
+    <h5 class='text-danger'>
+      The questions in this group can only be seen
+      by the group members
+    </h5>
+    <p class='my-0'>
+      Join the group to view the questions and participate
+    </p>
   </div>
 <% end %>
 <%= content_for :sidebar do %>
@@ -1131,11 +1245,12 @@ Let's start by adding extra links in our `navbar` partial.
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
     ...
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <% if user_signed_in? %>
           <li class="nav-item">
-            <%= link_to 'Questions', questions_path, class: 'nav-link' %>
+            <%= link_to 'Questions', questions_path,
+              class: 'nav-link' %>
           </li>
           <li class="nav-item">
             <%= link_to 'Groups', groups_path, class: 'nav-link' %>
@@ -1143,9 +1258,8 @@ Let's start by adding extra links in our `navbar` partial.
           <li class="nav-item">
             <%= link_to 'Users', users_path, class: 'nav-link' %>
           </li>
-          <li class="nav-item dropdown">
             ...
-          </li>
+            ...
         <% else %>
           ...
         <% end %>
@@ -1156,15 +1270,9 @@ Let's start by adding extra links in our `navbar` partial.
 </nav>
 ```
 
-Update the group index page
-
-`app/views/groups/index.html.erb`
-
-```erb
-
-```
-
 Update the group index page with a nice formatted table showing the group names and their types
+
+**app/views/groups/index.html.erb**
 
 ```erb
 <div class="d-flex align-items-center justify-content-between">
@@ -1184,10 +1292,11 @@ Update the group index page with a nice formatted table showing the group names 
       <tr>
         <td><%= index + 1 %></td>
         <td class='h5'>
-          <%= link_to group.name, group,
-              class: 'text-decoration-none' %>
+          <%= link_to group.name, group %>
         </td>
-        <td class='text-muted text-end'><%= group.group_type %></td>
+        <td class='text-muted text-end'>
+          <%= group.group_type %>
+        </td>
       </tr>
     <% end %>
   </tbody>
@@ -1196,7 +1305,7 @@ Update the group index page with a nice formatted table showing the group names 
     renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
 ```
 
-Update the groups controller to provide paginated results
+Update the groups controller to return paginated results
 
 ```ruby
 class GroupsController < ApplicationController
@@ -1212,7 +1321,7 @@ class GroupsController < ApplicationController
 end
 ```
 
-Add more groups in `db/seeds.rb`
+Add more groups and questions in `db/seeds.rb`
 
 ```ruby
 ...
@@ -1235,9 +1344,13 @@ Add more groups in `db/seeds.rb`
   end
 end
 
-2_000.times do |i|
-  include FactoryBot::Syntax::Methods
-  q = create :question
+800.times do |i|
+  q = Question.create!(
+    title: ["What is ", "How "].sample + \
+       Faker::Lorem.sentence.downcase + SecureRandom.hex(2),
+    user: User.active.sample,
+    content: Faker::Lorem.paragraphs(number: 7).join
+  )
   tags = []
   rand(1..3).times.each do
     tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
@@ -1250,19 +1363,17 @@ end
     q.save
   end
 
-  if i % 100 == 0
-    print(".")
-  end
+  print(".") if i % 50 == 0
 end
 ```
 
 ## 8.7 Popular and Recommended Questions
 
-In this section we will display the top questions in the groups index page and also display similar groups in the question show page. Top questions will be ranked by the number of stars and answers they have whereas similar questions will be determined by the number of common tags.
+In this section we will display the top questions in the groups index page and also display similar groups in the question show page. Top questions will be ranked by the number of stars and answers whereas similar questions will be determined by the number of common tags.
 
 Lets add the popular questions list in the sidebar of the group index page.
 
-`app/views/groups/index.html.erb`
+**app/views/groups/index.html.erb**
 
 ```erb
 ...
@@ -1272,7 +1383,7 @@ Lets add the popular questions list in the sidebar of the group index page.
   <% Question.ungrouped.popular.each do |question| %>
     <div class="card p-2 my-2 rounded-0 bg-light">
       <h6 class="card-title py-1 my-0">
-        <%= link_to question.title, question, class: 'text-decoration-none' %>
+        <%= link_to question.title, question %>
       </h6>
     </div>
   <% end %>
@@ -1294,13 +1405,12 @@ class Question < ApplicationRecord
         .order("COUNT(answers.id) DESC")
         .limit(10)
     }
-
   ...
   ...
 end
 ```
 
-Note that we are using a `left_join` to the `stars` and `answers` tables to get the questions number of stars and answers.
+Similar to the answers' `ranked` scope, we are using a `left_join` (instead of `joins`) to the `stars` and `answers` tables to get the questions number of stars and answers.
 
 Now the group list page looks similar to the following
 
@@ -1315,7 +1425,8 @@ Lets update the question show page to display questions with similar tags.
 <%= content_for :sidebar do %>
   <section>
     <% if @question.group %>
-      <% similar_group_qsns = @question.similar(5, group_id: @question.group.id) %>
+      <% similar_group_qsns = @question.similar(5,
+        group_id: @question.group.id) %>
       <% if similar_group_qsns.any? %>
         <h6 class="fw-bold">Similar Questions in Group</h6>
         <% similar_group_qsns.each do |question| %>
@@ -1367,7 +1478,7 @@ class Question < ApplicationRecord
 end
 ```
 
-The `similar` method accepts an optional `group_id` to find related questions within a group.
+The `similar` method accepts an optional `group_id` to find related questions within a group. This `similar` method uses the `find_related_tags` method from the `acts_as_taggable_on` gem.
 
 Now the question page looks as follows
 

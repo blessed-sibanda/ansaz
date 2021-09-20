@@ -22,12 +22,16 @@ class GroupMembershipsController < ApplicationController
   def accept
     @group_membership.state = GroupMembership::ACCEPTED
     @group_membership.save!
-    redirect_back(fallback_location: root_path)
+    respond_to do |format|
+      format.js { render "decide" }
+    end
   end
 
   def reject
     @group_membership.destroy
-    redirect_back(fallback_location: root_path)
+    respond_to do |format|
+      format.js { render "decide" }
+    end
   end
 
   private

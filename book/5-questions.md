@@ -896,7 +896,7 @@ Update the database seeds with more data to see the tag filtering feature in act
 
 puts "Adding questions"
 300.times do |i|
-  Question.create!(
+  q = Question.create!(
     title: ["What is ", "How "].sample + \
        Faker::Lorem.sentence.downcase + SecureRandom.hex(2),
     user: User.active.sample,
