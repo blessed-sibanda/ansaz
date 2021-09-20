@@ -1,11 +1,13 @@
 # 6 Answers
 
-In this chapter we will allow users to provide answers to questions. Users will also be able to comment on answers and even on other's comments.
+In this chapter we will allow users to provide answers to questions. Users will also be able to comment on answers and even on other comments.
 
 ## 6.1 Scaffold Answers
 
+Let's generate a scaffold for answers
+
 ```bash
-rails g scaffold answer user:references question:belongs_to accepted:boolean --skip-stylesheets
+$ rails g scaffold answer user:references question:belongs_to accepted:boolean --skip-stylesheets
 ```
 
 Update the `accepted` field in the migration to have a default value of `false`
@@ -100,11 +102,14 @@ class AnswersController < ApplicationController
 
     respond_to do |format|
       if @answer.save
-        format.html { redirect_to @answer.question, notice: "Answer was successfully created." }
-        format.json { render :show, status: :created, location: @answer }
+        format.html { redirect_to @answer.question,
+          notice: "Answer was successfully created." }
+        format.json { render :show, status: :created,
+          location: @answer }
       else
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @answer.errors, status: :unprocessable_entity }
+        format.json { render json: @answer.errors,
+          status: :unprocessable_entity }
       end
     end
   end
@@ -146,7 +151,8 @@ Update answer form
 ```
 
 Show answer 'form' in question 'show' page and display the questions' answers
-`app/views/questions/show.html.erb`
+
+**app/views/questions/show.html.erb**
 
 ```erb
 <%= render @question do %>
@@ -163,15 +169,15 @@ Show answer 'form' in question 'show' page and display the questions' answers
 Create answer partial
 
 ```bash
-touch app/views/answers/_answer.html.erb
+$ touch app/views/answers/_answer.html.erb
 ```
 
-`app/views/answers/_answer.html.erb`
+**app/views/answers/\_answer.html.erb**
 
 ```erb
 <div class="card my-3 answer-card">
   <div class="card-header d-flex align-items-center justify-content-between">
-    <%= link_to answer.user, class: 'd-flex align-items-center text-decoration-none' do %>
+    <%= link_to answer.user, class: 'd-flex align-items-center' do %>
       <%= user_avatar(answer.user, height: 35, width: 35) %>
       <span class='ms-2'><%= answer.user.name %></span>
     <% end %>
@@ -182,7 +188,11 @@ touch app/views/answers/_answer.html.erb
   <div class="card-body">
     <%= answer.content %>
     <% if policy(answer).destroy? %>
-      <%= link_to 'delete', question_answer_path(answer.question, answer), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+      <%= link_to 'delete',
+      question_answer_path(answer.question, answer),
+      method: :delete, remote: true,
+       data: {confirm: 'Are you sure?'},
+       class: 'float-end delete-link link-danger' %>
       <% end %>
   </div>
 </div>
@@ -193,12 +203,8 @@ Update `main.scss`
 ```scss
 // previous styles here
 
-a.reply-link,
-a.star-link,
-a.decide-link,
 a.delete-link,
 .timestamp {
-  text-decoration: none;
   font-size: 0.8rem;
   text-transform: lowercase;
 }
@@ -253,7 +259,7 @@ var answer = document.getElementById('<%= j dom_id(@answer) %>');
 answer.remove();
 ```
 
-Now if you visit a question page and provide an answer, it looks like this and the answer can be destroyed without a full page reload.
+Now if you visit a question page and provide an answer, it looks like the following, and the answer can be destroyed without a full page reload.
 
 ![Question Page with Answers](./question-with-answers.png)
 
@@ -261,7 +267,7 @@ Now if you visit a question page and provide an answer, it looks like this and t
 
 In this section, we will update the user profile page to show the user's questions and answers
 
-`app/views/users/show.html.erb`
+**app/views/users/show.html.erb**
 
 ```erb
 <%= render @user %>
@@ -293,11 +299,7 @@ In this section, we will update the user profile page to show the user's questio
 
 Note that we are using `data-controller`, `data-action` and `data-target` attributes in the html. These attributes are required by the `Stimulus JS` library that we will use for the interactivity of our tabs. Stimulus is a small javascript library for sprinkling bits of interactivity in your already existing html.
 
-Lets install stimulus
-
-```
-$ rails webpacker:install:stimulus
-```
+We already installed Stmulus JS in previous chapter.
 
 Create a stimulus `tab` controller (to make our user tab interactive)
 
@@ -305,7 +307,7 @@ Create a stimulus `tab` controller (to make our user tab interactive)
 $ touch app/javascript/controllers/tab_controller.js
 ```
 
-`app/javascript/controllers/tab_controller.js`
+**app/javascript/controllers/tab_controller.js**
 
 ```javascript
 import { Controller } from 'stimulus';
@@ -367,7 +369,7 @@ $ touch app/views/users/_answers.html.erb
   <div class="card my-3 shadow-none border-1">
     <div class="card-header">
       <strong>Question:</strong>
-      <%= link_to answer.question.title, answer.question, class: 'text-decoration-none' %>
+      <%= link_to answer.question.title, answer.question %>
     </div>
     <div class="card-body">
       <%= answer.content %>
@@ -386,13 +388,13 @@ $ touch app/views/users/_questions.html.erb
 <% user.questions.each do |question| %>
   <div class="card my-2 border-0 border-bottom bg-light">
     <div class="card-body">
-      <%= link_to question.title, question, class: 'card-title h5 text-decoration-none' %>
+      <%= link_to question.title, question, class: 'card-title h5' %>
     </div>
   </div>
 <% end %>
 ```
 
-Now if you open a users profile page you see something like this
+Now if you open a users profile page you see a page similiar to the following
 
 ![User Profile Page](./user-profile.png)
 
@@ -401,7 +403,8 @@ Now if you open a users profile page you see something like this
 Create a comment model
 
 ```bash
-$ rails g model comment user:references commentable:references{polymorphic} content:text
+$ rails g model comment user:references \
+   commentable:references{polymorphic} content:text
 ```
 
 Run the migrations
@@ -410,7 +413,7 @@ Run the migrations
 $ rails db:migrate
 ```
 
-Comments can be nested, so commentable_type can be either `Comment` or `Answer`
+Comments can be nested inside each other, so `commentable_type` can be either `Comment` or `Answer`
 
 Validate Comment content with a presence validation
 
@@ -429,7 +432,7 @@ class Answer < ApplicationRecord
   belongs_to :user
   belongs_to :question
   has_rich_text :answer
-  has_many :comments, as: :commentable, dependent: :destroy
+  has_many :comments, as: :commentable
 end
 ```
 
@@ -468,7 +471,7 @@ Rails.application.routes.draw do
   authenticate :user do
     ...
     ...
-    resources :comments, only: :create
+    resources :comments, only: [:create, :destroy]
   end
   root to: "home#index"
 end
@@ -517,7 +520,7 @@ var comment = document.getElementById('<%= j dom_id(@comment) %>');
 comment.remove();
 ```
 
-Generate the comment policy to only allow the comment owner to destroy the comment.
+Generate the comment policy to allow only the comment owner to destroy a comment.
 
 ```bash
 $ rails g pundit:policy comment
@@ -542,7 +545,7 @@ Now let's update `answer` partial to allow for commenting
     <div class='mt-2 small text-muted'>
       <%= render 'comments/reply', commentable: answer %>
       <span class="mx-2">&middot;</span>
-      <a class='text-decoration-none reply-link' href="#" href="#">Replies (<%= answer.comments.count %>)</a>
+      <a class='reply-link' href="#" href="#">Replies (<%= answer.comments.count %>)</a>
     </div>
   </div>
   <% comments = answer.comments.select(&:persisted?) %>
@@ -555,23 +558,28 @@ Now let's update `answer` partial to allow for commenting
 </div>
 ```
 
-The comments/reply will contain a link to open a modal with a form to comment on the answer
+The `comments/reply` partial will contain a link to open a modal with a form to comment on the answer
 
 ```bash
 $ touch app/views/comments/_reply.html.erb
 ```
 
-`app/views/comments/_reply.html.erb`
+**app/views/comments/\_reply.html.erb**
 
 ```erb
 <% modal_id = "modal_#{SecureRandom.hex(4)}" %>
-<%= render 'shared/modal', id: modal_id, title: "Reply #{commentable.class.name}" do %>
+<%= render 'shared/modal', id: modal_id,
+  title: "Reply #{commentable.class.name}" do %>
   <div class="bg-light p-2">
     <%= commentable.content %>
   </div>
-  <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
+  <%= render partial: 'comments/form',
+    locals: {comment: current_user.comments.build,
+             commentable: commentable} %>
 <% end %>
-<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>'>
+<a class='reply-link' href="#"
+  data-bs-toggle="modal"
+  data-bs-target='#<%= modal_id %>'>
   Reply
 </a>
 ```
@@ -582,7 +590,7 @@ The reply partial itself will render a modal partial containing the comment form
 $ touch app/views/shared/_modal.html.erb
 ```
 
-`app/views/shared/_modal.html.erb`
+**app/views/shared/\_modal.html.erb**
 
 ```erb
 <div class="modal fade" id="<%= id %>">
@@ -633,7 +641,7 @@ $ touch app/views/comments/_comment.html.erb
   <div class="d-flex justify-content-start align-items-center">
     <%= user_avatar(comment.user, height: 30, width: 30) %>
     <div class='d-flex flex-column ms-2'>
-      <%= link_to comment.user.name, comment.user, class: 'mx-1 text-decoration-none' %>
+      <%= link_to comment.user.name, comment.user, class: 'mx-1' %>
       <p class='fw-lighter timestamp my-0 ms-1'>
         <%= distance_of_time_in_words_to_now(comment.created_at) %> ago
       </p>
@@ -643,7 +651,10 @@ $ touch app/views/comments/_comment.html.erb
   <div class="d-flex align-items-center justify-content-between pe-3">
     <%= render 'comments/reply', commentable: comment %>
     <% if policy(comment).destroy? %>
-      <%= link_to 'delete', comment_path(comment), method: :delete, remote: true, data: {confirm: 'Are you sure?'}, class: 'float-end delete-link link-danger' %>
+      <%= link_to 'delete', comment_path(comment),
+          method: :delete, remote: true,
+          data: {confirm: 'Are you sure?'},
+          class: 'float-end delete-link link-danger' %>
     <% end %>
   </div>
   <%= render comment.comments %>
@@ -658,17 +669,16 @@ Update styles in `main.scss`
 a.reply-link,
 a.delete-link,
 .timestamp {
-  max-width: min-content;
-  text-decoration: none;
   font-size: 0.8rem;
+  text-transform: lowercase;
 }
 ```
 
-Now our users can comment on answers and even on comments to answers
+Now our users can comment on answers and even on other comments.
 
-Now that the user can comment on either answers or comments, we want to toggle the comments so that the user can view/hide them when they click the `replies` link
+Now that the user can comment on either answers or comments, we want to toggle the comments so that users can view/hide them when they click the `replies` link
 
-To do that, lets create a stimulus controller
+To do that, lets create a new stimulus controller
 
 ```
 $ touch app/javascript/controllers/reply_controller.js
@@ -690,7 +700,7 @@ export default class extends Controller {
 }
 ```
 
-Now connect the answer partial to the `reply_controller`
+Now connect the `answer` partial to the `reply_controller` Stimulus controller.
 
 ```erb
 <div class="card my-3" id="<%= dom_id(answer) %>">
@@ -708,17 +718,18 @@ Now connect the answer partial to the `reply_controller`
           <strong>Accepted</strong>
         </span>
       <% end %>
-      <%= render partial: 'comments/reply', locals: {commentable: answer, answer: answer} %>
+      <%= render partial: 'comments/reply',
+        locals: {commentable: answer, answer: answer} %>
       <span class="mx-2">&middot;</span>
       <% if comments.any? %>
-        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" href="#"
-          data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
+        <a class='reply-link' data-controller='reply'
+          data-action="click->reply#toggle" href="#"
+          data-reply-id="<%= "#{dom_id(answer)}_comments" %>">
+            Replies (<%= answer.comments.count %>)</a>
         <span class="mx-2">
           &middot;
         </span>
       <% end %>
-      <%= render 'stars/stars', starrable: answer %>
-      <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
     </div>
   </div>
   <% if comments.any? %>
@@ -758,7 +769,7 @@ class CommentsController < ApplicationController
 end
 ```
 
-Now lets update the comment form to submit data using ajax
+Next lets update the comment form to submit data using ajax
 
 ```erb
 <%= bootstrap_form_with(model: comment, data: {remote: true}) do |form| %>
@@ -796,7 +807,7 @@ document
   .classList.remove('d-none');
 ```
 
-Since the form is now submitted via ajax, we will have to close the modal manually since there is no longer a full page reload. This requires us to undo the bootstrap magic that creates the modal in the page when the `reply` link is clicked. Also note that we are removing the `d-none` class to display the newly added comment.
+Since the form is now submitted via ajax, we will now have to close the modal manually since there is no longer a full page reload. This requires us to undo the bootstrap magic that displays the modal in the page when the `reply` link is clicked. Also note that we are removing the `d-none` class from the replies so as to display the newly added comment.
 
 Now reload the question page and try responding to an answer, you will see that the user experience is now smooth and the reply is posted without a full page reload.
 
@@ -879,6 +890,8 @@ class AnswerAcceptanceController < ApplicationController
 end
 ```
 
+Note the way we are applying the authorization policy in the above controller. We supply the policy method as the 2nd argument to `authorize` if the `action` name doesn't match the authorization policy method we want to apply. So in this case we use (`authorize @answer, :accept_or_reject?`) since we are applying the same authorization to both `create` and `destroy` actions. `accept_or_reject?` is the policy method we are applying from the `AnswerPolicy`. By default, the policy name corresponds to the controller name.
+
 Create the `answers` js view
 
 ```
@@ -906,7 +919,7 @@ class Answer < ApplicationRecord
 end
 ```
 
-Note that we are using `left_joins` instead of just `joins` in the above scope because the later will only return the answers which have stars.
+Note that we are using `left_joins` instead of just `joins` in the above scope because the later will return only the answers with stars.
 
 Create a `decide` partial to accept/reject an answer
 
@@ -914,14 +927,18 @@ Create a `decide` partial to accept/reject an answer
 $ touch app/views/answer_acceptance/_decide.html.erb
 ```
 
-`app/views/answer_acceptance/_decide.html.erb`
+**app/views/answer_acceptance/\_decide.html.erb**
 
 ```erb
 <% if policy(answer).accept_or_reject? %>
   <% if answer.accepted %>
-    <%= link_to 'reject', answer_acceptance_path(answer), method: :delete, remote: true, class: 'text-decoration-none decide-link' %>
+    <%= link_to 'reject', answer_acceptance_path(answer),
+      method: :delete, remote: true,
+      class: 'decide-link' %>
   <% else %>
-    <%= link_to 'accept', answer_acceptance_path(answer), method: :patch, remote: true, class: 'text-decoration-none decide-link' %>
+    <%= link_to 'accept', answer_acceptance_path(answer),
+      method: :patch, remote: true,
+      class: 'decide-link' %>
   <% end %>
 <% end %>
 ```
@@ -983,7 +1000,6 @@ Add the `decide` partial in the `answer` partial and also show an accepted answe
       <span class="mx-2">
         &middot;
       </span>
-      <%= render 'stars/stars', starrable: answer %>
       <div class="float-end"><%= render 'answer_acceptance/decide', answer: answer %></div>
     </div>
   </div>
@@ -999,7 +1015,7 @@ Add the `decide` partial in the `answer` partial and also show an accepted answe
 
 ## 6.5 Notify Users When Their Questions Are Answered
 
-Generate a mailer to notify the user when his/her question receives and answer
+Generate a mailer to notify the user when his/her question receives an answer
 
 ```bash
 $ rails g mailer question answered
@@ -1016,7 +1032,7 @@ end
 
 Update the `question_mailer`
 
-`question_mailer.rb`
+**app/mailers/question_mailer.rb**
 
 ```ruby
 class QuestionMailer < ApplicationMailer
@@ -1043,7 +1059,7 @@ end
 
 Update the `answered` email templates
 
-`answered.text.erb`
+**app/views/answered.text.erb**
 
 ```erb
 Dear <%= @question.user.name %>
@@ -1054,7 +1070,7 @@ To view the answer,
 <%= link_to 'click here', @question %>
 ```
 
-`answered.html.erb`
+**app/views/answered.html.erb**
 
 ```erb
 <h2>Dear <%= @question.user.name %></h2>
@@ -1070,7 +1086,7 @@ To view the answer,
 
 Update the `question_mailer_preview` as well (to accept the question parameter)
 
-`question_mailer_preview.rb`
+**test/mailers/previews/question_mailer_preview.rb**
 
 ```ruby
 class QuestionMailerPreview < ActionMailer::Preview

@@ -23,15 +23,15 @@ class Answer < ApplicationRecord
   belongs_to :user
   belongs_to :question
   has_rich_text :content
-  has_many :comments, as: :commentable, dependent: :destroy
+  has_many :comments, as: :commentable
   has_many :stars, as: :starrable
 
   scope :ranked, -> {
-    left_joins(:stars).group(:id)
-                      .order(accepted: :desc)
-                      .order("COUNT(stars.id) DESC")
-                      .order(created_at: :asc)
-  }
+          left_joins(:stars).group(:id)
+                            .order(accepted: :desc)
+                            .order("COUNT(stars.id) DESC")
+                            .order(created_at: :asc)
+        }
 
   after_create :email_question_asker
 
