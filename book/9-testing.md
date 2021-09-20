@@ -1500,7 +1500,7 @@ Run the test
 $ rails t test/system/user_profiles_test.rb
 ```
 
-The next JavaScript test will be for commenting. We will test that the user can post a comment and can hide/unhide repies of an answer.
+The next JavaScript test will be for commenting. We will test that the user can post a comment and can hide/unhide replies of an answer.
 
 Lets generate the test
 
@@ -1591,4 +1591,136 @@ class CommentsTest < ApplicationSystemTestCase
     end
   end
 end
+```
+
+The next test will be for answers.
+
+We will test the following:
+
+- Question asker can mark answers as answers
+- User can star an answer
+- User can delete his/her answer
+
+Lets update the answer system test
+
+```ruby
+class AnswersTest < ApplicationSystemTestCase
+  setup do
+    @answer = create :answer
+  end
+
+  test "creating an Answer" do
+    login_as @answer.user
+    visit question_url(@answer.question)
+
+    # find rich text field and fill it
+    find("trix-editor").set("The answer is 43")
+    click_on "Create Answer"
+
+    assert_text "Answer was successfully created"
+    assert_equal Answer.last.content.to_plain_text, "The answer is 43"
+  end
+
+  test "destroying an Answer" do
+    login_as @answer.user
+    visit question_url(@answer.question)
+
+    assert_equal Answer.count, 1
+    within "#answer_#{@answer.id}" do
+      page.accept_confirm do
+        click_on "delete", match: :first
+      end
+    end
+
+    assert_no_selector "#answer_#{@answer.id}"
+  end
+
+  test "starring an Answer" do
+    login_as @answer.user
+    visit question_url(@answer.question)
+    within "#answer_#{@answer.id}_stars" do
+      click_on "0 stars"
+      assert_text "1 star"
+      click_on "1 star"
+      assert_text "0 stars"
+    end
+  end
+
+  test "marking an Answer as accepted" do
+    login_as @answer.question.user
+    visit question_url(@answer.question)
+    within "#answer_#{@answer.id}" do
+      assert_no_selector "span.badge.bg-success"
+      click_on "accept"
+      assert_selector "span.badge.bg-success"
+      click_on "reject"
+      assert_no_selector "span.badge.bg-success"
+    end
+  end
+end
+```
+
+Note that we are using `find("trix-editor")` to find the `rich_text_field` in the answer form and we are using `.set("")` to fill it in.
+
+Run the test
+
+```bash
+$ rails t test/system/answers_test.rb
+```
+
+Now lets update the `questions` system test to make it passs
+
+```ruby
+class QuestionsTest < ApplicationSystemTestCase
+  setup do
+    @question = create :question
+  end
+
+  test "visiting the index" do
+    login_as @question.user
+    visit questions_url
+    assert_selector "h1", text: "QUESTIONS"
+  end
+
+  test "creating a Question" do
+    login_as @question.user
+    visit questions_url
+    click_on "New Question"
+
+    fill_in "Title", with: "What is the purpose of life"
+    fill_in "question[tag_list]", with: "life,purpose"
+    find("trix-editor").set("I am trying to find my life purpose")
+    click_on "Create Question"
+
+    assert_text "Question was successfully created"
+  end
+
+  test "updating a Question" do
+    login_as @question.user
+    visit questions_url
+    click_on "Edit", match: :first
+
+    fill_in "Title", with: @question.title
+    fill_in "question[tag_list]", with: "life,purpose"
+    click_on "Update Question"
+
+    assert_text "Question was successfully updated"
+  end
+
+  test "destroying a Question" do
+    login_as @question.user
+    visit questions_url
+    page.accept_confirm do
+      click_on "Delete", match: :first
+    end
+
+    assert_text "Question was successfully destroyed"
+  end
+end
+```
+
+Run the test
+
+```
+$ rails t test/system/questions_test.rb
 ```
