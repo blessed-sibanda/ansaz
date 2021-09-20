@@ -5,6 +5,6 @@
   </div>
   <%= render partial: 'comments/form', locals: {comment: current_user.comments.build, commentable: commentable} %>
 <% end %>
-<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>'>
+<a class='reply-link' href="#" data-bs-toggle="modal" data-bs-target='#<%= modal_id %>' href="#">
   Reply
 </a>

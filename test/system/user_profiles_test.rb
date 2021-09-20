@@ -10,13 +10,6 @@ class UserProfilesTest < ApplicationSystemTestCase
     login_as @user
   end
 
-  def login_as(user)
-    visit new_user_session_url
-    fill_in "Email", with: user.email
-    fill_in "Password", with: "1234pass"
-    click_button "Log in"
-  end
-
   test "visiting own user profile" do
     visit user_url(@user)
     assert_selector "div", text: @user.about

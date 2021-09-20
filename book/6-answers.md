@@ -268,13 +268,13 @@ In this section, we will update the user profile page to show the user's questio
 <div data-controller='tab'>
   <ul class="nav nav-tabs mt-3">
     <li class="nav-item">
-      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active">About</a>
+      <a data-tab-target='aboutLink' data-action="click->tab#about" class="nav-link active" href="#">About</a>
     </li>
     <li class="nav-item">
-      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link">Questions</a>
+      <a data-tab-target='questionsLink' data-action="click->tab#questions" class="nav-link" href="#">Questions</a>
     </li>
     <li class="nav-item">
-      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link">Answers</a>
+      <a data-tab-target='answersLink' data-action="click->tab#answers" class="nav-link" href="#">Answers</a>
     </li>
   </ul>
   <div class="tab-content" id="user-tabs">
@@ -330,21 +330,24 @@ export default class extends Controller {
     });
   }
 
-  about() {
+  about(e) {
+    e.preventDefault();
     this.reset();
     this.aboutLinkTarget.classList.add('active');
     this.aboutTarget.classList.add('active');
     this.aboutTarget.classList.add('show');
   }
 
-  answers() {
+  answers(e) {
+    e.preventDefault();
     this.reset();
     this.answersLinkTarget.classList.add('active');
     this.answersTarget.classList.add('active');
     this.answersTarget.classList.add('show');
   }
 
-  questions() {
+  questions(e) {
+    e.preventDefault();
     this.reset();
     this.questionsLinkTarget.classList.add('active');
     this.questionsTarget.classList.add('active');
@@ -539,7 +542,7 @@ Now let's update `answer` partial to allow for commenting
     <div class='mt-2 small text-muted'>
       <%= render 'comments/reply', commentable: answer %>
       <span class="mx-2">&middot;</span>
-      <a class='text-decoration-none reply-link' href="#">Replies (<%= answer.comments.count %>)</a>
+      <a class='text-decoration-none reply-link' href="#" href="#">Replies (<%= answer.comments.count %>)</a>
     </div>
   </div>
   <% comments = answer.comments.select(&:persisted?) %>
@@ -708,7 +711,7 @@ Now connect the answer partial to the `reply_controller`
       <%= render partial: 'comments/reply', locals: {commentable: answer, answer: answer} %>
       <span class="mx-2">&middot;</span>
       <% if comments.any? %>
-        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle"
+        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" href="#"
           data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
         <span class="mx-2">
           &middot;

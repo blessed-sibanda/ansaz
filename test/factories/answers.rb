@@ -24,6 +24,7 @@ FactoryBot.define do
     user { build(:user) }
     question { build(:question) }
     accepted { false }
+    content { Faker::Lorem.paragraphs(number: 4).join }
 
     trait :accepted do
       accepted { true }

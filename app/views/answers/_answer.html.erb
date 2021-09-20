@@ -21,7 +21,7 @@
       <%= render partial: 'comments/reply', locals: {commentable: answer} %>
       <span class="mx-2">&middot;</span>
       <% if comments.any? %>
-        <a class='text-decoration-none reply-link' data-controller='reply' data-action="click->reply#toggle" 
+        <a class='text-decoration-none reply-link' href="#" data-controller='reply' data-action="click->reply#toggle" 
           data-reply-id="<%= "#{dom_id(answer)}_comments" %>">Replies (<%= answer.comments.count %>)</a>
         <span class="mx-2">
           &middot;
