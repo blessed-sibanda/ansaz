@@ -1478,7 +1478,7 @@ class Question < ApplicationRecord
 end
 ```
 
-The `similar` method accepts an optional `group_id` to find related questions within a group. This `similar` method uses the `find_related_tags` method from the `acts_as_taggable_on` gem.
+The `similar` method accepts an optional `group_id` to find related questions within a group. This `similar` method uses the `find_related_tags` method provided by the `acts_as_taggable_on` gem.
 
 Now the question page looks as follows
 
