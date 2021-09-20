@@ -1787,3 +1787,21 @@ Run the test
 ```bash
 $ rails t test/system/groups_test.rb
 ```
+
+We have now written all the tests to make sure that our application always works as expected.
+
+Lets re-run all our tests
+
+```bash
+$ rails test
+```
+
+And the system tests
+
+```bash
+$ rails test:system
+```
+
+All the tests pass!
+
+Congratulations if you have made it this far. I believe you have learnt a thing or two about developing Rails applications.

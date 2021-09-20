@@ -1,6 +1,6 @@
 # 4 User Authentication
 
-We are going to use devise for user authentication. Devise is a very popular gem for authenticating users in rails applications. It provides all the features required to build a robust authentication system in a modern web app.
+In this chapter we are going to build an authentication system for our application. We will use [devise](https://github.com/heartcombo/devise) for user authentication. Devise is a very popular gem for authenticating users in rails applications. It provides all the features required to build a robust authentication system in a modern web app.
 
 ## 4.1 Setup Devise
 
@@ -9,7 +9,7 @@ $ bundle add devise
 $ rails g devise:install
 ```
 
-Add mailer options to `config/environments/development.rb`
+Add default url mailer options to `config/environments/development.rb` and `config/environments/test.rb`
 
 ```ruby
 Rails.application.configure do
@@ -19,6 +19,19 @@ Rails.application.configure do
   config.action_mailer.default_url_options = {
     host: "localhost",
     port: 3000,
+  }
+end
+```
+
+`config/environments/test.rb`
+
+```ruby
+Rails.application.configure do
+  ...
+  ...
+
+  config.action_mailer.default_url_options = {
+    host: "ansaz.domain"
   }
 end
 ```
@@ -105,7 +118,7 @@ $ rails g devise:views
 Generate devise user model
 
 ```bash
-$ rails g devise user
+$ rails g devise User
 ```
 
 Make the following changes to `db/migrate/{timestamp}_devise_create_users.rb` migration file
@@ -124,7 +137,8 @@ class DeviseCreateUsers < ActiveRecord::Migration[6.1]
     create_table :users do |t|
       ## Database authenticatable
       t.string :email, null: false, default: ""
-      t.string :encrypted_password, null: false, default: ""
+      t.string :encrypted_password, null: false,\
+        default: ""
       t.string :name, null: false, default: ""
       t.text :about, null: true
 
@@ -146,12 +160,7 @@ class DeviseCreateUsers < ActiveRecord::Migration[6.1]
       t.string :confirmation_token
       t.datetime :confirmed_at
       t.datetime :confirmation_sent_at
-      t.string :unconfirmed_email # Only if using reconfirmable
-
-      ## Lockable
-      # t.integer  :failed_attempts, default: 0, null: false # Only if lock strategy is :failed_attempts
-      # t.string   :unlock_token # Only if unlock strategy is :email or :both
-      # t.datetime :locked_at
+      t.string :unconfirmed_email
 
       t.timestamps null: false
     end
@@ -159,7 +168,6 @@ class DeviseCreateUsers < ActiveRecord::Migration[6.1]
     add_index :users, :email, unique: true
     add_index :users, :reset_password_token, unique: true
     add_index :users, :confirmation_token, unique: true
-    # add_index :users, :unlock_token,         unique: true
   end
 end
 ```
@@ -168,8 +176,6 @@ Also, enable `:trackable` and `:confirmable` modules to devise user model in `ap
 
 ```ruby
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :confirmable, :trackable
@@ -230,7 +236,7 @@ import '../stylesheets/main.scss';
 import 'bootstrap/dist/js/bootstrap.min';
 ```
 
-Change the `webpack-dev-server` version from 4 to 3 in `package.json`
+Change the `webpack-dev-server` version from 4 to version 3 in `package.json`.
 
 ```json
 {
@@ -266,7 +272,7 @@ Run webpack dev server
 $ ./bin/webpack-dev-server
 ```
 
-Install `bootstrap_form` gem to automatically style our forms with bootstrap.
+Install [bootstrap_form](https://github.com/bootstrap-ruby/bootstrap_form) gem to automatically style our forms with bootstrap.
 
 ```bash
 $ bundle add bootstrap_form
@@ -284,12 +290,15 @@ The login page (i.e `app/views/devise/sessions/new.html.erb`) should look like
 
 ```erb
 <h2>Log in</h2>
-<%= bootstrap_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+<%= bootstrap_form_for(resource, as: resource_name,
+ url: session_path(resource_name)) do |f| %>
   <div class="field">
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+    <%= f.email_field :email, autofocus: true,
+     autocomplete: "email" %>
   </div>
   <div class="field">
-    <%= f.password_field :password, autocomplete: "current-password" %>
+    <%= f.password_field :password,
+      autocomplete: "current-password" %>
   </div>
   <% if devise_mapping.rememberable? %>
     <div class="field">
@@ -305,7 +314,7 @@ The login page (i.e `app/views/devise/sessions/new.html.erb`) should look like
 
 Now our forms are styled properly with bootstrap
 
-Add margin to all form submit buttons in `app/javascript/stylesheets/main.scss`. Also give help text in all forms and smaller font size and gray color.
+Add margin to all form submit buttons in `app/javascript/stylesheets/main.scss`. Also give help text in all forms with smaller font size and gray color.
 
 ```scss
 @import 'bootstrap';
@@ -328,7 +337,10 @@ Add `btn btn-danger` class to 'cancel my account' button in edit user form in `a
 ```erb
 ...
 <h3 class='mt-4'>Cancel my account</h3>
-<p>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger' %></p>
+<p>Unhappy? <%= button_to "Cancel my account",
+  registration_path(resource_name),
+  data: { confirm: "Are you sure?" }, method: :delete,
+  class: 'btn btn-danger' %></p>
 ...
 ```
 
@@ -363,40 +375,56 @@ $ touch app/views/layouts/_navbar.html.erb
 ```erb
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
-    <%= link_to content_tag(:strong, 'Ansaz'), root_path, class: 'navbar-brand' %>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <%= link_to content_tag(:strong, 'Ansaz'), root_path,
+      class: 'navbar-brand' %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <% if user_signed_in? %>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown" role="button"
+                data-bs-toggle="dropdown" >
               Account
             </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><%= link_to 'Edit Account', edit_user_registration_path, class: 'dropdown-item' %></li>
+            <ul class="dropdown-menu">
+              <li><%= link_to 'Edit Account',
+                      edit_user_registration_path,
+                      class: 'dropdown-item' %></li>
               <li><hr class="dropdown-divider"></li>
-              <li><%= link_to 'Logout', destroy_user_session_path, method: :delete, class: 'dropdown-item' %></li>
+              <li><%= link_to 'Logout',
+                      destroy_user_session_path,
+                      method: :delete,
+                      class: 'dropdown-item' %></li>
             </ul>
           </li>
         <% else %>
           <li class="nav-item">
-            <%= link_to 'Login', new_user_session_path, class: 'nav-link' %>
+            <%= link_to 'Login', new_user_session_path,
+              class: 'nav-link' %>
           </li>
           <li class="nav-item">
-            <%= link_to 'Register', new_user_registration_path, class: 'nav-link' %>
+            <%= link_to 'Register',
+              new_user_registration_path,
+              class: 'nav-link' %>
           </li>
         <% end %>
       </ul>
       <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        <input class="form-control me-2"
+          type="search" placeholder="Search">
+        <button class="btn btn-outline-success"
+          type="submit">Search</button>
       </form>
     </div>
   </div>
 </nav>
 ```
+
+Note that we are using the devise helper method `user_signed_in?` to check whether the user is signed in. If the user is not signed in, we show the `Login/Register` links.
 
 Create a partial template to hold flash messages
 
@@ -406,10 +434,10 @@ $ touch app/views/layouts/_flash_messages.html.erb
 
 ```erb
 <% if notice %>
-  <div class="notice alert alert-primary"><%= notice %></div>
+  <div class="alert alert-primary"><%= notice %></div>
 <% end %>
 <% if alert %>
-  <div class="alert alert alert-danger"><%= alert %></div>
+  <div class="alert alert-danger"><%= alert %></div>
 <% end %>
 ```
 
@@ -423,8 +451,10 @@ Include `navbar` and `flash_messages` partials in `app/views/layouts/application
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= stylesheet_link_tag 'application', media: 'all',
+      'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application',
+      'data-turbolinks-track': 'reload' %>
   </head>
   <body>
     <%= render 'layouts/navbar' %>
@@ -471,7 +501,7 @@ Now `application.html.erb` should be
 
 Create layout to be used by devise views
 
-By convention, devise controller will look for a layout named `devise.html.erb`
+By convention, devise controllers will render their views in a layout named `devise.html.erb`
 
 ```bash
 $ touch app/views/layouts/devise.html.erb
@@ -497,9 +527,12 @@ $ touch app/views/layouts/devise.html.erb
 
 Update `ApplicationController` to tell devise to also accept user's `name` in the params for sign up.
 
+**app/controllers/application_controller.rb**
+
 ```ruby
 class ApplicationController < ActionController::Base
-  before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :configure_permitted_parameters, \
+     if: :devise_controller?
 
   protected
 
@@ -507,7 +540,8 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(
       :sign_up,
       keys: [:name,
-             :email, :password,
+             :email,
+             :password,
              :password_confirmation],
     )
   end
@@ -516,26 +550,30 @@ end
 
 Add the user `name` field to the devise sign up page
 
-`app/views/devise/registrations/new.html.erb`
+**app/views/devise/registrations/new.html.erb**
 
 ```erb
 <h2>Sign up</h2>
-<%= bootstrap_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+<%= bootstrap_form_for(resource, as: resource_name,
+  url: registration_path(resource_name)) do |f| %>
+  <%= render "devise/shared/error_messages",
+    resource: resource %>
   <div class="field">
-    <%= f.text_field :name, required: true%>
+    <%= f.text_field :name, required: true %>
   </div>
   <div class="field">
     <%= f.text_area :about, required: true %>
   </div>
   <div class="field">
     <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em>
-    <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
+      <em>
+        (<%= @minimum_password_length %> characters minimum)
+      </em>
+    <% end %>
+    <%= f.password_field :password %>
   </div>
   <div class="field">
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+    <%= f.password_field :password_confirmation %>
   </div>
   <div class="actions">
     <%= f.submit "Sign up" %>
@@ -550,7 +588,7 @@ Now if we visit [http://localhost:3000/users/sign_up](http://localhost:3000/user
 
 ## 4.4 User Profiles
 
-Add User Avatar
+Add an avatar image to the user model
 
 ```ruby
 class User < ApplicationRecord
@@ -560,7 +598,7 @@ class User < ApplicationRecord
 end
 ```
 
-Install Active Storage
+Lets setup [Active Storage](https://edgeguides.rubyonrails.org/active_storage_overview.html) to support file uploads.
 
 ```
 $ rails active_storage:install
@@ -572,7 +610,7 @@ Run the active storage migrations
 $ rails db:migrate
 ```
 
-Install `image_processing` gem
+Install the [image_processing](https://github.com/janko/image_processing) gem for processing the uploaded images.
 
 ```
 $ bundle add image_processing
@@ -586,12 +624,15 @@ $ rails restart
 
 Add the user `name`, `about` and `avatar` to the Edit User page.
 
-`app/views/devise/registrations/edit.html.erb`
+**app/views/devise/registrations/edit.html.erb**
 
 ```erb
 <h2>Edit <%= resource_name.to_s.humanize %></h2>
-<%= bootstrap_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+<%= bootstrap_form_for(resource, as: resource_name,
+  url: registration_path(resource_name),
+  html: { method: :put }) do |f| %>
+  <%= render "devise/shared/error_messages",
+    resource: resource %>
   <div class="field">
     <%= f.text_field :name %>
   </div>
@@ -602,41 +643,56 @@ Add the user `name`, `about` and `avatar` to the Edit User page.
     <%= f.file_field :avatar %>
   </div>
   <div class="field">
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+    <%= f.email_field :email %>
   </div>
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
+  <% if devise_mapping.confirmable? && \
+     resource.pending_reconfirmation? %>
+    <div>
+      Currently waiting confirmation for:
+      <%= resource.unconfirmed_email %>
+    </div>
   <% end %>
   <div class="field">
     <i>(leave blank if you don't want to change it)</i>
-    <%= f.password_field :password, autocomplete: "new-password" %>
+    <%= f.password_field :password %>
     <% if @minimum_password_length %>
-      <em><%= @minimum_password_length %> characters minimum</em>
+      <em>
+        <%= @minimum_password_length %> characters minimum
+      </em>
     <% end %>
   </div>
   <div class="field">
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+    <%= f.password_field :password_confirmation %>
   </div>
   <div class="field">
-    <i>(we need your current password to confirm your changes)</i>
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
+    <i>
+      (we need your current password to confirm your changes)
+    </i>
+    <%= f.password_field :current_password %>
   </div>
   <div class="actions">
     <%= f.submit "Update" %>
   </div>
 <% end %>
 <h3 class='mt-4'>Cancel my account</h3>
-<p>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger' %></p>
+<p>
+  Unhappy? <%= button_to "Cancel my account",
+  registration_path(resource_name),
+  data: { confirm: "Are you sure?" },
+  method: :delete, class: 'btn btn-danger' %>
+</p>
 <%= link_to "Back", :back %>
 ```
 
-Update `ApplicationController` to tell devise to also accept user's `name`, `about`, `avatar` in the params for account update.
+Update `ApplicationController` to tell devise to also accept user's `name`, `about` and `avatar` in the params for account update.
 
 ```ruby
 class ApplicationController < ActionController::Base
   ...
+  ...
 
   def configure_permitted_parameters
+    ...
     ...
     devise_parameter_sanitizer.permit(
       :account_update,
@@ -682,7 +738,9 @@ class UsersController < ApplicationController
 end
 ```
 
-Create the `active` scope in `user` model to filter out activated users only.
+Note that the index action above use the `active` to retrieve activated users only.
+
+Now lets create the `active` scope in the user model.
 
 ```ruby
 class User < ApplicationRecord
@@ -693,7 +751,8 @@ end
 ```
 
 Update the users `index` view
-`app/views/users/index.html.erb`
+
+**app/views/users/index.html.erb**
 
 ```erb
 <%= render @users %>
@@ -702,7 +761,7 @@ Update the users `index` view
 Create the `user` partial
 
 ```
-touch app/views/user_profiles/_user.html.erb
+$ touch app/views/users/_user.html.erb
 ```
 
 ```erb
@@ -711,7 +770,7 @@ touch app/views/user_profiles/_user.html.erb
     <div class="d-flex align-items-center">
       <%= user_avatar(user, height: 50, width: 50) %>
       <div class='ms-2'>
-        <%= link_to user.name, user, class: 'card-title my-0 h5 text-decoration-none' %>
+        <%= link_to user.name, user, class: 'card-title h5' %>
         <p class="fw-light small my-0 py-0">
           <strong class='me-1'>Joined:</strong>
           <%= user.created_at.strftime("%d %b %Y, %H:%M") %>
@@ -722,7 +781,7 @@ touch app/views/user_profiles/_user.html.erb
 </div>
 ```
 
-Create the `user_avatar` helper in `app/helpers/users_helper.rb`
+Create the `user_avatar` helper in `app/helpers/users_helper.rb` to render the users avatar image (if the user has one) or to use the default gravatar image for the user.
 
 ```ruby
 module UsersHelper
@@ -741,12 +800,14 @@ Create the `avatar_img` partial to display the default gravatar url for a user w
 $ touch app/views/users/_avatar_img.html.erb
 ```
 
-`app/views/users/_avatar_img.html.erb`
+**app/views/users/\_avatar_img.html.erb**
 
 ```erb
-<% avatar_img_url = user.avatar&.variant(resize_to_limit: [height, width]) %>
+<% avatar_img_url = user.avatar&.variant(resize_to_limit: \
+   [height, width]) %>
 <% if avatar_img_url %>
-  <%= image_tag avatar_img_url, style: "width: #{width}px; height: #{height}px; object-fit: cover;" %>
+  <%= image_tag avatar_img_url,
+    style: "width: #{width}px; height: #{height}px; object-fit: cover;"%>
 <% else %>
   <%= image_tag gravatar_url(user), height: height, width: width %>
 <% end %>
@@ -765,15 +826,18 @@ module UsersHelper
 end
 ```
 
+The `gravatar_url` helper uses the [Gravatar](https://gravatar.com/) service which generates avatar images for users based on their emails. The service also allows users to upload their custom avatars.
+
 Update the users `show` page
-`app/views/users/show.html.erb`
+
+**app/views/users/show.html.erb**
 
 ```erb
 <%= render @user %>
 <div class="lead"><%= @user.about %></div>
 ```
 
-Install `faker` to generate fake data
+To play around with our application, we need some seed data. So lets install [faker](https://github.com/faker-ruby/faker) to generate the fake data.
 
 ```
 $ bundle add faker --group "development, test"
@@ -805,43 +869,55 @@ Seed the database
 $ rails db:seed:replant
 ```
 
-Update \_navbar partial with a users link
+Update \_navbar partial with a link to `users` index page
 
 ```erb
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
   <div class="container">
-    <%= link_to content_tag(:strong, 'Ansaz'), root_path, class: 'navbar-brand' %>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    ...
+    ...
+    <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <% if user_signed_in? %>
           <li class="nav-item">
             <%= link_to 'Users', users_path, class: 'nav-link' %>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle"
+              href="#" id="navbarDropdown" role="button"
+              data-bs-toggle="dropdown" >
               Account
             </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><%= link_to 'Edit Account', edit_user_registration_path, class: 'dropdown-item' %></li>
+            <ul class="dropdown-menu">
+              <li>
+                <%= link_to 'Edit Account',
+                  edit_user_registration_path,
+                  class: 'dropdown-item' %>
+              </li>
               <li><hr class="dropdown-divider"></li>
-              <li><%= link_to 'Logout', destroy_user_session_path, method: :delete, class: 'dropdown-item' %></li>
+              <li><%= link_to 'Logout',
+                destroy_user_session_path,
+                method: :delete, class: 'dropdown-item' %>
+              </li>
             </ul>
           </li>
         <% else %>
           <li class="nav-item">
-            <%= link_to 'Login', new_user_session_path, class: 'nav-link' %>
+            <%= link_to 'Login', new_user_session_path,
+              class: 'nav-link' %>
           </li>
           <li class="nav-item">
-            <%= link_to 'Register', new_user_registration_path, class: 'nav-link' %>
+            <%= link_to 'Register',
+              new_user_registration_path,
+              class: 'nav-link' %>
           </li>
         <% end %>
       </ul>
       <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        <input class="form-control me-2"
+          type="search" placeholder="Search">
+        <button class="btn btn-outline-success" type="submit">
+          Search</button>
       </form>
     </div>
   </div>

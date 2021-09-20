@@ -8,7 +8,9 @@ In this chapter, we will begin building the application that we will be working 
 
 - Users can search for questions
 
-- Users can comment on the answers
+- Users can filter questions based on tag names
+
+- Users can comment on the answers and on other comments
 
 - Users can star questions and the answers they think are most helpful.
 
@@ -16,9 +18,7 @@ In this chapter, we will begin building the application that we will be working 
 
 - Users can create private groups where they can ask questions on a specific subject or topic.
 
-- Groups have staff members who moderate content on the group.
-
-## 3.1 Create Ansaz
+## 3.1 Creating Ansaz
 
 In the terminal, create a new rails application with postgresql as the database.
 
@@ -52,13 +52,13 @@ $ rails s
 
 ## 3.2 Install Dependencies
 
-Install `factory_bot_rails` gem to create data factories for our models
+Before moving forward, lets install the [factory_bot_rails](https://github.com/thoughtbot/factory_bot_rails) gem to create data factories for our models. `factory_bot` is a fixtures replacement with a straightforward definition syntax, support for multiple build strategies, and support for multiple factories for the same class.
 
 ```
 $ bundle add factory_bot_rails --group "development, test"
 ```
 
-Install `annotate` gem to write the schema description of our models.
+Install [annotate](https://github.com/ctran/annotate_models) gem to write the schema description of our models.
 
 ```
 $ bundle add annotate --group development

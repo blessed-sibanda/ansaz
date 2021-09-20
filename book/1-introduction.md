@@ -6,7 +6,7 @@ way.
 
 ## 1.1 What is Ruby on Rails
 
-Ruby on Rails is popular web framework that is written in the Ruby
+Ruby on Rails is a popular web framework that is written in the Ruby
 programming language that allows developers to quickly build
 powerful and robust web applications. It’s commonly referred to
 as Rails and often abbreviated as RoR.
@@ -32,4 +32,4 @@ Before reading this book, I assume that the reader has the following:
 
 - Basic understanding of Rails (i.e you have done the [Rails Guides Getting Started Tutorial](https://guides.rubyonrails.org/getting_started.html))
 
-- A computer with at least 2GB of RAM and access to an internet connection
+- A computer with at least 2GB of RAM and access to internet connection

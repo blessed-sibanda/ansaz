@@ -1,32 +1,32 @@
-# Setup
+# 2 Setup
 
-Before we begin developing our Rails application, the following softwares need to be installed in addition to Ruby and Rails:
+Before we begin developing our Rails application, the following softwares need to be installed:
 
-- Node.js
+- **Node.js**
 
-  Rails uses a JavaScript package called webpack via the webpacker gem to manage and compile the frontend assets of our application. This requires a JavaScript runtime, and Node.js is that runtime.
+  Rails uses a JavaScript package called webpack via the `webpacker` gem to manage and compile the frontend assets of our application. This requires a JavaScript runtime, and Node.js is that runtime.
 
-- Yarn
+- **Yarn**
 
   This is a package manager for Node that we will use to install our JavaScript dependencies. Rails uses yarn by default to install the dependencies for webpacker.
 
-- PostgreSQL
+- **PostgreSQL**
 
-  Rails uses the sqlite database by default, but we will not be using that, as it is not suitable for production. It is recommended to develop with the same database that you will use in production.
+  Rails comes with the sqlite database by default, but we will not be using it, since it is not suitable for production. It is recommended to develop with the same database that you will use in production.
 
   In this book, we will be using PostgreSQL as our database because it is a very powerful open-source database management system with lots of advanced features.
 
-- VSCode (optional but recommended)
+- **VSCode (optional but recommended)**
 
   This is an open-source, lightweight and fast code editor with support for various languages and frameworks through its numerous extensions.
 
-## Setting Up Linux Ubuntu
+## 2.1 Setting Up Linux Ubuntu
 
 I will be using the Linux Ubuntu operating system in this book, therefore most of the installation instructions presented here are for Ubuntu. However, I have also provided some helpful links for setup instructions for windows 10 and macOS operating systems.
 
 We are going to install ruby and node.js using the [asdf](https://asdf-vm.com/) version manager. `asdf` is an extendable version manager with support for Ruby, Node.js, Elixir, Erlang & more. It manages multiple language runtime versions on a per-project basis.
 
-### Install Git
+### Installing Git
 
 Update package repositories
 
@@ -37,32 +37,34 @@ $ sudo apt-get update
 Install dev dependencies
 
 ```bash
-$ sudo apt install make libssl-dev libghc-zlib-dev libcurl4-gnutls-dev
-libexpat1-dev gettext unzip
+$ sudo apt install make libssl-dev libghc-zlib-dev \
+ libcurl4-gnutls-dev libexpat1-dev gettext unzip
 ```
 
 Install git
 
 ```bash
-sudo apt install git
+$ sudo apt install git
 ```
 
-### Install `asdf`
-
-Run the following commands in your terminal
+### Installing `asdf`
 
 Clone asdf
 
 ```bash
-$ git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
+$ git clone https://github.com/asdf-vm/asdf.git ~/.asdf \
+ --branch v0.8.1
+```
+
+Update `bashrc`
+
+```bash
+$ echo -e '\n. $HOME/.asdf/asdf.sh' >> .bashrc
 ```
 
 ```bash
-$ echo -e '\n. $HOME/.asdf/asdf.sh' > .bashrc
-```
-
-```bash
-$ echo -e '\n. $HOME/.asdf/completions/asdf.bash' >> ~/.bashrc
+$ echo -e '\n. $HOME/.asdf/completions/asdf.bash' \
+ >> ~/.bashrc
 ```
 
 Restart your terminal and check if `asdf` installed correctly
@@ -73,7 +75,7 @@ $ asdf --version
 
 The output should be `v0.8.1`
 
-### Install Node.js
+### Installing Node.js
 
 Add the Node.js plugin
 
@@ -107,7 +109,7 @@ $ node -v
 
 You should see `v14.11.0` as the output
 
-### Install yarn
+### Installing yarn
 
 ```bash
 $ npm install --global yarn
@@ -121,9 +123,9 @@ $ yarn --version
 
 You should see `1.22.10` or similar as the output
 
-### Install Ruby
+### Installing Ruby
 
-Now that `asdf` is installed, lets install `ruby`
+Install `ruby` using `asdf`
 
 Add the Ruby plugin to `asdf`
 
@@ -151,15 +153,15 @@ $ ruby -v
 
 Version '3.0.1' should be output
 
-### Install Rails
+### Installing Rails
 
-Install Bundler. A dependency management system for Ruby.
+First lets install Bundler. A dependency management tool for Ruby.
 
 ```bash
 $ gem install bundler
 ```
 
-Install the rails gem
+Now install rails
 
 ```
 $ gem install rails -v 6.1.4
@@ -177,9 +179,11 @@ Output
 Rails 6.1.4.1
 ```
 
-### Install PostgreSQL database
+### Installing PostgreSQL
 
-Create the file repository configuration
+We will install PostgreSQL using the apt repository.
+
+First lets create the file repository configuration
 
 ```bash
 $ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
@@ -213,6 +217,8 @@ Start the postgresql server
 $ sudo service postgresql start
 ```
 
+For more info on installing PostgreSQL on linux visit this [link](https://www.postgresql.org/download/linux/ubuntu/)
+
 Create a PostgresSQL account where the account's username is equal to the system's username. This will enable us to create Rails databases with just one commands (`rails db:create`).
 
 ```bash
@@ -232,6 +238,7 @@ $ gem install solagraph
 ```
 
 Install the `rufo` gem for Ruby formatting
+
 ```bash
 $ gem install rufo
 ```
@@ -240,8 +247,7 @@ Install the following extensions for VSCode
 
 ![VSCode Extensions](./vscode.png)
 
-
-## For MacOS and Windows 10
+## 2.2 For MacOS and Windows 10
 
 **Note:** The previous setup instructions apply for ubuntu 18.04 (or later). For macOS and Windows, use the following links.
 
