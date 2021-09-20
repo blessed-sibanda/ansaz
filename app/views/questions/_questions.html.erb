@@ -2,7 +2,8 @@
   <%= yield %>
 </div>
 <%= render questions %>
-<%= will_paginate questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
+<%= will_paginate questions,
+  renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
 <%= content_for :sidebar do %>
   <%= render 'groups/popular' %>
 <% end %>

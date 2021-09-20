@@ -74,8 +74,6 @@ gem "pundit", "~> 2.1"
 
 gem "will_paginate", "~> 3.3"
 
-gem "will_paginate-bootstrap4", "~> 0.2.2"
-
 gem "pg_search", "~> 2.3"
 
 gem "acts-as-taggable-on", "~> 8.1"
@@ -87,3 +85,5 @@ gem "shoulda-context", "~> 2.0", :group => :test
 gem "shoulda-callback-matchers", "~> 1.1", :group => :test
 
 gem "policy-assertions", "~> 0.2.0", :group => :test
+
+gem "will_paginate-bootstrap-style", "~> 0.2.4"

@@ -26,7 +26,6 @@ class Question < ApplicationRecord
                   against: :title,
                   associated_against: {
                     rich_text_content: [:body],
-                  # tags: [:name],
                   }
 
   belongs_to :user

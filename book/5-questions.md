@@ -1,6 +1,6 @@
 # 5 Asking Questions
 
-In this chapter we are going to allow users to create questions. The questions will be displayed in the home page.
+In this chapter we are going to allow users to create questions. Users will also be able to do a full-text search on questions and also find questions by tag names.
 
 ## 5.1 Scaffold questions
 
@@ -19,6 +19,35 @@ Rails.application.routes.draw do
   end
   root to: "home#index"
 end
+```
+
+Update \_navbar partial with a link to `questions` index page
+
+```erb
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+  <div class="container">
+    ...
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <%= link_to 'Questions', questions_path,
+              class: 'nav-link' %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Users', users_path, class: 'nav-link' %>
+          </li>
+          <li class="nav-item dropdown">
+            ...
+          </li>
+        <% else %>
+          ...
+        <% end %>
+      </ul>
+      ...
+    </div>
+  </div>
+</nav>
 ```
 
 Add presence validation to question `title`
@@ -68,7 +97,10 @@ $ touch app/views/shared/_form_errors.html.erb
 ```erb
 <% if resource.errors.any? %>
   <div id="error_explanation">
-    <h2 class='h6'><%= pluralize(resource.errors.count, "error") %> prohibited this <%= resource.class.name.downcase %> from being saved:</h2>
+    <h2 class='h6'>
+      <%= pluralize(resource.errors.count, "error") %>
+      prohibited this <%= resource.class.name.downcase %>
+      from being saved:</h2>
     <ul>
       <% resource.errors.each do |error| %>
         <li class='small'><%= error.full_message %></li>
@@ -93,13 +125,13 @@ Update question `form` partial
 <% end %>
 ```
 
-Add `questions resource` inside the `authenticate :user` block in `config/routes.rb`
+Add `questions` resource `authenticate :user` block in `config/routes.rb`
 
 ```ruby
 Rails.application.routes.draw do
   ...
   authenticate :user do
-    resources :user_profiles, except: [:destroy, :index]
+    resources :users, except: [:destroy, :index]
     resources :questions
   end
   ...
@@ -108,17 +140,17 @@ end
 
 Update `questions-controller`
 
-- Update the `create` action to assign the questions to the `current_user`
+- Update the `create` action to assign the question to the `current_user`
 
 - Remove `:user_id` from 'question_params'
 
-`app/controllers/questions_controller.rb`
+**app/controllers/questions_controller.rb**
 
 ```ruby
 class QuestionsController < ApplicationController
   ...
+  ...
 
-  # POST /questions or /questions.json
   def create
     @question = current_user.questions.build(question_params)
 
@@ -128,6 +160,7 @@ class QuestionsController < ApplicationController
     end
   end
 
+  ...
   ...
 
   private
@@ -157,11 +190,13 @@ Create `question` partial
 $ touch app/views/questions/_question.html.erb
 ```
 
-`app/views/questions/_question.html.erb`
+**app/views/questions/\_question.html.erb**
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   <div class="card-body py-2">
     <h6 class="card-title fw-light d-flex justify-content-between">
       <div class='d-flex align-items-center'>
@@ -172,20 +207,22 @@ $ touch app/views/questions/_question.html.erb
         </div>
       </div>
       <div class='d-flex align-items-center'>
-        <%= link_to 'Edit', edit_question_path(question), class: 'small fw-bold text-decoration-none link-warning' %>
+        <%= link_to 'Edit', edit_question_path(question),
+           class: 'small fw-bold link-warning' %>
         <span class="mx-1"></span>
-        <%= link_to 'Delete', question, method: :delete, data: {confirm: 'Are you sure?'}, class: 'small fw-bold text-decoration-none link-danger' %>
+        <%= link_to 'Delete', question, method: :delete,
+          data: {confirm: 'Are you sure?'},
+          class: 'small fw-bold link-danger' %>
       </div>
     </h6>
     <h5 class="card-subtitle fw-normal mt-3">
-      <%= link_to question.title, question, class: 'text-decoration-none' %>
+      <%= link_to question.title, question %>
     </h5>
   </div>
 </div>
-
 ```
 
-Order questions in descending order(i.e newer questiosns first)
+Order questions in descending order(i.e newer questions first)
 
 ```ruby
 class QuestionsController < ApplicationController
@@ -217,11 +254,16 @@ end
 
 ## 5.2 Add Rich Text to Questions
 
-```bash
-rails action_text:install
+Setup [Action Text](https://guides.rubyonrails.org/action_text_overview.html) to add support for rich text.
 
-# Run Migrations
-rails db:migrate
+```bash
+$ rails action_text:install
+```
+
+Run migrations
+
+```bash
+$ rails db:migrate
 ```
 
 Add rich text to question model
@@ -254,7 +296,7 @@ Update question `form` to include _rich text_
 
 Update questions `new` page
 
-`app/views/questions/new.html.erb`
+**app/views/questions/new.html.erb**
 
 ```erb
 <h1 class='h2'>New Question</h1>
@@ -263,7 +305,8 @@ Update questions `new` page
 ```
 
 Update questions `edit` page
-`app/views/questions/edit.html.erb`
+
+**app/views/questions/edit.html.erb**
 
 ```erb
 <h1 class='h2'>Editing Question</h1>
@@ -272,7 +315,7 @@ Update questions `edit` page
 <%= link_to 'Back', questions_path %>
 ```
 
-Update `questions-controller` to accept question content in `questions_params`
+Update `questions-controller` to also accept question content in `questions_params`
 
 ```ruby
 def question_params
@@ -280,16 +323,18 @@ def question_params
 end
 ```
 
-Update 'question' partial as follows (so that we can re-use it in both the question index and show page)
+Update 'question' partial as follows (so that we can re-use it in both the question index and show pages)
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   <div class="card-body py-2">
     ...
     ...
     <h5 class="card-subtitle fw-normal mt-3">
-      <%= link_to question.title, question, class: 'text-decoration-none' %>
+      <%= link_to question.title, question, class: ' %>
     </h5>
     <%= yield if on_question_page? %>
   </div>
@@ -299,7 +344,7 @@ Update 'question' partial as follows (so that we can re-use it in both the quest
 
 Create the `on_question_page?` helper in `questions_helper.rb` to check whether the user is on the `show` question page.
 
-`app/helpers/questions_helper.rb`
+**app/helpers/questions_helper.rb**
 
 ```ruby
 module QuestionsHelper
@@ -312,7 +357,7 @@ end
 
 Display question content in question show page
 
-`app/views/questions/show.html.erb`
+**app/views/questions/show.html.erb**
 
 ```
 <%= render @question do %>
@@ -320,7 +365,66 @@ Display question content in question show page
 <% end %>
 ```
 
-Update the `db/seeds.rb` with questions data
+### Paginating Questions
+
+As our application grows, the number of questions in our database will also increase. Loading all the questions at once in a single request is not very efficient. To solve this, we will use the [will_paginate](https://github.com/mislav/will_paginate) gem to paginate our questions into separate pages.
+
+For styling the pagination links we will use the super helpful[will_paginate-bootstrap-style](https://github.com/delef/will_paginate-bootstrap-style) gem.
+
+Lets install the gems
+
+```bash
+$ bundle add will_paginate
+$ bundle add will_paginate-bootstrap-style
+```
+
+Update the `questions-controller` index action to use pagination
+
+```ruby
+class QuestionsController < ApplicationController
+  ...
+  ...
+
+  def index
+    page = params[:page]
+    @questions = Question.paginated(page)
+  end
+
+  ...
+  ...
+end
+```
+
+The paginated `Question` scope paginates the questions and orders them in descending order of creation date.
+
+```ruby
+class Question < ApplicationRecord
+  ...
+
+  scope :paginated, ->(page) {
+        .paginate(page: page, per_page: 10)
+        .order(created_at: :desc)
+    }
+end
+```
+
+Now lets update the questions `_questions` partial with pagination ui.
+
+**app/views/questions/\_questions.html.erb**
+
+```erb
+<div class="d-flex justify-content-between align-items-center my-2">
+  <%= yield %>
+</div>
+<%= render questions %>
+<%= will_paginate questions,
+renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
+<%= content_for :sidebar do %>
+  <%= render 'groups/popular' %>
+<% end %>
+```
+
+Update the `db/seeds.rb` with more questions data to see the pagination in action.
 
 ```ruby
 ...
@@ -341,11 +445,11 @@ Seed the database
 $ rails db:seed:replant
 ```
 
-Now if you login and visit the home page, you will see the questions list
+Now if you login and visit the home page, you will see the nicely formatted and paginated questions list
 
 ## 5.3 User Authorization
 
-We are going to use the `pundit` gem to build a robust authorization system in our application.
+We are going to use the [pundit](https://github.com/varvet/pundit) gem to build a robust authorization system in our application.
 
 Setup pundit
 
@@ -359,8 +463,10 @@ Include `Pundit` in `ApplicationController` and a method to flash an alert messa
 ```ruby
 class ApplicationController < ActionController::Base
   include Pundit
-  before_action :configure_permitted_parameters, if: :devise_controller?
-  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  before_action :configure_permitted_parameters, \
+     if: :devise_controller?
+  rescue_from Pundit::NotAuthorizedError, \
+     with: :user_not_authorized
 
   ...
   ...
@@ -383,7 +489,7 @@ Create a pundit question policy
 $ rails g pundit:policy question
 ```
 
-Only allow the owner of the question to update/delete a question. To do that, add the `update?` and `destroy?` method in question policy.
+Only allow the owner of the question to update/delete a question. To do so, add the following `update?` and `destroy?` methods in question policy.
 
 `app/policies/question_policy.rb`
 
@@ -399,24 +505,15 @@ class QuestionPolicy < ApplicationPolicy
 end
 ```
 
-Update `config/locales/en.yml` with pundit messages for question policy
-
-```yml
-en:
-  pundit:
-    default: 'You cannot perform this action.'
-    question_policy:
-      edit?: 'Only question owner can edit the question!'
-      update?: 'Only question owner can update the question!'
-      destroy?: 'Only question owner can delete the question!'
-```
-
 Update the `Edit` and `Destroy` links in question partial
-`_question.html.erb`
+
+**\_question.html.erb**
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   <div class="card-body py-2">
     <div>
       <h6 class="card-title fw-light d-flex justify-content-between">
@@ -424,11 +521,14 @@ Update the `Edit` and `Destroy` links in question partial
         ...
         <div class='d-flex align-items-center'>
           <% if policy(question).update? %>
-            <%= link_to 'Edit', edit_question_path(question), class: 'small fw-bold text-decoration-none link-warning' %>
+            <%= link_to 'Edit', edit_question_path(question),
+              class: 'small fw-bold link-warning' %>
           <% end %>
           <span class="mx-1"></span>
           <% if policy(question).destroy? %>
-            <%= link_to 'Delete', question, method: :delete, data: {confirm: 'Are you sure?'}, class: 'small fw-bold text-decoration-none link-danger' %>
+            <%= link_to 'Delete', question, method: :delete,
+            data: {confirm: 'Are you sure?'},
+            class: 'small fw-bold link-danger' %>
           <% end %>
         </div>
       </h6>
@@ -439,7 +539,9 @@ Update the `Edit` and `Destroy` links in question partial
 </div>
 ```
 
-Update the `question-controller` to use the `question-policy` authorization
+Note that we are using the `policy` method from Pundit in our \_question partial to check whether the user has the authorization to `Edit` or `Delete` a question.
+
+Update the `question-controller` to use the `question-policy` authorization as well
 
 ```ruby
 class QuestionsController < ApplicationController
@@ -465,7 +567,7 @@ Now if you access the `edit` page of a question you did not create, Pundit will 
 
 ## 5.4 Tagging Questions
 
-In this chapter we will allow users to tag their questions for easier discoverability and filtering. We are going to use the `acts-as-taggable-on` gem. This gem greatly simplifies the process of adding tags to active record models and also allows us to specify different tag "contexts" in the same model.
+In this chapter we will allow users to tag their questions for easier discoverability and filtering. We are going to use the [acts-as-taggable-on](https://github.com/mbleigh/acts-as-taggable-on) gem. This gem greatly simplifies the process of adding tags to active record models and also allows us to specify different tag "contexts" within the same model.
 
 Lets install the gem
 
@@ -478,6 +580,12 @@ Generate and run the migrations
 ```
 $ rake acts_as_taggable_on_engine:install:migrations
 $ rails db:migrate
+```
+
+Restart rails server
+
+```
+$ rails restart
 ```
 
 Update the question model to include tags
@@ -497,14 +605,13 @@ Display question tags in question partial
 `app/views/questions/_question.html.erb`
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   ...
   ...
   <div class="card-footer d-flex justify-content-between">
-    <div>
-      <%= render 'stars/stars', starrable: question %>
-    </div>
     <div class="d-flex">
       <% question.tags.each do |tag| %>
         <%= link_to "##{tag.name}", '#', class: 'badge tag-item' %>
@@ -518,6 +625,10 @@ Update `main.scss`
 
 ```scss
 // previous styles here
+
+a {
+  text-decoration: none;
+}
 
 a.tag-item {
   background: white;
@@ -540,16 +651,24 @@ Update question form to include tags
   <div class="field">
     <%= form.text_field :title %>
   </div>
-  <%= form.hidden_field :group_id, value: question.group&.id %>
   <div class="field">
     <%= form.rich_text_area :content %>
   </div>
   <div data-controller='tag'>
     <label for="">Tags</label>
-    <small class="small text-muted">Separate tag names with commas</small>
-    <div data-controller="autocomplete" data-autocomplete-url-value="/tags/">
-      <input name='question[tag_list]' value='<%= question.tag_list.join(',') %>' type="text" class='form-control' data-tag-target='input' data-autocomplete-target="input"/>
-      <ul class="list-group" data-autocomplete-target="results" style="max-height: 10rem; overflow-y: scroll;"></ul>
+    <small class="text-muted">
+      Separate tag names with commas
+    </small>
+    <div data-controller="autocomplete"
+      data-autocomplete-url-value="/tags/">
+      <input name='question[tag_list]'
+        value='<%= question.tag_list.join(',') %>'
+        class='form-control' data-tag-target='input'
+        data-autocomplete-target="input"/>
+      <ul class="list-group"
+        data-autocomplete-target="results"
+        style="max-height: 10rem; overflow-y: scroll;">
+      </ul>
     </div>
   </div>
   <div class="actions">
@@ -558,9 +677,16 @@ Update question form to include tags
 <% end %>
 ```
 
-Note that we are using markup to with `stimulus-autocomplete` controller. This is provided by the `stimulus-autocomplete` npm package. This package allows us to to make a selection from a list of results fetched from the server. In this case we want to fetch tag names from our server and provide autocomplete as the user types.
+Note that we are using the `data-controller="autocomplete"` attribute in the `div` surrounding the `input` field for tag_list. This attribute connects our input field to the `autocomplete` Stimulus JS controller, which we will install shortly. This controller is provided by
+the `stimulus-autocomplete` npm package. It allows us to to make a selection from a list of results fetched from the server. In this case we want to fetch tag names from our server and provide autocomplete as the user types.
 
-Lets install the npm package
+First, lets install Stimulus JS via webpacker
+
+```bash
+$ rails webpacker:install:stimulus
+```
+
+Now install [stimulus autocomplete](https://github.com/afcapel/stimulus-autocomplete) component using yarn
 
 ```
 $ yarn add stimulus-autocomplete
@@ -601,17 +727,20 @@ class TagsController < ApplicationController
 end
 ```
 
-Lets create the tag `index` view
+The index action in our tags controller uses `ilike` query to search for tags with names that contain the keyword entered in the input box (after the last comma). Also note that the `tags-controller` index action is not using the layout (i.e. `layout false`). This is so because we only want to return the list of tags markup only in our auto-complete input.
+
+Note that we are using `ActsAsTaggableOn::` prefix on the `Tag` model because the `Tag` model is not defined in our application - ie. it comes with the `acts_as_taggable_on` gem.
+
+Now lets create the tag `index` view
 
 ```erb
 <% @tags.each do |tag| %>
-  <li id="<%= dom_id(tag) %>" class="list-group-item" role="option">
+  <li id="<%= dom_id(tag) %>" class="list-group-item"
+    role="option">
     <%= tag.name %>
   </li>
 <% end %>
 ```
-
-The index action in our tags controller uses `ilike` query to search for tags with names that contain the keyword entered in the input box.
 
 Update routes
 
@@ -675,12 +804,13 @@ class QuestionsController < ApplicationController
 
   ...
   def question_params
-    params.require(:question).permit(:title, :content, :group_id, :tag_list)
+    params.require(:question).permit(:title, :content,
+     :group_id, :tag_list)
   end
 end
 ```
 
-Now try creating a new question and you will notice the autocomplete feature working on the tag list
+Now try creating a new question and you will notice the live autocomplete feature working on the tag list
 
 Update tags controller `show` action to allow filtering questions by tag names
 
@@ -722,11 +852,6 @@ $ touch app/views/questions/_questions.html.erb
 <div class="d-flex justify-content-between align-items-center my-2">
   <%= yield %>
 </div>
-<%= render questions %>
-<%= will_paginate questions, renderer: WillPaginate::ActionView::BootstrapLinkRenderer %>
-<%= content_for :sidebar do %>
-  <%= render 'groups/popular' %>
-<% end %>
 ```
 
 Now update the questions `index` page
@@ -734,15 +859,18 @@ Now update the questions `index` page
 ```erb
 <%= render 'questions', questions: @questions do %>
   <h1 class="h5 text-uppercase">Questions</h1>
-  <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
+  <%= link_to 'New Question', new_question_path,
+    class: 'btn btn-primary' %>
 <% end %>
 ```
 
 Update the question partial to allow filtering questions by tag names
 
 ```erb
-<p class='small text-muted fw-bold mb-0 pb-0'><%= question.created_at.to_s(:long) %></p>
-<div class="card question-card mt-0 mb-3 border-0 bg-light border-top">
+<p class='small text-muted fw-bold mb-0 pb-0'>
+  <%= question.created_at.to_s(:long) %>
+</p>
+<div class="card mt-0 mb-3 border-0 bg-light border-top">
   ...
   ...
   <div class="card-footer d-flex justify-content-between">
@@ -750,16 +878,49 @@ Update the question partial to allow filtering questions by tag names
     ...
     <div class="d-flex">
       <% question.tags.each do |tag| %>
-        <%= link_to "##{tag.name}", tag_path(tag.name), class: 'badge tag-item' %>
+        <%= link_to "##{tag.name}", tag_path(tag.name),
+           class: 'badge tag-item' %>
       <% end %>
     </div>
   </div>
 </div>
 ```
 
+Update the database seeds with more data to see the tag filtering feature in action
+
+`db/seeds.rb`
+
+```ruby
+...
+...
+
+puts "Adding questions"
+300.times do |i|
+  Question.create!(
+    title: ["What is ", "How "].sample + \
+       Faker::Lorem.sentence.downcase + SecureRandom.hex(2),
+    user: User.active.sample,
+    content: Faker::Lorem.paragraphs(number: 7).join
+  )
+  tags = []
+  rand(1..3).times.each do
+    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
+  end
+
+  q.tag_list = tags.uniq
+  q.save!
+
+  print(".") if i % 50 == 0
+end
+```
+
+Note that we are printing a dot each time we add 50 questions. This is a way to show the progress as we add questions (so that the `seed`ing process doesn't appear stuck especially if we are `seed`ing large amounts of data)
+
+Now if you visit the questions page and click in any one of the questions tags, you will see the questions list being filtered by that tag name.
+
 ## 5.5 Searching for Questions
 
-In this chapter we will implement a question search feature. This search feature will allow users to find questions based on title, content and/or tags. To implement our search, we are going to take advantage of the built-in PostgreSQL full-text search capabilities using a gem called `pg-search`. This gem does all the heavy lifting in dealing with things like `ts_vector` and `ts_query` behind the scenes for us. It is a perfect example of how ruby and rails makes life easier for us developers.
+In this section we will implement a question search feature. We will allow users to find questions based on title, and/or content. To implement our search, we are going to take advantage of the built-in PostgreSQL full-text search capabilities using a gem called [pg-search](https://github.com/Casecommons/pg_search). This gem does all the heavy lifting for us by dealing with things like `ts_vector` and `ts_query` behind the scenes. It is a perfect example of how ruby and rails makes life easier for us developers.
 
 Lets install `pg_search`
 
@@ -767,14 +928,14 @@ Lets install `pg_search`
 $ bundle add pg_search
 ```
 
-Generate a migration to create the pg_search_documents database table.
+Generate a migration to create the `pg_search_documents` database table.
 
 ```
 $ rails g pg_search:migration:multisearch
 $ rails db:migrate
 ```
 
-Include `PgSearch` in question model and provide a search scopes for question title and content.
+Include `PgSearch` in question model and provide a search scopes for question title and content. This search scope allows questions to be searched by both title and content.
 
 ```ruby
 class Question < ApplicationRecord
@@ -786,10 +947,11 @@ class Question < ApplicationRecord
                   against: :title,
                   associated_against: {
                     rich_text_content: [:body],
-                    tags: [:name],
                   }
 end
 ```
+
+Note that `action_text_rich_texts` are stored in a separate table to `questions`, so to search against the 'rich text' `body` field, we have to include it as an `associated_against` hash option in our `pg_search_scope`.
 
 Update the questions controller index action to allow for search
 
@@ -813,21 +975,9 @@ class QuestionsController < ApplicationController
 end
 ```
 
-The paginated scope paginates the questions and orders them in descending order of creation date. It also filters questions by group_id if the group is given.
+Note that the we are retrieving the search `keywords` from the search form via the `params` hash. If there are `keywords` we use the question `PgSearch` search scope to do a full-text search for the matching questions, otherwise we just just return all the questions as before.
 
-```ruby
-class Question < ApplicationRecord
-  ...
-
-  scope :paginated, ->(page, group: nil) {
-      where(group: group&.id)
-        .paginate(page: page, per_page: 10)
-        .order(created_at: :desc)
-    }
-end
-```
-
-Now lets update our navbar search form to send our searches via `get` to the `questions_url`.
+Now lets update our navbar search form to send our search `keywords` via `get` to the `questions_url`.
 
 ```erb
 <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
@@ -860,32 +1010,6 @@ Now update the questions index page with different headers based on whether the 
     <%= link_to 'New Question', new_question_path, class: 'btn btn-primary' %>
   <% end %>
 </div>
-...
-<%= content_for :sidebar do %>
-  ...
-<% end %>
 ```
 
-Update the database seeds with more data to see the search and tagging features in action
-
-`db/seeds.rb`
-
-```ruby
-...
-...
-
-puts "Adding questions"
-500.times do |i|
-  include FactoryBot::Syntax::Methods
-  q = create :question
-  tags = []
-  rand(1..3).times.each do
-    tags << Faker::Educator.subject.downcase.gsub(/[^A-Za-z-]/, "")
-  end
-
-  q.tag_list = tags.uniq
-  q.save!
-
-  print(".") if i % 100 == 0
-end
-```
+Now we have implemented full-text search and filtering in our questions. In the next chapter, we will allow users to post answers to questions and do many other things.
